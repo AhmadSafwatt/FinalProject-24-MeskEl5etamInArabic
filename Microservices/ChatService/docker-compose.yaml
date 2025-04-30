@@ -9,8 +9,6 @@ services:
       CASSANDRA_NUM_TOKENS: "256"
       CASSANDRA_KEYSPACE: "chat_keyspace"
 
-#    volumes:
-#      - ./init.cql:/docker-entrypoint-initdb.d/init.cql
 
   chatservice:
     container_name: chatservice
