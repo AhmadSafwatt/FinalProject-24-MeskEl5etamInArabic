@@ -11,5 +11,6 @@
         <module>ChatService</module>
         <module>OrderService</module>
         <module>CartService</module>
+        <module>API-Gateway</module>
     </modules>
 </project>
