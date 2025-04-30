@@ -1,6 +1,5 @@
 package com.example.chatservice.models;
 
-import com.example.chatservice.configurations.CassandraInitConfig;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
