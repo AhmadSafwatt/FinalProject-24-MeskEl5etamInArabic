@@ -80,7 +80,7 @@ public class User {
         this.role = "customer";
     }
 
-    public void setRoleBuyer() {
+    public void setRoleSeller() {
         this.role = "seller";
     }
 }
