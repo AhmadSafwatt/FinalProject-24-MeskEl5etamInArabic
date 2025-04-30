@@ -9,5 +9,6 @@
     <modules>
         <module>AuthService</module>
         <module>ChatService</module>
+        <module>OrderService</module>
     </modules>
 </project>
