@@ -60,7 +60,7 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
                     // call the auth service to validate the token
 
 
-//                  //TODO: modify according to actual AuthService routes
+                    // this is less secure than using JwtUtil
 //                  template.getForObject("http://auth-service/auth/validate?token={token}", Boolean.class, authHeader);
 
                     //validate the token using the JwtUtil class
