@@ -6,4 +6,4 @@ spring:
       uri: mongodb://bahy:alansary@localhost:27017/elsolasyelmare7?authSource=admin
       database: elsolasyelmare7
 server:
-  port: 8085
+  port: 8082

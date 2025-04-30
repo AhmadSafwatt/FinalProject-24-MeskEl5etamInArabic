@@ -9,7 +9,7 @@ services:
         - mongo
         - mongo-express
       ports:
-        - "8085:8085"
+        - "8082:8082"
       environment:
         spring.data.mongodb.uri: mongodb://bahy:alansary@mongo:27017/elsolasyelmare7?authSource=admin
         spring.data.mongodb.database: elsolasyelmare7
