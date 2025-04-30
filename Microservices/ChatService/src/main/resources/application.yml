@@ -2,10 +2,9 @@ spring:
   application:
     name: ChatService
   cassandra:
-    contact-points: localhost
+    local-datacenter: datacenter1
+    contact-points: cassandra
     port: 9042
-    keyspace-name: chat_keyspace
-    schema-action: CREATE_IF_NOT_EXISTS
 
 server:
   port: 8083
