@@ -10,5 +10,6 @@
         <module>AuthService</module>
         <module>ChatService</module>
         <module>OrderService</module>
+        <module>CartService</module>
     </modules>
 </project>
