@@ -3,21 +3,7 @@ spring:
     name: CartService
   data:
     mongodb:
-      uri: mongodb://root:example@mongo:27017/madamnofe5a?authSource=admin
-      database: madamnofe5a
-  datasource:
-    url: jdbc:postgresql://postgres:5432/madamnofe5a
-    username: postgres
-    password: password
-  jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-    hibernate:
-      ddl-auto: create-drop
-    generate-ddl: true
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
-        use_sql_comments: true
+      uri: mongodb://bahy:alansary@localhost:27017/elsolasyelmare7?authSource=admin
+      database: elsolasyelmare7
 server:
-  port: 8085
+  port: 8082

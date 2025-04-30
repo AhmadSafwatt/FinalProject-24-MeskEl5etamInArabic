@@ -1,0 +1,45 @@
+services:
+  # app
+    cart_app:
+      build: .
+      container_name: cart_service_container
+      image: cart_service_image
+      restart: always
+      depends_on:
+        - mongo
+        - mongo-express
+      ports:
+        - "8082:8082"
+      environment:
+        spring.data.mongodb.uri: mongodb://bahy:alansary@mongo:27017/elsolasyelmare7?authSource=admin
+        spring.data.mongodb.database: elsolasyelmare7
+
+    # MongoDB
+    mongo:
+      image: mongo
+      restart: always
+      environment:
+        MONGO_INITDB_ROOT_USERNAME: bahy
+        MONGO_INITDB_ROOT_PASSWORD: alansary
+        MONGO_INITDB_DATABASE: elsolasyelmare7
+      ports:
+        - "27017:27017"
+      volumes:
+        - cart_volume:/data/db
+
+    # Mongo Express
+    mongo-express:
+      image: mongo-express
+      restart: always
+      ports:
+        - "9000:8081"
+      environment:
+        ME_CONFIG_MONGODB_ADMINUSERNAME: bahy
+        ME_CONFIG_MONGODB_ADMINPASSWORD: alansary
+        ME_CONFIG_MONGODB_URL: mongodb://bahy:alansary@mongo:27017/
+        ME_CONFIG_BASICAUTH: false
+      depends_on:
+        - mongo
+
+volumes:
+  cart_volume:
