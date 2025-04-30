@@ -1,0 +1,51 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ "Team-2-Tammaa" ]
+  pull_request:
+    branches: [ "Team-2-Tammaa" ]
+
+permissions:
+  contents: read
+  actions: write
+  checks: write
+  pull-requests: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 23
+        uses: actions/setup-java@v4
+        with:
+          java-version: '23'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Start Cassandra container
+        run: docker compose up -d cassandra
+        working-directory: Microservices/ChatService
+
+      - name: Wait for Cassandra to be ready
+        run: |
+          echo "Waiting for Cassandra..."
+          until docker compose exec cassandra cqlsh -e "DESCRIBE KEYSPACES"; do sleep 5; done
+          echo "Cassandra is ready!"
+        working-directory: Microservices/ChatService
+
+      - name: Build and Test
+        run: mvn -B verify
+        working-directory: Microservices/ChatService
+
+      - name: Test Results
+        if: always()
+        uses: dorny/test-reporter@v1
+        with:
+          name: Test Results
+          path: 'Microservices/ChatService/target/surefire-reports/TEST-*.xml'
+          reporter: java-junit
