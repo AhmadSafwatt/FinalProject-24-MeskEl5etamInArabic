@@ -1,4 +1,4 @@
-package model;
+package com.homechef.CartService.model;
 
 import org.springframework.data.annotation.Id;
 
