@@ -1,4 +1,42 @@
 spring:
+    application:
+        name: api-gateway
+
+    cloud:
+        gateway:
+          routes:
+            # TODO: change names and routes and stuff as appropriate later on
+            - id: authentication-service
+              uri: lb://authentication-service
+              predicates:
+                - Path=/auth/**
+              filters:
+                - AuthenticationFilter
+
+            - id: cart-service
+              uri: lb://cart-service
+              predicates:
+                - Path=/cart/**
+              filters:
+                - AuthenticationFilter
+
+
+            - id: order-service
+              uri: lb://order-service
+              predicates:
+                - Path=/order/**
+              filters:
+                - AuthenticationFilter
+
+
+            - id: chat-service
+              uri: lb://chat-service
+              predicates:
+                - Path=/chat/**
+              filters:
+                - AuthenticationFilter
+
+
 
 server:
   port: 8080
