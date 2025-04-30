@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: ProductService
+  data:
+    mongodb:
+      uri: mongodb://root:example@localhost:27017/productDB?authSource=admin
+      database: productDB
+server:
+  port: 8085
