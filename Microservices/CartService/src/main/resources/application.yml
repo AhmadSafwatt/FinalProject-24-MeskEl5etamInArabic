@@ -3,7 +3,7 @@ spring:
     name: CartService
   data:
     mongodb:
-      uri: mongodb://bahy:alansary@mongo:27017/elsolasyelmare7?authSource=admin
+      uri: mongodb://bahy:alansary@localhost:27017/elsolasyelmare7?authSource=admin
       database: elsolasyelmare7
 server:
   port: 8085
