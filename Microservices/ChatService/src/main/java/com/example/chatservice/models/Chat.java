@@ -10,6 +10,11 @@ import org.springframework.data.cassandra.core.mapping.Table;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Represents a chat between two users.
+ * A chat contains a list of messages exchanged between the users.
+ */
+
 
 @Getter
 @Setter
