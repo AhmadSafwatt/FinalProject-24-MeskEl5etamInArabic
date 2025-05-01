@@ -66,9 +66,7 @@ class ChatServiceApplicationTests {
 	@Test
 	void testSaveMessage_shouldNotSaveMessage_whenMessageIsNull() throws IllegalArgumentException {
 
-		assertThrows(IllegalArgumentException.class, () -> {
-			messageService.saveMessage(null);
-		});
+		assertThrows(IllegalArgumentException.class, () -> messageService.saveMessage(null));
 	}
 
 	@Test
