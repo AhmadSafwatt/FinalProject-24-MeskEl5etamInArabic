@@ -5,7 +5,6 @@ spring:
   cassandra:
     local-datacenter: datacenter1
     keyspace-name: ${CASSANDRA_KEYSPACE:chat_keyspace}
-    schema-action: create_if_not_exists
     contact-points: ${CASSANDRA_HOST:localhost}
     port: ${CASSANDRA_PORT:9042}
 
