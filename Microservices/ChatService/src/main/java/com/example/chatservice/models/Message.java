@@ -1,5 +1,6 @@
 package com.example.chatservice.models;
 
+import com.example.chatservice.enums.ReportType;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.cassandra.core.mapping.PrimaryKey;
@@ -22,9 +23,9 @@ public class Message {
     @PrimaryKey
     private UUID id;
 
-    private String sender;
+    private UUID sender;
 
-    private String receiver;
+    private UUID receiver;
 
     private String content;
 
@@ -32,4 +33,7 @@ public class Message {
 
     private MessageStatus status;
     private MessageType type;
+
+    private boolean isReported;
+    private ReportType reportType;
 }

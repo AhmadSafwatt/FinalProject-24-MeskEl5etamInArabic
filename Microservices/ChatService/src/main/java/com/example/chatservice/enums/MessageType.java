@@ -1,5 +1,8 @@
 package com.example.chatservice.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum MessageType {
     TEXT("text"),
     IMAGE("image"),
@@ -13,7 +16,4 @@ public enum MessageType {
         this.type = type;
     }
 
-    public String getType() {
-        return type;
-    }
 }

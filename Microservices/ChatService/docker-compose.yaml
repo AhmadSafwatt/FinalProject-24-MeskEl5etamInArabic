@@ -5,6 +5,7 @@ services:
     ports:
       - "9042:9042"
     environment:
+      CASSANDRA_DC: "datacenter1"
       CASSANDRA_CLUSTER_NAME: "ChatCluster"
       CASSANDRA_NUM_TOKENS: "256"
       CASSANDRA_KEYSPACE: "chat_keyspace"
