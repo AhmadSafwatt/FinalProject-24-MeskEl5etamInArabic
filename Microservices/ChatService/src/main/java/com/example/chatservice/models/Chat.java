@@ -21,9 +21,6 @@ import java.util.UUID;
 @Table(value = "chats")
 public class Chat {
 
-    @Value("${spring.cassandra.keyspace-name}")
-    private String keyspaceName;
-
     @PrimaryKey
     private UUID id;
 

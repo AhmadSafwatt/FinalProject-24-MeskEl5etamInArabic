@@ -56,8 +56,8 @@ public class MessageController {
      *
      * @param id Message ID
      */
-    @PutMapping("/delete/{id}")
-    public void deleteMessage(UUID id) {
+    @DeleteMapping("/delete/{id}")
+    public void deleteMessage(@PathVariable UUID id) {
         messageService.deleteMessage(id);
     }
 }
