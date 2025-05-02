@@ -2,7 +2,6 @@ package Services;
 
 import Models.User;
 import Repositories.UserRepository;
-import jakarta.persistence.Id;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,7 +23,7 @@ public class AuthService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public String registerUser(User user) {
+    public String registerUser(User user, String role) {
         if (userRepository.findByUsername(user.getUsername()) != null) {
             return "Username already exists";
         }
@@ -38,7 +37,13 @@ public class AuthService {
 
         // hash password
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setRoleUnverifiedUser();
+
+        // set role unverified
+        if (role.equals("customer")) {
+            user.setRoleUnverifiedUser();
+        } else {
+            user.setRoleUnverifiedSeller();
+        }
         User newUser = userRepository.save(user);
 
         // verify email by sending url with user.getId() and user.getEmail() to the email
@@ -47,7 +52,7 @@ public class AuthService {
     }
 
     public String sendEmailVerificationLink(String email, UUID id) {
-        //TODO: send email verification link, the link should be the url of verifyEmail with value of id
+        //TODO: send email verification link, the link should be the url of verifyEmail controller with value of id
         return "TODO";
     }
 
