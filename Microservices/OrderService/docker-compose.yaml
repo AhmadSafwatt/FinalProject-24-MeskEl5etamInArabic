@@ -1,0 +1,39 @@
+services:
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        ports:
+            - "8084:8084"
+        depends_on:
+            db:
+                condition: service_healthy
+        environment:
+            - spring.datasource.url=jdbc:postgresql://db:5432/OrderService
+            - spring.datasource.username=postgres
+            - spring.datasource.password=pass
+        restart: always
+    db:
+        image: postgres
+        ports:
+            - "5436:5432"
+        environment:
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=pass
+            - POSTGRES_DB=OrderService
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U postgres"]
+            interval: 5s
+            timeout: 5s
+            retries: 5
+            start_period: 10s
+        restart: always
+
+    pgadmin:
+        image: dpage/pgadmin4
+        container_name: pgadmin
+        environment:
+            PGADMIN_DEFAULT_EMAIL: admin@homechef.com
+            PGADMIN_DEFAULT_PASSWORD: admin
+        ports:
+            - "5050:80"
