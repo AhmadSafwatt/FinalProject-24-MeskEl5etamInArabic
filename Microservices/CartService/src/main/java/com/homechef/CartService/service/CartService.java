@@ -1,6 +1,10 @@
 package com.homechef.CartService.service;
 
+import com.homechef.CartService.model.Cart;
 import com.homechef.CartService.repository.CartRepository;
+
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -9,4 +13,8 @@ public class CartService {
 
     @Autowired
     private CartRepository cartRepository;
+
+    public Cart getCartByUserId(UUID userId) {
+        return cartRepository.findByUserId(userId);
+    }
 }
