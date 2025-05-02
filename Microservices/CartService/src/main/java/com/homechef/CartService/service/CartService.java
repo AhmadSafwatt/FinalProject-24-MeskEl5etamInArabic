@@ -1,5 +1,6 @@
 package com.homechef.CartService.service;
 
+import com.homechef.CartService.client.ProductClient;
 import com.homechef.CartService.model.Cart;
 import com.homechef.CartService.repository.CartRepository;
 
@@ -14,8 +15,26 @@ public class CartService {
     @Autowired
     private CartRepository cartRepository;
 
+    @Autowired
+    private final ProductClient productClient;
+
+    public CartService(ProductClient productClient) {
+        this.productClient = productClient;
+    }
+
     public Cart getCartByCustomerId(String customerId) {
         UUID customerUUID = UUID.fromString(customerId);
         return cartRepository.findByCustomerId(customerUUID);
+    }
+
+    public Cart getCartById(String cartId) {
+        UUID cartUUID = UUID.fromString(cartId);
+        Cart c = cartRepository.findById(cartUUID).orElse(null);
+
+        if (c == null) {
+            return null;
+        }
+        // Fetch product details from Product Service
+        return c;
     }
 }

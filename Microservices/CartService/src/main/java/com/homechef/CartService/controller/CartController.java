@@ -24,4 +24,9 @@ public class CartController {
     public Cart getCartByCustomerId(@PathVariable String customerId) {
         return cartService.getCartByCustomerId(customerId);
     }
+
+    @GetMapping("/{cartId}")
+    public Cart getCartById(@PathVariable String cartId) {
+        return cartService.getCartById(cartId);
+    }
 }
