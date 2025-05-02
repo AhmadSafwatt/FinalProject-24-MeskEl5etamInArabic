@@ -1,6 +1,8 @@
 package com.example.chatservice.models;
 
 import com.example.chatservice.enums.ReportType;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.cassandra.core.mapping.PrimaryKey;
@@ -24,32 +26,18 @@ public class Message {
     public Message() {
         this.id = UUID.randomUUID();
         this.timestamp = LocalDateTime.now();
-    }
-
-    public Message(UUID sender, UUID receiver, String content, MessageStatus status, MessageType type) {
-        this.id = UUID.randomUUID();
-        this.sender = sender;
-        this.receiver = receiver;
-        this.content = content;
-        this.timestamp = LocalDateTime.now();
-        this.status = status;
-        this.type = type;
+        this.status = MessageStatus.SENT;
     }
 
     public Message(UUID sender, UUID receiver, String content, MessageType type) {
+        this();
         this.id = UUID.randomUUID();
         this.sender = sender;
         this.receiver = receiver;
         this.content = content;
-        this.timestamp = LocalDateTime.now();
         this.type = type;
     }
 
-    public Message(String content) {
-        this.id = UUID.randomUUID();
-        this.content = content;
-        this.timestamp = LocalDateTime.now();
-    }
     @PrimaryKey
     private UUID id;
 
