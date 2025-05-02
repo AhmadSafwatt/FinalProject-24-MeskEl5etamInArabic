@@ -14,7 +14,8 @@ public class CartService {
     @Autowired
     private CartRepository cartRepository;
 
-    public Cart getCartByCustomerId(UUID userId) {
-        return cartRepository.findByCustomerId(userId);
+    public Cart getCartByCustomerId(String customerId) {
+        UUID customerUUID = UUID.fromString(customerId);
+        return cartRepository.findByCustomerId(customerUUID);
     }
 }
