@@ -60,4 +60,16 @@ public class MessageController {
     public void deleteMessage(@PathVariable UUID id) {
         messageService.deleteMessage(id);
     }
+
+    /**
+     * Endpoint to check if a message has been seen.
+     *
+     * @param messageId Message ID
+     * @return true if the message is seen, false otherwise
+     */
+
+    @GetMapping("/seen/{messageId}")
+    public boolean isMessageSeen(@PathVariable UUID messageId) {
+        return messageService.isMessageSeen(messageId);
+    }
 }
