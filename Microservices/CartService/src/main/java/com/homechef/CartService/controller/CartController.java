@@ -22,6 +22,6 @@ public class CartController {
 
     @GetMapping("/customerId/{customerId}")
     public Cart getCartByCustomerId(@PathVariable UUID customerId) {
-        return cartService.getCartByUserId(customerId);
+        return cartService.getCartByCustomerId(customerId);
     }
 }
