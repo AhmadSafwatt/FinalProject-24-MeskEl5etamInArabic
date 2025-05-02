@@ -25,6 +25,28 @@ public class OrderItem {
 
 
 
+    public OrderItem() {}
+    public OrderItem(Order order, String productId, String sellerId, Integer quantity, String notes, Double totalPrice) {
+        this.order = order;
+        this.productId = productId;
+        this.sellerId = sellerId;
+        this.quantity = quantity;
+        this.notes = notes;
+        this.totalPrice = totalPrice;
+    }
+
+    public Order getOrder() {return order;}
+    public void setOrder(Order order) { this.order = order; }
+    public String getProductId() {return productId;}
+    public void setProductId(String productId) {this.productId = productId;}
+    public String getSellerId() {return sellerId;}
+    public void setSellerId(String sellerId) {this.sellerId = sellerId;}
+    public Integer getQuantity() {return quantity;}
+    public void setQuantity(Integer quantity) {this.quantity = quantity;}
+    public String getNotes() {return notes;}
+    public void setNotes(String notes) {this.notes = notes;}
+    public Double getTotalPrice() {return totalPrice;}
+    public void setTotalPrice(Double totalPrice) {this.totalPrice = totalPrice;}
 
     // composite key
     public static class OrderItemPK implements Serializable {
