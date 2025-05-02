@@ -28,13 +28,13 @@ public class Cart {
     }
 
     public Cart(UUID customer_id, List<CartItem> cartItems) {
-        this.customer_id = customer_id;
+        this.customerId = customer_id;
         this.cartItems = cartItems;
     }
 
     public Cart(UUID id, UUID customer_id, List<CartItem> cartItems) {
         this.id = id;
-        this.customer_id = customer_id;
+        this.customerId = customer_id;
         this.cartItems = cartItems;
     }
 
@@ -46,12 +46,11 @@ public class Cart {
         this.id = id;
     }
 
-    public UUID getCustomer_id() {
-        return customer_id;
+    public UUID getCustomerId() {
+        return customerId;
     }
-
-    public void setCustomer_id(UUID customer_id) {
-        this.customer_id = customer_id;
+    public void setCustomerId(UUID customerId) {
+        this.customerId = customerId;
     }
 
     public List<CartItem> getCartItems() {
