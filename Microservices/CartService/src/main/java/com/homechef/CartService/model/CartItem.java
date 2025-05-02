@@ -1,38 +1,35 @@
 package com.homechef.CartService.model;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.mongodb.core.mapping.FieldType;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class CartItem {
 
-
-    UUID product_id;
+    @Field(targetType = FieldType.STRING)
+    UUID productId;
     int quantity;
     LocalDateTime dateAdded;
     String notes;
-    UUID seller_id;
+    @Field(targetType = FieldType.STRING)
+    UUID sellerId;
 
 
     public CartItem() {
     }
 
-    public CartItem(UUID product_id, int quantity, LocalDateTime dateAdded, UUID seller_id, String notes) {
-        this.product_id = product_id;
+    public CartItem(UUID productId, int quantity, LocalDateTime dateAdded, UUID sellerId, String notes) {
+        this.productId = productId;
         this.quantity = quantity;
         this.dateAdded = dateAdded;
-        this.seller_id = seller_id;
+        this.sellerId = sellerId;
         this.notes = notes;
     }
 
-    public UUID getProduct_id() {
-        return product_id;
-    }
-
-    public void setProduct_id(UUID product_id) {
-        this.product_id = product_id;
-    }
+   
 
     public int getQuantity() {
         return quantity;
@@ -58,11 +55,21 @@ public class CartItem {
         this.notes = notes;
     }
 
-    public UUID getSeller_id() {
-        return seller_id;
+    public UUID getProductId() {
+        return productId;
     }
 
-    public void setSeller_id(UUID seller_id) {
-        this.seller_id = seller_id;
+    public void setProductId(UUID productId) {
+        this.productId = productId;
     }
+
+    public UUID getSellerId() {
+        return sellerId;
+    }
+
+    public void setSellerId(UUID sellerId) {
+        this.sellerId = sellerId;
+    }
+
+   
 }
