@@ -32,6 +32,10 @@ public class User {
         this.email = email;
     }
 
+    public UUID getId() {
+        return id;
+    }
+
     public String getUsername() {
         return username;
     }
@@ -82,5 +86,13 @@ public class User {
 
     public void setRoleSeller() {
         this.role = "seller";
+    }
+
+    public void setRoleUnverifiedUser() {
+        this.role = "unverified_user";
+    }
+
+    public void setRoleUnverifiedSeller() {
+        this.role = "unverified_seller";
     }
 }
