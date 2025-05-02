@@ -40,11 +40,10 @@ public class DatabaseSeeder {
             "No onions"
         ));
 
-        // Create first cart
-        Cart cart1 = new Cart(
-            UUID.randomUUID(), // Customer ID
-            items1
-        );
+        // Create first cart using setters
+        Cart cart1 = new Cart();
+        cart1.setCustomerId(UUID.randomUUID());
+        cart1.setCartItems(items1);
 
         // Create sample cart items for second cart
         List<CartItem> items2 = new ArrayList<>();
@@ -56,11 +55,10 @@ public class DatabaseSeeder {
             "Medium rare"
         ));
 
-        // Create second cart
-        Cart cart2 = new Cart(
-            UUID.randomUUID(),
-            items2
-        );
+        // Create second cart using setters
+        Cart cart2 = new Cart();
+        cart2.setCustomerId(UUID.randomUUID());
+        cart2.setCartItems(items2);
 
         // Save carts to database
         cartRepository.saveAll(List.of(cart1, cart2));

@@ -25,16 +25,18 @@ public class Cart {
     List<CartItem> cartItems;
 
     public Cart() {
+        this.id = UUID.randomUUID();
     }
 
-    public Cart(UUID customer_id, List<CartItem> cartItems) {
-        this.customerId = customer_id;
+    public Cart(UUID customerId, List<CartItem> cartItems) {
+        this.id = UUID.randomUUID();
+        this.customerId = customerId;
         this.cartItems = cartItems;
     }
 
-    public Cart(UUID id, UUID customer_id, List<CartItem> cartItems) {
+    public Cart(UUID id, UUID customerId, List<CartItem> cartItems) {
         this.id = id;
-        this.customerId = customer_id;
+        this.customerId = customerId;
         this.cartItems = cartItems;
     }
 
@@ -49,6 +51,7 @@ public class Cart {
     public UUID getCustomerId() {
         return customerId;
     }
+
     public void setCustomerId(UUID customerId) {
         this.customerId = customerId;
     }
