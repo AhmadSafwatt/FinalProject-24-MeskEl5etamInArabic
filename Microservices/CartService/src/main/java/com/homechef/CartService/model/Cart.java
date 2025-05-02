@@ -22,7 +22,7 @@ import java.util.UUID;
 public class Cart {
 
     @Id
-    @Field(targetType = FieldType.STRING)
+    @Field(targetType = FieldType.STRING)   // force mongo to store the UUID as a string
     UUID id;
     @Field(targetType = FieldType.STRING)
     UUID customerId;
