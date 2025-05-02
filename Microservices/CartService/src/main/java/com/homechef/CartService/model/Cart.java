@@ -2,6 +2,8 @@ package com.homechef.CartService.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.mongodb.core.mapping.FieldType;
 
 import java.util.List;
 import java.util.UUID;
@@ -20,7 +22,9 @@ import java.util.UUID;
 public class Cart {
 
     @Id
+    @Field(targetType = FieldType.STRING)
     UUID id;
+    @Field(targetType = FieldType.STRING)
     UUID customerId;
     List<CartItem> cartItems;
 

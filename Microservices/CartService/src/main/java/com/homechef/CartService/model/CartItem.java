@@ -1,17 +1,20 @@
 package com.homechef.CartService.model;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.mongodb.core.mapping.FieldType;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class CartItem {
 
-
+    @Field(targetType = FieldType.STRING)
     UUID product_id;
     int quantity;
     LocalDateTime dateAdded;
     String notes;
+    @Field(targetType = FieldType.STRING)
     UUID seller_id;
 
 
