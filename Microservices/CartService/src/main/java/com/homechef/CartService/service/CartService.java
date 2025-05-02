@@ -15,6 +15,6 @@ public class CartService {
     private CartRepository cartRepository;
 
     public Cart getCartByCustomerId(UUID userId) {
-        return cartRepository.findByCustomer_Id(userId);
+        return cartRepository.findByCustomerId(userId);
     }
 }

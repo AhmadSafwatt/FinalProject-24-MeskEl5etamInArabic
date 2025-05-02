@@ -21,7 +21,7 @@ public class Cart {
 
     @Id
     UUID id;
-    UUID customer_id;
+    UUID customerId;
     List<CartItem> cartItems;
 
     public Cart() {
