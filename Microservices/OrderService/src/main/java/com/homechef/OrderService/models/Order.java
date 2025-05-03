@@ -1,5 +1,6 @@
 package com.homechef.OrderService.models;
 
+import com.homechef.OrderService.states.*;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -12,34 +13,52 @@ public class Order {
     @Id
     private UUID id;
     private String buyerId;
-    private String state;
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status;
+
+    @Transient
+    private OrderState state = new CreatedState();
 
     @OneToMany(mappedBy = "order", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<OrderItem> items;
 
     public Order() {}
-    public Order(UUID id, String buyerId, String state, List<OrderItem> items) {
+    public Order(UUID id, String buyerId, OrderStatus status, List<OrderItem> items) {
         this.id = id;
         this.buyerId = buyerId;
-        this.state = state;
+        this.status = status;
         this.items = items;
     }
-    public Order(String buyerId, String state, List<OrderItem> items) {
+    public Order(String buyerId, OrderStatus status, List<OrderItem> items) {
         this.id = UUID.randomUUID();
         this.buyerId = buyerId;
-        this.state = state;
+        this.status = status;
         this.items = items;
     }
     public UUID getId() {return id;}
     public void setId(UUID id) {this.id = id;}
     public String getBuyerId() {return buyerId;}
     public void setBuyerId(String buyerId) {this.buyerId = buyerId;}
-    public String getState() {return state;}
-    public void setState(String state) {this.state = state;}
+    public OrderStatus getStatus() {return status;}
+    public void setStatus(OrderStatus status) {this.status = status; initState();}
+    public OrderState getState() {return state;}
+    public void setState(OrderState state) {this.state = state; setStatus(OrderState.getOrderStatus(state));}
     public List<OrderItem> getItems() {return items;}
     public void setItems(List<OrderItem> items) {this.items = items;}
-    public void addItem(OrderItem item) {
-        this.items.add(item);
-        item.setOrder(this);
+    public void addItem(OrderItem item) {this.items.add(item);}
+
+    public void setOrderState(OrderState state) {
+        this.state.setOrderState(this, state);
+    }
+    public void cancelOrder() {
+        this.state.cancelOrder(this);
+    }
+    public void updateItemNote(UUID productId, String note) {
+        this.state.updateItemNote(this, productId, note);
+    }
+
+    @PostLoad
+    public void initState() {
+        this.state = OrderStatus.getState(this.status);
     }
 }

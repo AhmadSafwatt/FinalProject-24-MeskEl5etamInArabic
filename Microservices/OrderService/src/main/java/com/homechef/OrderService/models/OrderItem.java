@@ -16,9 +16,9 @@ public class OrderItem {
     @JsonIgnore
     private Order order;
     @Id
-    private String productId;
+    private UUID productId;
 
-    private String sellerId;
+    private UUID sellerId;
     private Integer quantity;
     private String notes;
     private Double totalPrice;
@@ -26,7 +26,7 @@ public class OrderItem {
 
 
     public OrderItem() {}
-    public OrderItem(Order order, String productId, String sellerId, Integer quantity, String notes, Double totalPrice) {
+    public OrderItem(Order order, UUID productId, UUID sellerId, Integer quantity, String notes, Double totalPrice) {
         this.order = order;
         this.productId = productId;
         this.sellerId = sellerId;
@@ -37,10 +37,10 @@ public class OrderItem {
 
     public Order getOrder() {return order;}
     public void setOrder(Order order) { this.order = order; }
-    public String getProductId() {return productId;}
-    public void setProductId(String productId) {this.productId = productId;}
-    public String getSellerId() {return sellerId;}
-    public void setSellerId(String sellerId) {this.sellerId = sellerId;}
+    public UUID getProductId() {return productId;}
+    public void setProductId(UUID productId) {this.productId = productId;}
+    public UUID getSellerId() {return sellerId;}
+    public void setSellerId(UUID sellerId) {this.sellerId = sellerId;}
     public Integer getQuantity() {return quantity;}
     public void setQuantity(Integer quantity) {this.quantity = quantity;}
     public String getNotes() {return notes;}
@@ -51,7 +51,7 @@ public class OrderItem {
     // composite key
     public static class OrderItemPK implements Serializable {
         private UUID order;
-        private String productId;
+        private UUID productId;
         public OrderItemPK() {}
         @Override public boolean equals(Object o) {
             if (this == o) return true;
