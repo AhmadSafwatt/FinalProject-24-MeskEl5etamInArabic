@@ -28,4 +28,14 @@ public class OrderController {
     public List<Order> getAllOrdersByBuyerId(@PathVariable String buyerId) {
         return orderService.getAllOrdersByBuyerId(UUID.fromString(buyerId));
     }
+
+    @GetMapping("/seller/{sellerId}")
+    public List<Order> getFilteredOrdersBySellerId(@PathVariable String sellerId) {
+        return orderService.getFilteredOrdersBySellerId(UUID.fromString(sellerId));
+    }
+
+    @GetMapping("/{orderId}/seller/{sellerId}")
+    public Order getOrderByIdFilteredBySellerId(@PathVariable String orderId, @PathVariable String sellerId) throws IllegalAccessException {
+        return orderService.getOrderByIdFilteredBySellerId(UUID.fromString(orderId), UUID.fromString(sellerId));
+    }
 }

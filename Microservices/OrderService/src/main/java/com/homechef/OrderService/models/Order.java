@@ -61,4 +61,24 @@ public class Order {
     public void initState() {
         this.state = OrderStatus.getState(this.status);
     }
+
+    @Override
+    public String toString() {
+        return "Order{" +
+                "id=" + id +
+                ", buyerId=" + buyerId +
+                ", status=" + status +
+                ", items=" + items +
+                '}';
+    }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Order order)) return false;
+        return id.equals(order.id) && buyerId.equals(order.buyerId) && status == order.status && items.equals(order.items);
+    }
+    @Override
+    public int hashCode() {
+        return id.hashCode() + buyerId.hashCode() + status.hashCode() + items.hashCode();
+    }
 }

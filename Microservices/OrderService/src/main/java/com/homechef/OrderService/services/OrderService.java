@@ -22,4 +22,36 @@ public class OrderService {
     public List<Order> getAllOrdersByBuyerId(UUID buyerId) {
         return orderRepository.findAllByBuyerId(buyerId);
     }
+
+    public List<Order> getFilteredOrdersBySellerId(UUID sellerId) {
+        List<Order> sellerOrders =  orderRepository.findAllOrdersContainingSellerId(sellerId);
+        sellerOrders.forEach(order -> {
+            order.setItems(
+                    order.getItems().stream()
+                            .filter(item -> item.getSellerId().equals(sellerId))
+                            .toList()
+            );
+        });
+        return sellerOrders;
+    }
+
+    public Order getOrderByIdFilteredBySellerId(UUID orderId, UUID sellerId) throws IllegalAccessException {
+        Order order = orderRepository.findById(orderId).orElse(null);
+        if (order != null) {
+            order.setItems(
+                    order.getItems().stream()
+                            .filter(item -> item.getSellerId().equals(sellerId))
+                            .toList()
+            );
+        }
+        if (order == null) {
+            // order not found
+            throw new IllegalArgumentException("Order not found");
+        }
+        if (order.getItems().isEmpty()) {
+            // not allowed to access this order
+            throw new IllegalAccessException("Order does not belong to this seller");
+        }
+        return order;
+    }
 }

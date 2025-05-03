@@ -61,4 +61,29 @@ public class OrderItem {
         }
         @Override public int hashCode() { return Objects.hash(order, productId);}
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof OrderItem)) return false;
+        OrderItem orderItem = (OrderItem) o;
+        return Objects.equals(order, orderItem.order) && Objects.equals(productId, orderItem.productId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(order, productId);
+    }
+
+    @Override
+    public String toString() {
+        return "OrderItem{" +
+                "order=" + order +
+                ", productId=" + productId +
+                ", sellerId=" + sellerId +
+                ", quantity=" + quantity +
+                ", notes='" + notes + '\'' +
+                ", totalPrice=" + totalPrice +
+                '}';
+    }
 }
