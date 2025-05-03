@@ -1,5 +1,7 @@
 package com.example.chatservice;
 
+import com.example.chatservice.commands.SendMessageCommand;
+import com.example.chatservice.commands.UpdateMessageCommand;
 import com.example.chatservice.enums.MessageStatus;
 import com.example.chatservice.enums.MessageType;
 import com.example.chatservice.factories.MessageFactory;
@@ -45,6 +47,7 @@ class ChatServiceApplicationTests {
         objectMapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
         senderId = UUID.randomUUID();
         receiverId = UUID.randomUUID();
+        messageService = new MessageService(messageRepository);
     }
 
     private Message createTestMessage(MessageType type) {
@@ -55,6 +58,10 @@ class ChatServiceApplicationTests {
                 type
         );
     }
+
+    @Test
+    void contextLoads() {
+	}
 
     @Nested
     class MessageEndpointTests {
@@ -92,8 +99,11 @@ class ChatServiceApplicationTests {
             Message textMessage = createTestMessage(MessageType.TEXT);
             Message productMessage = createTestMessage(MessageType.PRODUCT);
 
-            messageService.saveMessage(textMessage);
-            messageService.saveMessage(productMessage);
+            SendMessageCommand textCommand = new SendMessageCommand(textMessage, messageService);
+            SendMessageCommand productCommand = new SendMessageCommand(productMessage, messageService);
+
+            textCommand.execute();
+            productCommand.execute();
 
             assertNotNull(messageService.getMessages());
             assertEquals(messageCountBefore + 2, messageService.getMessages().size());
@@ -110,7 +120,9 @@ class ChatServiceApplicationTests {
         @Test
         void testDeleteMessage_shouldDeleteMessage_whenMessageExists() throws Exception {
             Message message = createTestMessage(MessageType.TEXT);
-            messageRepository.save(message);
+
+            SendMessageCommand messageSender = new SendMessageCommand(message, messageService);
+            messageSender.execute();
 
             Message existingMessage = messageService.getMessageById(message.getId());
             assertNotNull(existingMessage);
@@ -133,12 +145,56 @@ class ChatServiceApplicationTests {
         }
     }
 
+
+    @Nested
+    class MessageUpdateTests {
+        @Test
+        void testUpdateMessage_shouldUpdateMessage_whenMessageExists() {
+            Message message = createTestMessage(MessageType.TEXT);
+            SendMessageCommand messageSender = new SendMessageCommand(message, messageService);
+            messageSender.execute();
+
+
+            UpdateMessageCommand updateMessageCommand = new UpdateMessageCommand(message, messageService);
+            message.setContent("Updated content");
+            updateMessageCommand.execute();
+
+            Message updatedMessage = messageService.getMessageById(message.getId());
+            assertNotNull(updatedMessage);
+            assertEquals(message.getId(), updatedMessage.getId());
+            assertEquals("Updated content", updatedMessage.getContent());
+        }
+
+        @Test
+        void testUPdateMessageEndpoint_shouldReturnUpdatedMessage_whenValidMessage() throws Exception {
+            Message message = createTestMessage(MessageType.TEXT);
+            SendMessageCommand messageSender = new SendMessageCommand(message, messageService);
+            messageSender.execute();
+
+            message.setContent("Updated content");
+
+            String responseContent = mockMvc.perform(MockMvcRequestBuilders.put("/messages/update")
+                            .contentType("application/json")
+                            .content(objectMapper.writeValueAsString(message)))
+                    .andExpect(MockMvcResultMatchers.status().isOk())
+                    .andReturn()
+                    .getResponse()
+                    .getContentAsString();
+
+            Message updatedMessage = objectMapper.readValue(responseContent, Message.class);
+            assertEquals("Updated content", updatedMessage.getContent());
+        }
+    }
+
+
     @Nested
     class MessageStatusTests {
         @Test
-        void testUpdateMessageStatus_shouldUpdateStatus_whenMessageExists() throws Exception {
+        void testUpdateMessageStatus_shouldUpdateStatus_whenMessageExists() {
             Message message = createTestMessage(MessageType.TEXT);
-            messageRepository.save(message);
+
+            SendMessageCommand messageSender = new SendMessageCommand(message, messageService);
+            messageSender.execute();
 
 			int messageCountBefore = messageService.getMessages().size();
 
@@ -157,7 +213,9 @@ class ChatServiceApplicationTests {
         void testIsMessageSeenEndpoint_shouldReturnTrue_whenMessageIsSeen() throws Exception {
             Message message = createTestMessage(MessageType.TEXT);
             message.setStatus(MessageStatus.READ);
-            messageRepository.save(message);
+
+            SendMessageCommand messageSender = new SendMessageCommand(message, messageService);
+            messageSender.execute();
 
             mockMvc.perform(MockMvcRequestBuilders.get("/messages/seen/" + message.getId()))
                     .andExpect(MockMvcResultMatchers.status().isOk())
@@ -169,7 +227,10 @@ class ChatServiceApplicationTests {
         void testIsMessageSeenEndpoint_shouldReturnFalse_whenMessageIsNotSeen() throws Exception {
             Message message = createTestMessage(MessageType.TEXT);
             message.setStatus(MessageStatus.SENT);
-            messageRepository.save(message);
+
+            SendMessageCommand messageSender = new SendMessageCommand(message, messageService);
+            messageSender.execute();
+
 
             mockMvc.perform(MockMvcRequestBuilders.get("/messages/seen/" + message.getId()))
                     .andExpect(MockMvcResultMatchers.status().isOk())
