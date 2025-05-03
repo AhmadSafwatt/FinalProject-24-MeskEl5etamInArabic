@@ -16,7 +16,7 @@ public class MarkMessageAsSeenCommand implements Command {
     @Override
     public void execute() {
         if (message != null) {
-            message.setStatus(MessageStatus.READ);
+            message.setStatus(MessageStatus.SEEN);
             messageService.saveMessage(message);
         }
     }

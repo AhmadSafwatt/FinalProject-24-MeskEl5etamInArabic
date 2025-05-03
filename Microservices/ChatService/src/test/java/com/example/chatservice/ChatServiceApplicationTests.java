@@ -1,5 +1,6 @@
 package com.example.chatservice;
 
+import com.example.chatservice.commands.MarkMessageAsSeenCommand;
 import com.example.chatservice.commands.SendMessageCommand;
 import com.example.chatservice.commands.UpdateMessageCommand;
 import com.example.chatservice.enums.MessageStatus;
@@ -166,7 +167,7 @@ class ChatServiceApplicationTests {
         }
 
         @Test
-        void testUPdateMessageEndpoint_shouldReturnUpdatedMessage_whenValidMessage() throws Exception {
+        void testUpdateMessageEndpoint_shouldReturnUpdatedMessage_whenValidMessage() throws Exception {
             Message message = createTestMessage(MessageType.TEXT);
             SendMessageCommand messageSender = new SendMessageCommand(message, messageService);
             messageSender.execute();
@@ -198,12 +199,12 @@ class ChatServiceApplicationTests {
 
 			int messageCountBefore = messageService.getMessages().size();
 
-            message.setStatus(MessageStatus.READ);
+            message.setStatus(MessageStatus.SEEN);
             messageService.saveMessage(message);
 
             Message updatedMessage = messageService.getMessageById(message.getId());
             assertNotNull(updatedMessage);
-            assertEquals(MessageStatus.READ, updatedMessage.getStatus());
+            assertEquals(MessageStatus.SEEN, updatedMessage.getStatus());
 
 			// Verify that the updated message was not saved again as a new message
 			assertEquals(messageCountBefore, messageService.getMessages().size());
@@ -212,7 +213,9 @@ class ChatServiceApplicationTests {
         @Test
         void testIsMessageSeenEndpoint_shouldReturnTrue_whenMessageIsSeen() throws Exception {
             Message message = createTestMessage(MessageType.TEXT);
-            message.setStatus(MessageStatus.READ);
+
+            MarkMessageAsSeenCommand markMessageAsSeenCommand = new MarkMessageAsSeenCommand(message, messageService);
+            markMessageAsSeenCommand.execute();
 
             SendMessageCommand messageSender = new SendMessageCommand(message, messageService);
             messageSender.execute();
@@ -226,7 +229,6 @@ class ChatServiceApplicationTests {
         @Test
         void testIsMessageSeenEndpoint_shouldReturnFalse_whenMessageIsNotSeen() throws Exception {
             Message message = createTestMessage(MessageType.TEXT);
-            message.setStatus(MessageStatus.SENT);
 
             SendMessageCommand messageSender = new SendMessageCommand(message, messageService);
             messageSender.execute();

@@ -49,6 +49,6 @@ public class MessageService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found");
         }
 
-        return message.getStatus() == MessageStatus.READ;
+        return message.getStatus() == MessageStatus.SEEN;
     }
 }
