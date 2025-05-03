@@ -12,7 +12,7 @@ public class Order {
 
     @Id
     private UUID id;
-    private String buyerId;
+    private UUID buyerId;
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
@@ -23,13 +23,13 @@ public class Order {
     private List<OrderItem> items;
 
     public Order() {}
-    public Order(UUID id, String buyerId, OrderStatus status, List<OrderItem> items) {
+    public Order(UUID id, UUID buyerId, OrderStatus status, List<OrderItem> items) {
         this.id = id;
         this.buyerId = buyerId;
         this.status = status;
         this.items = items;
     }
-    public Order(String buyerId, OrderStatus status, List<OrderItem> items) {
+    public Order(UUID buyerId, OrderStatus status, List<OrderItem> items) {
         this.id = UUID.randomUUID();
         this.buyerId = buyerId;
         this.status = status;
@@ -37,8 +37,8 @@ public class Order {
     }
     public UUID getId() {return id;}
     public void setId(UUID id) {this.id = id;}
-    public String getBuyerId() {return buyerId;}
-    public void setBuyerId(String buyerId) {this.buyerId = buyerId;}
+    public UUID getBuyerId() {return buyerId;}
+    public void setBuyerId(UUID buyerId) {this.buyerId = buyerId;}
     public OrderStatus getStatus() {return status;}
     public void setStatus(OrderStatus status) {this.status = status; initState();}
     public OrderState getState() {return state;}
