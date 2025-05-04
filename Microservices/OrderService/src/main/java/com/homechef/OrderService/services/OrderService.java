@@ -19,6 +19,8 @@ public class OrderService {
 
     public Order createOrder(Order order) {
         order.setId(UUID.randomUUID());
+        // set the order date to now
+        order.setOrderDate(java.time.LocalDateTime.now());
         order.getItems().forEach(item -> item.setOrder(order));
         return orderRepository.save(order);
     }

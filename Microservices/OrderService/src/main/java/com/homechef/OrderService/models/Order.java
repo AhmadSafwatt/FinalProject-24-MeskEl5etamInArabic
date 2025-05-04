@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.homechef.OrderService.states.*;
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -16,6 +17,7 @@ public class Order {
     private UUID buyerId;
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
+    private LocalDateTime orderDate;
 
     @Transient
     @JsonIgnore
@@ -24,15 +26,15 @@ public class Order {
     @OneToMany(mappedBy = "order", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<OrderItem> items;
 
-    public Order() { this.id = UUID.randomUUID(); }
-    public Order(UUID id, UUID buyerId, OrderStatus status, List<OrderItem> items) {
+    public Order() { this.id = UUID.randomUUID(); this.orderDate = LocalDateTime.now(); }
+    public Order(UUID id, UUID buyerId, OrderStatus status, List<OrderItem> items, LocalDateTime orderDate) {
         this.id = id;
         this.buyerId = buyerId;
         this.status = status;
         this.items = items;
     }
     public Order(UUID buyerId, OrderStatus status, List<OrderItem> items) {
-        this.id = UUID.randomUUID();
+        this();
         this.buyerId = buyerId;
         this.status = status;
         this.items = items;
@@ -43,6 +45,8 @@ public class Order {
     public void setBuyerId(UUID buyerId) {this.buyerId = buyerId;}
     public OrderStatus getStatus() {return status;}
     public void setStatus(OrderStatus status) {this.status = status; initState();}
+    public LocalDateTime getOrderDate() {return orderDate;}
+    public void setOrderDate(LocalDateTime orderDate) {this.orderDate = orderDate;}
     public OrderState getState() {return state;}
     public void setState(OrderState state) {this.state = state; setStatus(OrderState.getOrderStatus(state));}
     public List<OrderItem> getItems() {return items;}
