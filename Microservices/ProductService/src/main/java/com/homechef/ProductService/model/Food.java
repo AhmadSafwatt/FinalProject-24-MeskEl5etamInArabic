@@ -1,11 +1,16 @@
 package com.homechef.ProductService.model;
 
+import org.springframework.data.annotation.TypeAlias;
+
 import java.util.UUID;
 
 public class Food extends Product {
 
-    private Food(Builder builder) {
-        this.id = builder.id;
+    public Food() {
+        this.id = UUID.randomUUID();
+    }
+    public Food(Builder builder) {
+        this.id = builder.id != null ? builder.id : UUID.randomUUID();
         this.name = builder.name;
         this.sellerId = builder.sellerId;
         this.price = builder.price;
