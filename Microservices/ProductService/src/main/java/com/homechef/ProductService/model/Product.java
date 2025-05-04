@@ -11,20 +11,10 @@ public class Product {
     @Id
     UUID id;
     String name;
+    UUID sellerId;
+    Double price;
 
 
-    public Product() {
-    }
-
-    public Product(String name) {
-        this.name = name;
-    }
-
-
-    public Product(UUID id, String name) {
-        this.id = id;
-        this.name = name;
-    }
 
     public UUID getId() {
         return id;
@@ -42,7 +32,19 @@ public class Product {
         this.name = name;
     }
 
+    public UUID getSellerId() {
+        return sellerId;
+    }
 
+    public void setSellerId(UUID sellerId) {
+        this.sellerId = sellerId;
+    }
 
+    public Double getPrice() {
+        return price;
+    }
 
+    public void setPrice(Double price) {
+        this.price = price;
+    }
 }
