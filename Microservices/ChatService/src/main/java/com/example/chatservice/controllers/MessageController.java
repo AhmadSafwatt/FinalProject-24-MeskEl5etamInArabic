@@ -1,5 +1,6 @@
 package com.example.chatservice.controllers;
 
+import com.example.chatservice.commands.DeleteMessageCommand;
 import com.example.chatservice.models.Message;
 import com.example.chatservice.services.MessageService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +8,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
+
+import com.example.chatservice.commands.SendMessageCommand;
+import com.example.chatservice.commands.UpdateMessageCommand;
+import com.example.chatservice.commands.DeleteMessageCommand;
+
 
 @RestController
 @RequestMapping("/messages")
@@ -48,7 +54,9 @@ public class MessageController {
      */
     @PostMapping("/save")
     public Message saveMessage(Message message) {
-        return messageService.saveMessage(message);
+        SendMessageCommand sendMessageCommand = new SendMessageCommand(message, messageService);
+        sendMessageCommand.execute();
+        return message;
     }
 
     /**
@@ -58,6 +66,34 @@ public class MessageController {
      */
     @DeleteMapping("/delete/{id}")
     public void deleteMessage(@PathVariable UUID id) {
-        messageService.deleteMessage(id);
+        DeleteMessageCommand deleteMessageCommand = new DeleteMessageCommand(id, messageService);
+        deleteMessageCommand.execute();
+    }
+
+
+    /**
+     * Endpoint to update a message.
+     *
+     * @param message Message object
+     * @return Updated message object
+     */
+
+    @PutMapping("/update")
+    public Message updateMessage(@RequestBody Message message) {
+        UpdateMessageCommand updateMessageCommand = new UpdateMessageCommand(message, messageService);
+        updateMessageCommand.execute();
+        return message;
+    }
+
+    /**
+     * Endpoint to check if a message has been seen.
+     *
+     * @param messageId Message ID
+     * @return true if the message is seen, false otherwise
+     */
+
+    @GetMapping("/seen/{messageId}")
+    public boolean isMessageSeen(@PathVariable UUID messageId) {
+        return messageService.isMessageSeen(messageId);
     }
 }
