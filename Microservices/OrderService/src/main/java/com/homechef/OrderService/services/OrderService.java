@@ -41,17 +41,15 @@ public class OrderService {
 
     public Order getOrderByIdFilteredBySellerId(UUID orderId, UUID sellerId) throws IllegalAccessException {
         Order order = orderRepository.findById(orderId).orElse(null);
-        if (order != null) {
-            order.setItems(
-                    order.getItems().stream()
-                            .filter(item -> item.getSellerId().equals(sellerId))
-                            .toList()
-            );
-        }
         if (order == null) {
             // order not found
             throw new IllegalArgumentException("Order not found");
         }
+        order.setItems(
+                order.getItems().stream()
+                        .filter(item -> item.getSellerId().equals(sellerId))
+                        .toList()
+        );
         if (order.getItems().isEmpty()) {
             // not allowed to access this order
             throw new IllegalAccessException("Order does not belong to this seller");
