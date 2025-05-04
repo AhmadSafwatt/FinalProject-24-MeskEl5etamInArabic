@@ -68,7 +68,7 @@ class ChatServiceApplicationTests {
     class MessageEndpointTests {
         @Test
         void testGetMessagesEndpoint() throws Exception {
-            mockMvc.perform(MockMvcRequestBuilders.get("/messages/"))
+            mockMvc.perform(MockMvcRequestBuilders.get("/messages"))
                     .andExpect(MockMvcResultMatchers.status().isOk())
                     .andDo(MockMvcResultHandlers.print());
         }
@@ -77,7 +77,7 @@ class ChatServiceApplicationTests {
         void testSaveMessageEndpoint_shouldReturnSavedMessage_whenValidMessage() throws Exception {
             Message message = createTestMessage(MessageType.IMAGE);
 
-            String responseContent = mockMvc.perform(MockMvcRequestBuilders.post("/messages/save")
+            String responseContent = mockMvc.perform(MockMvcRequestBuilders.post("/messages")
                             .contentType("application/json")
                             .content(objectMapper.writeValueAsString(message)))
                     .andExpect(MockMvcResultMatchers.status().isOk())
@@ -129,7 +129,7 @@ class ChatServiceApplicationTests {
             assertNotNull(existingMessage);
             assertEquals(message.getId(), existingMessage.getId());
 
-            mockMvc.perform(MockMvcRequestBuilders.delete("/messages/delete/" + message.getId()))
+            mockMvc.perform(MockMvcRequestBuilders.delete("/messages/" + message.getId()))
                     .andExpect(MockMvcResultMatchers.status().isOk())
                     .andDo(MockMvcResultHandlers.print());
 
@@ -174,7 +174,7 @@ class ChatServiceApplicationTests {
 
             message.setContent("Updated content");
 
-            String responseContent = mockMvc.perform(MockMvcRequestBuilders.put("/messages/update")
+            String responseContent = mockMvc.perform(MockMvcRequestBuilders.put("/messages/" + message.getId())
                             .contentType("application/json")
                             .content(objectMapper.writeValueAsString(message)))
                     .andExpect(MockMvcResultMatchers.status().isOk())
@@ -220,7 +220,7 @@ class ChatServiceApplicationTests {
             SendMessageCommand messageSender = new SendMessageCommand(message, messageService);
             messageSender.execute();
 
-            mockMvc.perform(MockMvcRequestBuilders.get("/messages/seen/" + message.getId()))
+            mockMvc.perform(MockMvcRequestBuilders.get("/messages/" + message.getId() + "/seen"))
                     .andExpect(MockMvcResultMatchers.status().isOk())
                     .andExpect(MockMvcResultMatchers.content().string("true"))
                     .andDo(MockMvcResultHandlers.print());
@@ -234,7 +234,7 @@ class ChatServiceApplicationTests {
             messageSender.execute();
 
 
-            mockMvc.perform(MockMvcRequestBuilders.get("/messages/seen/" + message.getId()))
+            mockMvc.perform(MockMvcRequestBuilders.get("/messages/" + message.getId() + "/seen"))
                     .andExpect(MockMvcResultMatchers.status().isOk())
                     .andExpect(MockMvcResultMatchers.content().string("false"))
                     .andDo(MockMvcResultHandlers.print());
@@ -244,7 +244,7 @@ class ChatServiceApplicationTests {
         void testIsMessageSeenEndpoint_shouldReturnNotFound_whenMessageDoesNotExist() throws Exception {
             UUID nonExistingMessageId = UUID.randomUUID();
 
-            mockMvc.perform(MockMvcRequestBuilders.get("/messages/seen/" + nonExistingMessageId))
+            mockMvc.perform(MockMvcRequestBuilders.get("/messages/" + nonExistingMessageId + "/seen"))
                     .andExpect(MockMvcResultMatchers.status().isNotFound())
                     .andDo(MockMvcResultHandlers.print());
         }
