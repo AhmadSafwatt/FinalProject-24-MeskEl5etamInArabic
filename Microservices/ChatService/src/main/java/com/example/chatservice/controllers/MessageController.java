@@ -2,6 +2,7 @@ package com.example.chatservice.controllers;
 import com.example.chatservice.models.Message;
 import com.example.chatservice.services.MessageService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -52,6 +53,17 @@ public class MessageController {
      */
     @PostMapping
     public ResponseEntity<Message> createMessage(@RequestBody Message message) {
+
+        if (message == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        Message existingMessage = messageService.getMessageById(message.getId());
+
+        if (existingMessage != null) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
+
         SendMessageCommand sendMessageCommand = new SendMessageCommand(message, messageService);
         sendMessageCommand.execute();
         return ResponseEntity.ok(message);
@@ -78,9 +90,16 @@ public class MessageController {
      */
     @PutMapping("/{id}")
     public ResponseEntity<Message> updateMessage(@PathVariable UUID id, @RequestBody Message message) {
-        UpdateMessageCommand updateMessageCommand = new UpdateMessageCommand(message, messageService);
-        updateMessageCommand.execute();
-        return ResponseEntity.ok(message);
+        if (message == null || !id.equals(message.getId())) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        if (messageService.getMessageById(id) == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        Message updatedMessage = messageService.saveMessage(message);
+        return ResponseEntity.ok(updatedMessage);
     }
 
     /**
