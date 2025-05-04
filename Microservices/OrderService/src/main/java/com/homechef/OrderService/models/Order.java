@@ -24,7 +24,7 @@ public class Order {
     @OneToMany(mappedBy = "order", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<OrderItem> items;
 
-    public Order() {}
+    public Order() { this.id = UUID.randomUUID(); }
     public Order(UUID id, UUID buyerId, OrderStatus status, List<OrderItem> items) {
         this.id = id;
         this.buyerId = buyerId;
