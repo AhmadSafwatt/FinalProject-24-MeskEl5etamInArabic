@@ -32,8 +32,8 @@ public class Message {
     public Message(UUID sender, UUID receiver, String content, MessageType type) {
         this();
         this.id = UUID.randomUUID();
-        this.sender = sender;
-        this.receiver = receiver;
+        this.senderId = sender;
+        this.receiverId = receiver;
         this.content = content;
         this.type = type;
     }
@@ -41,9 +41,9 @@ public class Message {
     @PrimaryKey
     private UUID id;
 
-    private UUID sender;
+    private UUID senderId;
 
-    private UUID receiver;
+    private UUID receiverId;
 
     private String content;
 
