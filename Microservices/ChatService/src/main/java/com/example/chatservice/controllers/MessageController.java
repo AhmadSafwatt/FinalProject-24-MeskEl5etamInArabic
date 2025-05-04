@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.UUID;
 
 import com.example.chatservice.commands.SendMessageCommand;
-import com.example.chatservice.commands.UpdateMessageCommand;
 import com.example.chatservice.commands.DeleteMessageCommand;
 
 @RestController

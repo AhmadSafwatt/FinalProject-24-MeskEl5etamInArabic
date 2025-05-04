@@ -130,7 +130,7 @@ class ChatServiceApplicationTests {
             SendMessageCommand messageSender = new SendMessageCommand(message, messageService);
             messageSender.execute();
 
-            String responseContent = mockMvc.perform(MockMvcRequestBuilders.post("/messages")
+            mockMvc.perform(MockMvcRequestBuilders.post("/messages")
                             .contentType("application/json")
                             .content(objectMapper.writeValueAsString(message)))
                     .andExpect(MockMvcResultMatchers.status().isConflict())
@@ -216,7 +216,7 @@ class ChatServiceApplicationTests {
             Message message = createTestMessage(MessageType.TEXT);
             message.setId(nonExistingMessageId);
 
-            String responseContent = mockMvc.perform(MockMvcRequestBuilders.put("/messages/" + nonExistingMessageId)
+            mockMvc.perform(MockMvcRequestBuilders.put("/messages/" + nonExistingMessageId)
                             .contentType("application/json")
                             .content(objectMapper.writeValueAsString(message)))
                     .andExpect(MockMvcResultMatchers.status().isNotFound())
