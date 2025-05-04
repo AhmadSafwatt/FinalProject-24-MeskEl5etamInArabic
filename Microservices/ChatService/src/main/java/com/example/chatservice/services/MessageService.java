@@ -25,10 +25,28 @@ public class MessageService {
     }
 
     public Message getMessageById(UUID id) {
+        if (id == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message ID cannot be null");
+        }
         return messageRepository.findById(id).orElse(null);
     }
 
     public Message saveMessage(Message message) {
+        if (message == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message cannot be null");
+        }
+        if (message.getId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message ID cannot be null");
+        }
+        if (message.getSenderId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sender ID cannot be null");
+        }
+        if (message.getReceiverId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Receiver ID cannot be null");
+        }
+        if (message.getContent() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message content cannot be null");
+        }
         return messageRepository.save(message);
     }
 
