@@ -65,8 +65,7 @@ public class OrderItem {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof OrderItem)) return false;
-        OrderItem orderItem = (OrderItem) o;
+        if (!(o instanceof OrderItem orderItem)) return false;
         return Objects.equals(order, orderItem.order) && Objects.equals(productId, orderItem.productId);
     }
 

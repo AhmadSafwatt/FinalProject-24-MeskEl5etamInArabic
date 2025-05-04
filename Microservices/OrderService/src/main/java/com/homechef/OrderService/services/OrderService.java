@@ -10,7 +10,7 @@ import java.util.UUID;
 
 @Service
 public class OrderService {
-    private OrderRepository orderRepository;
+    private final OrderRepository orderRepository;
 
     @Autowired
     public OrderService(OrderRepository orderRepository) {this.orderRepository = orderRepository;}
@@ -31,13 +31,11 @@ public class OrderService {
 
     public List<Order> getFilteredOrdersBySellerId(UUID sellerId) {
         List<Order> sellerOrders =  orderRepository.findAllOrdersContainingSellerId(sellerId);
-        sellerOrders.forEach(order -> {
-            order.setItems(
-                    order.getItems().stream()
-                            .filter(item -> item.getSellerId().equals(sellerId))
-                            .toList()
-            );
-        });
+        sellerOrders.forEach(order -> order.setItems(
+                order.getItems().stream()
+                        .filter(item -> item.getSellerId().equals(sellerId))
+                        .toList()
+        ));
         return sellerOrders;
     }
 

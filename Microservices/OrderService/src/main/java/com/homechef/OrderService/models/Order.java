@@ -32,6 +32,7 @@ public class Order {
         this.buyerId = buyerId;
         this.status = status;
         this.items = items;
+        this.orderDate = orderDate;
     }
     public Order(UUID buyerId, OrderStatus status, List<OrderItem> items) {
         this();
