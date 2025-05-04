@@ -12,6 +12,20 @@ public class Product {
     UUID id;
     String name;
 
+
+    public Product() {
+    }
+
+    public Product(String name) {
+        this.name = name;
+    }
+
+
+    public Product(UUID id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
     public UUID getId() {
         return id;
     }
