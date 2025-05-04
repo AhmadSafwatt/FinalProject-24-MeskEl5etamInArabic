@@ -17,7 +17,11 @@ public class OrderService {
 
     public List<Order> getAllOrders() { return orderRepository.findAll(); }
 
-    public Order createOrder(Order order) { return orderRepository.save(order); }
+    public Order createOrder(Order order) {
+        order.setId(UUID.randomUUID());
+        order.getItems().forEach(item -> item.setOrder(order));
+        return orderRepository.save(order);
+    }
 
     public List<Order> getAllOrdersByBuyerId(UUID buyerId) {
         return orderRepository.findAllByBuyerId(buyerId);

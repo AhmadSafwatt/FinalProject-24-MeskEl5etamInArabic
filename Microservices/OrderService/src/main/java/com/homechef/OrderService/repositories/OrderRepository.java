@@ -14,6 +14,6 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
     List<Order> findAllByBuyerId(UUID buyerId);
 
     @Query(nativeQuery = true, value = "SELECT * FROM orders o WHERE :sellerId IN"+
-    "(SELECT seller_id FROM order_items WHERE order_items.order_id = o.id)")
+    "(SELECT seller_id FROM order_item WHERE order_item.order_id = o.id)")
     List<Order> findAllOrdersContainingSellerId(@Param("sellerId") UUID sellerId);
 }

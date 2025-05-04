@@ -1,5 +1,6 @@
 package com.homechef.OrderService.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.homechef.OrderService.states.*;
 import jakarta.persistence.*;
 
@@ -17,6 +18,7 @@ public class Order {
     private OrderStatus status;
 
     @Transient
+    @JsonIgnore
     private OrderState state = new CreatedState();
 
     @OneToMany(mappedBy = "order", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
