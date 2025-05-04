@@ -52,6 +52,7 @@ public class Product {
 
         }
         public Builder(String name, UUID sellerId, Double price) {
+            this.id=UUID.randomUUID();
             this.name = name;
             this.sellerId = sellerId;
             this.price = price;
