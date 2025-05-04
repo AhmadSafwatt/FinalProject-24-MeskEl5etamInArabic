@@ -24,14 +24,6 @@ public class ProductController {
         this.productService = productService;
     }
 
-    @PostMapping
 
-    public Product createProduct(@RequestBody Map<String, Object> request) {
-        String name = (String) request.get("name");
-        Double price = ((Number) request.get("price")).doubleValue();
-        UUID sellerId = UUID.fromString((String) request.get("sellerId"));
-
-        return productService.createProduct(name, price, sellerId);
-    }
 
 }

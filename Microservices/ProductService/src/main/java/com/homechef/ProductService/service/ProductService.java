@@ -21,12 +21,6 @@ public class ProductService {
         this.mongoClient = mongoClient;
     }
 
-    public Product createProduct(String name, Double price, UUID sellerId) {
-        Product product = new Product.Builder(name, sellerId, price)
-                .build();
-
-        return productRepository.save(product);
-    }
 
 
 
