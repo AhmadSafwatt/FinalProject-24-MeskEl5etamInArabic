@@ -1,9 +1,8 @@
 package com.example.chatservice.controllers;
-
-import com.example.chatservice.commands.DeleteMessageCommand;
 import com.example.chatservice.models.Message;
 import com.example.chatservice.services.MessageService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,7 +11,6 @@ import java.util.UUID;
 import com.example.chatservice.commands.SendMessageCommand;
 import com.example.chatservice.commands.UpdateMessageCommand;
 import com.example.chatservice.commands.DeleteMessageCommand;
-
 
 @RestController
 @RequestMapping("/messages")
@@ -26,74 +24,73 @@ public class MessageController {
     }
 
     /**
-     * Endpoint to get all messages.
+     * Get all messages.
      *
      * @return List of messages
      */
-    @GetMapping("/")
-    public List<Message> getMessages() {
-        return messageService.getMessages();
+    @GetMapping
+    public ResponseEntity<List<Message>> getMessages() {
+        return ResponseEntity.ok(messageService.getMessages());
     }
 
     /**
-     * Endpoint to get a message by its ID.
+     * Get a message by its ID.
      *
      * @param id Message ID
      * @return Message object
      */
     @GetMapping("/{id}")
-    public Message getMessageById(UUID id) {
-        return messageService.getMessageById(id);
+    public ResponseEntity<Message> getMessageById(@PathVariable UUID id) {
+        return ResponseEntity.ok(messageService.getMessageById(id));
     }
 
     /**
-     * Endpoint to save a new message.
+     * Create a new message.
      *
      * @param message Message object
-     * @return Saved message object
+     * @return Created message object
      */
-    @PostMapping("/save")
-    public Message saveMessage(Message message) {
+    @PostMapping
+    public ResponseEntity<Message> createMessage(@RequestBody Message message) {
         SendMessageCommand sendMessageCommand = new SendMessageCommand(message, messageService);
         sendMessageCommand.execute();
-        return message;
+        return ResponseEntity.ok(message);
     }
 
     /**
-     * Endpoint to delete a message by its ID.
+     * Delete a message by its ID.
      *
      * @param id Message ID
      */
-    @DeleteMapping("/delete/{id}")
-    public void deleteMessage(@PathVariable UUID id) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteMessage(@PathVariable UUID id) {
         DeleteMessageCommand deleteMessageCommand = new DeleteMessageCommand(id, messageService);
         deleteMessageCommand.execute();
+        return ResponseEntity.ok("Message deleted successfully");
     }
 
-
     /**
-     * Endpoint to update a message.
+     * Update a message.
      *
+     * @param id Message ID
      * @param message Message object
      * @return Updated message object
      */
-
-    @PutMapping("/update")
-    public Message updateMessage(@RequestBody Message message) {
+    @PutMapping("/{id}")
+    public ResponseEntity<Message> updateMessage(@PathVariable UUID id, @RequestBody Message message) {
         UpdateMessageCommand updateMessageCommand = new UpdateMessageCommand(message, messageService);
         updateMessageCommand.execute();
-        return message;
+        return ResponseEntity.ok(message);
     }
 
     /**
-     * Endpoint to check if a message has been seen.
+     * Get message seen status.
      *
-     * @param messageId Message ID
-     * @return true if the message is seen, false otherwise
+     * @param id Message ID
+     * @return Message seen status
      */
-
-    @GetMapping("/seen/{messageId}")
-    public boolean isMessageSeen(@PathVariable UUID messageId) {
-        return messageService.isMessageSeen(messageId);
+    @GetMapping("/{id}/seen")
+    public ResponseEntity<Boolean> getMessageSeenStatus(@PathVariable UUID id) {
+        return ResponseEntity.ok(messageService.isMessageSeen(id));
     }
 }
