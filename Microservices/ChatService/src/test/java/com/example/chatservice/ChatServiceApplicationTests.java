@@ -20,6 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
 
@@ -112,7 +113,30 @@ class ChatServiceApplicationTests {
 
         @Test
         void testSaveMessageService_shouldNotSaveMessage_whenMessageIsNull() {
-            assertThrows(IllegalArgumentException.class, () -> messageService.saveMessage(null));
+            assertThrows(ResponseStatusException.class, () -> messageService.saveMessage(null));
+        }
+
+        @Test
+        void testSaveMessageService_shouldNotSaveMessage_whenMessageIdIsNull() {
+            Message message = createTestMessage(MessageType.TEXT);
+            message.setId(null);
+
+            assertThrows(ResponseStatusException.class, () -> messageService.saveMessage(message));
+        }
+
+        @Test
+        void testSaveMessageEndpoint_shouldReturnConflict_whenMessageExists() throws Exception {
+            Message message = createTestMessage(MessageType.TEXT);
+            SendMessageCommand messageSender = new SendMessageCommand(message, messageService);
+            messageSender.execute();
+
+            String responseContent = mockMvc.perform(MockMvcRequestBuilders.post("/messages")
+                            .contentType("application/json")
+                            .content(objectMapper.writeValueAsString(message)))
+                    .andExpect(MockMvcResultMatchers.status().isConflict())
+                    .andReturn()
+                    .getResponse()
+                    .getContentAsString();
         }
     }
 
@@ -184,6 +208,21 @@ class ChatServiceApplicationTests {
 
             Message updatedMessage = objectMapper.readValue(responseContent, Message.class);
             assertEquals("Updated content", updatedMessage.getContent());
+        }
+
+        @Test
+        void testUpdateMessageEndpoint_shouldReturnNotFound_whenMessageDoesNotExist() throws Exception {
+            UUID nonExistingMessageId = UUID.randomUUID();
+            Message message = createTestMessage(MessageType.TEXT);
+            message.setId(nonExistingMessageId);
+
+            String responseContent = mockMvc.perform(MockMvcRequestBuilders.put("/messages/" + nonExistingMessageId)
+                            .contentType("application/json")
+                            .content(objectMapper.writeValueAsString(message)))
+                    .andExpect(MockMvcResultMatchers.status().isNotFound())
+                    .andReturn()
+                    .getResponse()
+                    .getContentAsString();
         }
     }
 
