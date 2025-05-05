@@ -22,18 +22,20 @@ import com.example.chatservice.enums.MessageType;
 public class Message {
 
     public Message() {
-        this.id = UUID.randomUUID();
-        this.timestamp = LocalDateTime.now();
-        this.status = MessageStatus.SENT;
     }
 
+    public Message(MessageType type) {
+        this.id = UUID.randomUUID();
+        this.type = type;
+    }
     public Message(UUID sender, UUID receiver, String content, MessageType type) {
-        this();
         this.id = UUID.randomUUID();
         this.senderId = sender;
         this.receiverId = receiver;
         this.content = content;
         this.type = type;
+        this.timestamp = LocalDateTime.now();
+        this.status = MessageStatus.SENT;
     }
 
     @PrimaryKey
