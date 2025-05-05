@@ -72,4 +72,21 @@ public class AuthService {
         userRepository.save(user);
         return "Email Verified";
     }
+
+    public String emailResetPassword(String email) {
+        // generate otp and store in redis along with email
+
+        // send email with reset link
+        return "TODO";
+    }
+
+    public String resetPassword(String email, String otp, String newPassword) {
+        // check if otp is valid (compare with redis entry)
+        // check if email is valid
+        // check if password is valid
+        // hash password
+        // update password in database
+        // remove otp entry from redis
+        return "TODO";
+    }
 }
