@@ -11,4 +11,8 @@ public class ImageMessage extends Message {
     public ImageMessage(UUID sender, UUID receiver, String content) {
         super(sender, receiver, content, MessageType.IMAGE);
     }
+
+    public ImageMessage() {
+        super(MessageType.IMAGE);
+    }
 }

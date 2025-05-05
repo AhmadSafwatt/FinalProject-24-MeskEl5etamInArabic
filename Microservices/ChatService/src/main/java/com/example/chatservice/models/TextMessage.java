@@ -12,4 +12,8 @@ public class TextMessage extends Message {
     public TextMessage(UUID sender, UUID receiver, String content) {
         super(sender, receiver, content, MessageType.TEXT);
     }
+
+    public TextMessage() {
+        super(MessageType.TEXT);
+    }
 }

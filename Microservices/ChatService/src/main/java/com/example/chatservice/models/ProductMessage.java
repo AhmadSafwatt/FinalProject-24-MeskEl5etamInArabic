@@ -12,4 +12,8 @@ public class ProductMessage extends Message {
     public ProductMessage(UUID sender, UUID receiver, String content) {
         super(sender, receiver, content, MessageType.PRODUCT);
     }
+
+    public ProductMessage() {
+        super(MessageType.PRODUCT);
+    }
 }
