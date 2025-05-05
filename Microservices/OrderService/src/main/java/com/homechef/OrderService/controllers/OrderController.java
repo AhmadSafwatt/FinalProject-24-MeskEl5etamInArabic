@@ -18,10 +18,10 @@ public class OrderController {
     @Autowired
     public OrderController(OrderService orderService) {this.orderService = orderService;}
 
-    @GetMapping("/all")
+    @GetMapping
     public List<Order> getAllOrders() {return orderService.getAllOrders();}
 
-    @PostMapping("/create")
+    @PostMapping
     public Order createOrder(@RequestBody Order order) {
         return orderService.createOrder(order);
     }

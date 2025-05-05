@@ -33,12 +33,10 @@ public class Order {
         this.status = status;
         this.items = items;
         this.orderDate = orderDate;
+        items.forEach(item -> item.setOrder(this));
     }
     public Order(UUID buyerId, OrderStatus status, List<OrderItem> items) {
-        this();
-        this.buyerId = buyerId;
-        this.status = status;
-        this.items = items;
+        this(UUID.randomUUID(), buyerId, status, items, LocalDateTime.now());
     }
     public UUID getId() {return id;}
     public void setId(UUID id) {this.id = id;}
