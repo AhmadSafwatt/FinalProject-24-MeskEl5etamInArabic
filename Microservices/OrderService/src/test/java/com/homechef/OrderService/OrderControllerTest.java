@@ -83,14 +83,14 @@ class OrderControllerTest {
     @Test
     void createOrder_ShouldReturnCreatedOrder() {
         // Arrange
-        when(orderService.createOrder(testOrder)).thenReturn(testOrder);
+        when(orderService.createOrder(testOrder.getBuyerId(),testOrder.getStatus(), testOrder.getItems())).thenReturn(testOrder);
 
         // Act
         Order result = orderController.createOrder(testOrder);
 
         // Assert
         assertEquals(testOrder, result);
-        verify(orderService, times(1)).createOrder(testOrder);
+        verify(orderService, times(1)).createOrder(testOrder.getBuyerId(),testOrder.getStatus(), testOrder.getItems());
     }
 
     @Test

@@ -8,19 +8,24 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Entity
-@IdClass(OrderItem.OrderItemPK.class) // composite key
+@Table(name = "order_item",
+uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"order_id", "product_id"})
+        })
 public class OrderItem {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "order_id", referencedColumnName = "id")
     @JsonIgnore
     private Order order;
-    @Id
     private UUID productId;
 
     private UUID sellerId;
     private Integer quantity;
-    private String notes;
+    private String notes = "";
     private Double totalPrice;
 
 
@@ -35,6 +40,8 @@ public class OrderItem {
         this.totalPrice = totalPrice;
     }
 
+    public UUID getOrderItemId() {return id;}
+    public void setOrderItemId(UUID orderItemId) {this.id = orderItemId;}
     public Order getOrder() {return order;}
     public void setOrder(Order order) { this.order = order; }
     public UUID getProductId() {return productId;}
@@ -48,20 +55,6 @@ public class OrderItem {
     public Double getTotalPrice() {return totalPrice;}
     public void setTotalPrice(Double totalPrice) {this.totalPrice = totalPrice;}
 
-    // composite key
-    public static class OrderItemPK implements Serializable {
-        private UUID order;
-        private UUID productId;
-        public OrderItemPK() {}
-        @Override public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            OrderItemPK that = (OrderItemPK) o;
-            return Objects.equals(order, that.order) && Objects.equals(productId, that.productId);
-        }
-        @Override public int hashCode() { return Objects.hash(order, productId);}
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -71,12 +64,12 @@ public class OrderItem {
 
     @Override
     public int hashCode() {
-        return Objects.hash(order, productId);
+        return Objects.hash(id);
     }
 
     @Override
     public String toString() {
-        return "OrderItem{" +
+        return "OrderItem{" + "id=" + id +
                 "order=" + order +
                 ", productId=" + productId +
                 ", sellerId=" + sellerId +
