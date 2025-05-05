@@ -6,8 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import com.homechef.OrderService.models.OrderStatus;
-import com.homechef.OrderService.models.OrderItem;
 
 import java.util.List;
 import java.util.UUID;
@@ -21,8 +19,7 @@ public class OrderService {
 
     public List<Order> getAllOrders() { return orderRepository.findAll(); }
 
-    public Order createOrder(UUID buyerId, OrderStatus status, List<OrderItem> items) {
-        Order order = new Order(buyerId, status, items);
+    public Order createOrder(Order order) {
         return orderRepository.save(order);
     }
 

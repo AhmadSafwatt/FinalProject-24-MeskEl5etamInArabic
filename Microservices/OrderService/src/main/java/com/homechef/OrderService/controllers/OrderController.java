@@ -21,11 +21,7 @@ public class OrderController {
 
     @PostMapping
     public Order createOrder(@RequestBody Order order) {
-        return orderService.createOrder(
-                order.getBuyerId(),
-                order.getStatus(),
-                order.getItems()
-        );
+        return orderService.createOrder(order);
     }
 
     @GetMapping("/buyer/{buyerId}")
