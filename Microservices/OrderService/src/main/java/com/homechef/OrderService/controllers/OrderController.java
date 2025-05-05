@@ -3,9 +3,7 @@ package com.homechef.OrderService.controllers;
 import com.homechef.OrderService.models.Order;
 import com.homechef.OrderService.services.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.UUID;
@@ -38,12 +36,6 @@ public class OrderController {
 
     @GetMapping("/{orderId}/seller/{sellerId}")
     public Order getOrderByIdFilteredBySellerId(@PathVariable String orderId, @PathVariable String sellerId) {
-        try {
             return orderService.getOrderByIdFilteredBySellerId(UUID.fromString(orderId), UUID.fromString(sellerId));
-        } catch (IllegalAccessException e) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Order does not belong to this seller");
-        } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found");
-        }
     }
 }

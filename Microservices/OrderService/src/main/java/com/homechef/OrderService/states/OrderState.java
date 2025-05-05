@@ -17,20 +17,7 @@ public interface OrderState {
         throw new IllegalStateException("Cannot update item note in " + order.getState().getClass().getSimpleName() + " state");
     }
 
-    static OrderStatus getOrderStatus(OrderState orderState) {
-        if (orderState instanceof CreatedState) {
-            return OrderStatus.CREATED;
-        } else if (orderState instanceof PreparingState) {
-            return OrderStatus.PREPARING;
-        } else if (orderState instanceof PreparedState) {
-            return OrderStatus.PREPARED;
-        } else if (orderState instanceof OutForDeliveryState) {
-            return OrderStatus.OUT_FOR_DELIVERY;
-        } else if (orderState instanceof DeliveredState) {
-            return OrderStatus.DELIVERED;
-        } else if (orderState instanceof CancelledState) {
-            return OrderStatus.CANCELLED;
-        }
-        throw new IllegalArgumentException("Unknown order state: " + orderState.getClass().getSimpleName());
+    default OrderStatus getOrderStatus() {
+        throw new IllegalArgumentException("Unknown order state: " + this.getClass().getSimpleName());
     }
 }

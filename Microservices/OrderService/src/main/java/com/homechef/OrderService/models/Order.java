@@ -47,7 +47,7 @@ public class Order {
     public LocalDateTime getOrderDate() {return orderDate;}
     public void setOrderDate(LocalDateTime orderDate) {this.orderDate = orderDate;}
     public OrderState getState() {return state;}
-    public void setState(OrderState state) {this.state = state; setStatus(OrderState.getOrderStatus(state));}
+    public void setState(OrderState state) {this.state = state; setStatus(state.getOrderStatus());}
     public List<OrderItem> getItems() {return items;}
     public void setItems(List<OrderItem> items) {this.items = items;}
     public void addItem(OrderItem item) {this.items.add(item);}

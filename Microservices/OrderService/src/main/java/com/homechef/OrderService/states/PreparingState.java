@@ -24,4 +24,10 @@ public class PreparingState implements OrderState {
             }
         }
     }
+
+
+    @Override
+    public OrderStatus getOrderStatus() {
+        return OrderStatus.PREPARING;
+    }
 }

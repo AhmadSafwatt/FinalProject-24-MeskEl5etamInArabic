@@ -34,4 +34,10 @@ public class CreatedState implements OrderState{
             }
         }
     }
+
+
+    @Override
+    public OrderStatus getOrderStatus() {
+        return OrderStatus.CREATED;
+    }
 }

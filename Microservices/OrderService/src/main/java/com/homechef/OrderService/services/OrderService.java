@@ -3,7 +3,9 @@ package com.homechef.OrderService.services;
 import com.homechef.OrderService.models.Order;
 import com.homechef.OrderService.repositories.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.UUID;
@@ -33,11 +35,11 @@ public class OrderService {
         return sellerOrders;
     }
 
-    public Order getOrderByIdFilteredBySellerId(UUID orderId, UUID sellerId) throws IllegalAccessException {
+    public Order getOrderByIdFilteredBySellerId(UUID orderId, UUID sellerId) {
         Order order = orderRepository.findById(orderId).orElse(null);
         if (order == null) {
             // order not found
-            throw new IllegalArgumentException("Order not found");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Order not found");
         }
         order.setItems(
                 order.getItems().stream()
@@ -46,7 +48,7 @@ public class OrderService {
         );
         if (order.getItems().isEmpty()) {
             // not allowed to access this order
-            throw new IllegalAccessException("Order does not belong to this seller");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Order does not belong to this seller");
         }
         return order;
     }

@@ -12,4 +12,10 @@ public class PreparedState implements  OrderState{
         }
         throw new IllegalStateException("Cannot change state to " + state.getClass().getSimpleName());
     }
+
+
+    @Override
+    public OrderStatus getOrderStatus() {
+        return OrderStatus.PREPARED;
+    }
 }
