@@ -1,8 +1,12 @@
 package com.example.chatservice.models;
 
 import com.example.chatservice.enums.ReportType;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.cassandra.core.mapping.PrimaryKey;
 import org.springframework.data.cassandra.core.mapping.Table;
 
@@ -25,13 +29,17 @@ public class Message {
     }
 
     public Message(MessageType type) {
-        this.id = UUID.randomUUID();
         this.type = type;
     }
-    public Message(UUID sender, UUID receiver, String content, MessageType type) {
-        this.id = UUID.randomUUID();
-        this.senderId = sender;
-        this.receiverId = receiver;
+
+    @JsonCreator
+    public Message(
+            @JsonProperty("senderId") @NotNull UUID senderId,
+            @JsonProperty("receiverId") @NotNull UUID receiverId,
+            @JsonProperty("content") @NotNull String content,
+            @JsonProperty("type") MessageType type) {
+        this.senderId = senderId;
+        this.receiverId = receiverId;
         this.content = content;
         this.type = type;
         this.timestamp = LocalDateTime.now();
@@ -39,12 +47,17 @@ public class Message {
     }
 
     @PrimaryKey
-    private UUID id;
+    @NotNull
+    @JsonProperty(access =  JsonProperty.Access.READ_ONLY)
+    private UUID id = UUID.randomUUID();
 
+    @NotNull
     private UUID senderId;
 
+    @NotNull
     private UUID receiverId;
 
+    @NotNull
     private String content;
 
     private LocalDateTime timestamp;
