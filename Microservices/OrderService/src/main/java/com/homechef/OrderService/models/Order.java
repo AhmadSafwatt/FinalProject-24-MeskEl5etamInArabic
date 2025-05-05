@@ -1,56 +1,58 @@
 package com.homechef.OrderService.models;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.homechef.OrderService.states.*;
 import jakarta.persistence.*;
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
 @Entity
+@Data
+@NoArgsConstructor
 @Table(name = "orders")
 public class Order {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private UUID id;
+
     private UUID buyerId;
+
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
+
     private LocalDateTime orderDate;
 
     @Transient
     @JsonIgnore
     private OrderState state = new CreatedState();
 
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @OneToMany(mappedBy = "order", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<OrderItem> items;
 
-    public Order() { this.id = UUID.randomUUID(); this.orderDate = LocalDateTime.now(); }
-    public Order(UUID id, UUID buyerId, OrderStatus status, List<OrderItem> items, LocalDateTime orderDate) {
-        this.id = id;
+
+    @JsonCreator
+    public Order(
+        @JsonProperty("buyerId") UUID buyerId,
+        @JsonProperty("items") List<OrderItem> items
+    ) {
         this.buyerId = buyerId;
-        this.status = status;
+        this.status = OrderStatus.CREATED;
+        this.state = new CreatedState();
         this.items = items;
-        this.orderDate = orderDate;
+        this.orderDate = LocalDateTime.now();
         items.forEach(item -> item.setOrder(this));
     }
-    public Order(UUID buyerId, OrderStatus status, List<OrderItem> items) {
-        this(UUID.randomUUID(), buyerId, status, items, LocalDateTime.now());
-    }
-    public UUID getId() {return id;}
-    public void setId(UUID id) {this.id = id;}
-    public UUID getBuyerId() {return buyerId;}
-    public void setBuyerId(UUID buyerId) {this.buyerId = buyerId;}
-    public OrderStatus getStatus() {return status;}
-    public void setStatus(OrderStatus status) {this.status = status; initState();}
-    public LocalDateTime getOrderDate() {return orderDate;}
-    public void setOrderDate(LocalDateTime orderDate) {this.orderDate = orderDate;}
-    public OrderState getState() {return state;}
-    public void setState(OrderState state) {this.state = state; setStatus(state.getOrderStatus());}
-    public List<OrderItem> getItems() {return items;}
-    public void setItems(List<OrderItem> items) {this.items = items;}
-    public void addItem(OrderItem item) {this.items.add(item);}
 
     public void setOrderState(OrderState state) {
         this.state.setOrderState(this, state);
@@ -60,30 +62,5 @@ public class Order {
     }
     public void updateItemNote(UUID productId, String note) {
         this.state.updateItemNote(this, productId, note);
-    }
-
-    @PostLoad
-    public void initState() {
-        this.state = OrderStatus.getState(this.status);
-    }
-
-    @Override
-    public String toString() {
-        return "Order{" +
-                "id=" + id +
-                ", buyerId=" + buyerId +
-                ", status=" + status +
-                ", items=" + items +
-                '}';
-    }
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Order order)) return false;
-        return id.equals(order.id) && buyerId.equals(order.buyerId) && status == order.status && items.equals(order.items);
-    }
-    @Override
-    public int hashCode() {
-        return id.hashCode() + buyerId.hashCode() + status.hashCode() + items.hashCode();
     }
 }
