@@ -1,6 +1,7 @@
 package com.example.chatservice.controllers;
 
-import com.example.chatservice.commands.DeleteMessageCommand;
+import com.example.chatservice.commands.*;
+import com.example.chatservice.enums.ReportType;
 import com.example.chatservice.models.Message;
 import com.example.chatservice.services.MessageService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,8 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
-import com.example.chatservice.commands.SendMessageCommand;
-import com.example.chatservice.commands.UpdateMessageCommand;
 import com.example.chatservice.commands.DeleteMessageCommand;
 
 
@@ -96,4 +95,18 @@ public class MessageController {
     public boolean isMessageSeen(@PathVariable UUID messageId) {
         return messageService.isMessageSeen(messageId);
     }
+
+    /**
+     * Endpoint to report a message.
+     *
+     * @param messageId Message ID
+     * @param reportType Report type
+     */
+    @PatchMapping("/report/{id}")
+    public Message reportMessage(@PathVariable UUID messageId, @RequestParam ReportType reportType) {
+        ReportMessageCommand reportCommand = new ReportMessageCommand(messageId, reportType, messageService);
+        reportCommand.execute();
+        return messageService.getMessageById(messageId);
+    }
+
 }
