@@ -53,17 +53,6 @@ public class MessageController {
      */
     @PostMapping
     public ResponseEntity<Message> createMessage(@RequestBody Message message) {
-
-        if (message == null) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        Message existingMessage = messageService.getMessageById(message.getId());
-
-        if (existingMessage != null) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        }
-
         SendMessageCommand sendMessageCommand = new SendMessageCommand(message, messageService);
         sendMessageCommand.execute();
         return ResponseEntity.ok(message);
