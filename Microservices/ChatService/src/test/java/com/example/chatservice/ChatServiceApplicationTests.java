@@ -13,7 +13,6 @@ import com.example.chatservice.models.TextMessage;
 import com.example.chatservice.repositories.MessageRepository;
 import com.example.chatservice.services.MessageService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -26,7 +25,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.awt.*;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
