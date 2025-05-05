@@ -6,9 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.homechef.OrderService.states.*;
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
