@@ -60,6 +60,28 @@ public class MessageService {
         messageRepository.deleteById(id);
     }
 
+    public void updateMessage(UUID id, Message partialMessage) {
+        Message existingMessage = getMessageById(id);
+
+        if (existingMessage == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found");
+        }
+
+        if (partialMessage.getContent() != null) {
+            existingMessage.setContent(partialMessage.getContent());
+        }
+
+        if (partialMessage.getStatus() != null) {
+            existingMessage.setStatus(partialMessage.getStatus());
+        }
+
+        if (partialMessage.getType() != null) {
+            existingMessage.setType(partialMessage.getType());
+        }
+
+        saveMessage(existingMessage);
+    }
+
     public boolean isMessageSeen(UUID messageId) {
         Message message = getMessageById(messageId);
 

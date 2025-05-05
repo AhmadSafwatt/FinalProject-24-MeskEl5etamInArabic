@@ -1,4 +1,5 @@
 package com.example.chatservice.controllers;
+import com.example.chatservice.commands.UpdateMessageCommand;
 import com.example.chatservice.models.Message;
 import com.example.chatservice.services.MessageService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,22 +84,16 @@ public class MessageController {
     /**
      * Update a message.
      *
-     * @param id Message ID
-     * @param message Message object
-     * @return Updated message object
+     * @param id      Message ID
+     * @param partialMessage Updated message object
      */
-    @PutMapping("/{id}")
-    public ResponseEntity<Message> updateMessage(@PathVariable UUID id, @RequestBody Message message) {
-        if (message == null || !id.equals(message.getId())) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        if (messageService.getMessageById(id) == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-
-        Message updatedMessage = messageService.saveMessage(message);
+    @PatchMapping("/{id}")
+    public ResponseEntity<Message> updateMessage(@PathVariable UUID id, @RequestBody Message partialMessage) {
+        UpdateMessageCommand updateMessageCommand = new UpdateMessageCommand(id, partialMessage, messageService);
+        updateMessageCommand.execute();
+        Message updatedMessage = messageService.getMessageById(id);
         return ResponseEntity.ok(updatedMessage);
+
     }
 
     /**
