@@ -48,5 +48,9 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
+    public void deleteProductById(String id) {
+        UUID productUUID = UUID.fromString(id);
+        productRepository.deleteById(productUUID);
+    }
 
 }

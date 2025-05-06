@@ -39,5 +39,9 @@ public class ProductController {
     public List<Product> getMostSoldProducts() {
         return productService.getMostSoldProducts();
     }
+    @DeleteMapping("/{id}")
+    public void deleteProductById(@PathVariable String id) {
+        productService.deleteProductById(id);
+    }
 
 }

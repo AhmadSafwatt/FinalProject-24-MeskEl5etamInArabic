@@ -14,4 +14,5 @@ public interface ProductRepository extends MongoRepository<Product, UUID> {
 
     Optional<Product> findById(UUID id);
 
+    void deleteById(UUID id);
 }
