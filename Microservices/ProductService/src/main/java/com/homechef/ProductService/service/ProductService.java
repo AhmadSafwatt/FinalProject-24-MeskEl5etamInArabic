@@ -9,7 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
@@ -31,6 +33,19 @@ public class ProductService {
     public Product getProductById(String id) {
         UUID productUUID = UUID.fromString(id);
         return productRepository.findById(productUUID).orElse(null);
+    }
+
+    public List<Product> getMostSoldProducts() {
+        int maxAmountSold = productRepository.findAll()
+                .stream()
+                .mapToInt(Product::getAmountSold)
+                .max()
+                .orElse(0);
+
+        return productRepository.findAll()
+                .stream()
+                .filter(product -> product.getAmountSold() == maxAmountSold)
+                .collect(Collectors.toList());
     }
 
 
