@@ -99,8 +99,50 @@ class ChatServiceApplicationTests {
         }
 
         @Test
-        void testSaveMessageService_shouldNotSaveMessage_whenMessageIsNull() {
-            assertThrows(ResponseStatusException.class, () -> messageService.saveMessage(null));
+        void testSaveMessageEndpoint_shouldSaveMessage_whenIdIsNull() throws Exception {
+            Message message = createTestMessage(MessageType.TEXT);
+            message.setId(null);
+
+            String responseContent = mockMvc.perform(
+                            MockMvcRequestBuilders.post("/messages")
+                                    .contentType("application/json")
+                                    .content(objectMapper.writeValueAsString(message)))
+                    .andExpect(MockMvcResultMatchers.status().isOk())
+                    .andReturn()
+                    .getResponse()
+                    .getContentAsString();
+
+            Message savedMessage = objectMapper.readValue(responseContent, Message.class);
+            assertNotNull(savedMessage.getId());
+        }
+
+        @Test
+        void testSaveMessageEndpoint_ShouldSaveMessageAndIgnoreId() throws Exception {
+            Message message = createTestMessage(MessageType.TEXT);
+            message.setId(UUID.randomUUID());
+
+            String responseContent = mockMvc.perform(
+                            MockMvcRequestBuilders.post("/messages")
+                                    .contentType("application/json")
+                                    .content(objectMapper.writeValueAsString(message)))
+                    .andExpect(MockMvcResultMatchers.status().isOk())
+                    .andReturn()
+                    .getResponse()
+                    .getContentAsString();
+
+            Message savedMessage = objectMapper.readValue(responseContent, Message.class);
+            assertNotEquals(message.getId(), savedMessage.getId());
+        }
+
+        @Test
+        void testSaveMessageEndpoint_shouldReturnBadRequest_whenMessageIsNull() throws Exception {
+            Message nullMessage = null;
+
+            mockMvc.perform(MockMvcRequestBuilders.post("/messages")
+                            .contentType("application/json")
+                            .content(objectMapper.writeValueAsString(nullMessage)))
+                    .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                    .andDo(MockMvcResultHandlers.print());
         }
 
         @Test
@@ -149,6 +191,68 @@ class ChatServiceApplicationTests {
             Message savedMessage = messageService.getMessageById(message.getId());
             assertNotNull(savedMessage);
             assertEquals(message.getId(), savedMessage.getId());
+        }
+
+        @Test
+        void testSaveMessageEndpoint_shouldReturnBadRequest_whenContentIsNull() throws Exception {
+            Message invalidMessage = createTestMessage(MessageType.TEXT);
+            invalidMessage.setContent(null);
+
+            mockMvc.perform(MockMvcRequestBuilders.post("/messages")
+                            .contentType("application/json")
+                            .content(objectMapper.writeValueAsString(invalidMessage)))
+                    .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                    .andDo(MockMvcResultHandlers.print());
+        }
+
+        @Test
+        void testSaveMessageEndpoint_shouldReturnBadRequest_whenContentIsEmpty() throws Exception {
+            Message invalidMessage = createTestMessage(MessageType.TEXT);
+            invalidMessage.setContent("");
+
+            mockMvc.perform(MockMvcRequestBuilders.post("/messages")
+                            .contentType("application/json")
+                            .content(objectMapper.writeValueAsString(invalidMessage)))
+                    .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                    .andDo(MockMvcResultHandlers.print());
+        }
+
+        @Test
+        void testSaveMessageEndpoint_shouldSaveMesage_whenContentWithinLimit() throws Exception {
+            String validContent = "a".repeat(500); // 500 characters
+            Message validMessage = createTestMessage(MessageType.TEXT);
+            validMessage.setContent(validContent);
+
+            mockMvc.perform(MockMvcRequestBuilders.post("/messages")
+                            .contentType("application/json")
+                            .content(objectMapper.writeValueAsString(validMessage)))
+                    .andExpect(MockMvcResultMatchers.status().isOk())
+                    .andDo(MockMvcResultHandlers.print());
+        }
+
+        @Test
+        void testSaveMessageEndpoint_shouldReturnBadRequest_whenContentIsTooLong() throws Exception {
+            String longContent = "a".repeat(501); // 501 characters
+            Message invalidMessage = createTestMessage(MessageType.TEXT);
+            invalidMessage.setContent(longContent);
+
+            mockMvc.perform(MockMvcRequestBuilders.post("/messages")
+                            .contentType("application/json")
+                            .content(objectMapper.writeValueAsString(invalidMessage)))
+                    .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                    .andDo(MockMvcResultHandlers.print());
+        }
+
+        @Test
+        void testSaveMessageEndpoint_shouldReturnBadRequest_whenSenderIdIsNull() throws Exception {
+            Message invalidMessage = createTestMessage(MessageType.TEXT);
+            invalidMessage.setSenderId(null);
+
+            mockMvc.perform(MockMvcRequestBuilders.post("/messages")
+                            .contentType("application/json")
+                            .content(objectMapper.writeValueAsString(invalidMessage)))
+                    .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                    .andDo(MockMvcResultHandlers.print());
         }
     }
 
