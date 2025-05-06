@@ -2,14 +2,14 @@ package com.homechef.OrderService.controllers;
 
 import com.homechef.OrderService.models.Order;
 import com.homechef.OrderService.models.OrderItem;
+import com.homechef.OrderService.models.OrderStatus;
 import com.homechef.OrderService.services.OrderService;
+import com.homechef.OrderService.states.OrderState;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -48,14 +48,33 @@ public class OrderController {
         return orderService.getOrderByIdFilteredBySellerId(UUID.fromString(orderId), UUID.fromString(sellerId));
     }
 
-    // for buyer use
-    @GetMapping("/{orderId}/items")
-    public List<OrderItem> getOrderItems(@PathVariable UUID orderId) {
-        return orderService.getOrderItems(orderId);
+    // buyer is probably the one who will use this, to see all items in the order
+    @GetMapping("/{orderId}")
+    public Order getOrderById(@PathVariable UUID orderId) {
+        return orderService.getOrderById(orderId);
     }
 
     @GetMapping("/{orderId}/delete")
     public void deleteOrder(@PathVariable UUID orderId) {
         orderService.deleteOrder(orderId);
+    }
+
+    // update order state
+    @PutMapping("/{orderId}/newState")
+    public void updateOrderState(@PathVariable UUID orderId, @RequestBody String newState) {
+        // check if new state is in one of the states written in the OrderStatus enum
+        OrderStatus newStatus;
+        try {
+            newStatus = OrderStatus.valueOf(newState.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            // the illegal argument exception is thrown when the newState is not one of the
+            // possible enum values (this is the behavior of the valueOf method in any enum)
+            throw new RuntimeException("Invalid order state: " + newState + ". Valid values are: " +
+                    String.join(", ", Arrays.stream(OrderStatus.values())
+                            .map(Enum::name)
+                            .toList()));
+        }
+        orderService.updateOrderStatus(orderId, OrderStatus.getState(newStatus));
+
     }
 }

@@ -3,6 +3,8 @@ package com.homechef.OrderService.services;
 import com.homechef.OrderService.models.Order;
 import com.homechef.OrderService.models.OrderItem;
 import com.homechef.OrderService.repositories.OrderRepository;
+import com.homechef.OrderService.states.OrderState;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -58,16 +60,26 @@ public class OrderService {
         return order;
     }
 
-    public List<OrderItem> getOrderItems(UUID orderId) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order with ID " + orderId + " not found"));
-        return order.getItems();
+    // for buyer use
+    public Order getOrderById(UUID orderId) {
+        return orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Order with id " + orderId + " not found"));
     }
 
     public void deleteOrder(UUID orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order with ID " + orderId + " not found"));
         orderRepository.delete(order);
+    }
+
+    // update order stateus
+    public void updateOrderStatus(UUID orderId, OrderState newState) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order with ID " + orderId + " does not exist"));
+
+        order.setOrderState(newState);
+        orderRepository.save(order);
     }
 
 }
