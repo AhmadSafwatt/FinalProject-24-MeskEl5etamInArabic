@@ -1,45 +1,72 @@
 package com.homechef.OrderService.models;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.homechef.OrderService.states.*;
 import jakarta.persistence.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
 @Entity
+@Data
+@NoArgsConstructor
 @Table(name = "orders")
 public class Order {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private UUID id;
-    private String buyerId;
-    private String state;
+
+    private UUID buyerId;
+
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status;
+
+    private LocalDateTime orderDate;
+
+    @Transient
+    @JsonIgnore
+    private OrderState state = new CreatedState();
 
     @OneToMany(mappedBy = "order", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<OrderItem> items;
 
-    public Order() {}
-    public Order(UUID id, String buyerId, String state, List<OrderItem> items) {
-        this.id = id;
+
+    @JsonCreator
+    public Order(
+        @JsonProperty("buyerId") UUID buyerId,
+        @JsonProperty("items") List<OrderItem> items
+    ) {
         this.buyerId = buyerId;
-        this.state = state;
+        this.status = OrderStatus.CREATED;
+        this.state = new CreatedState();
         this.items = items;
+        this.orderDate = LocalDateTime.now();
+        items.forEach(item -> item.setOrder(this));
     }
-    public Order(String buyerId, String state, List<OrderItem> items) {
-        this.id = UUID.randomUUID();
-        this.buyerId = buyerId;
-        this.state = state;
-        this.items = items;
+
+    // setter override
+    public void setStatus(OrderStatus status) {this.status = status; initState();}
+    public void setState(OrderState state) {this.state = state; setStatus(state.getOrderStatus());}
+
+    @PostLoad
+    public void initState() {
+        this.state = OrderStatus.getState(this.status);
     }
-    public UUID getId() {return id;}
-    public void setId(UUID id) {this.id = id;}
-    public String getBuyerId() {return buyerId;}
-    public void setBuyerId(String buyerId) {this.buyerId = buyerId;}
-    public String getState() {return state;}
-    public void setState(String state) {this.state = state;}
-    public List<OrderItem> getItems() {return items;}
-    public void setItems(List<OrderItem> items) {this.items = items;}
-    public void addItem(OrderItem item) {
-        this.items.add(item);
-        item.setOrder(this);
+
+    public void setOrderState(OrderState state) {
+        this.state.setOrderState(this, state);
+    }
+    public void cancelOrder() {
+        this.state.cancelOrder(this);
+    }
+    public void updateItemNote(UUID productId, String note) {
+        this.state.updateItemNote(this, productId, note);
     }
 }
