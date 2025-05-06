@@ -6,7 +6,7 @@ import java.util.UUID;
 
 public class CartBuilder {
 
-    private UUID id = UUID.randomUUID(); // default to random if not set
+//    private UUID id = UUID.randomUUID(); // default to random if not set
     private UUID customer_id;
     private List<CartItem> cartItems = new ArrayList<>();
 
@@ -15,10 +15,10 @@ public class CartBuilder {
         return this;
     }
 
-    public CartBuilder id(UUID id) {
-        this.id = id;
-        return this;
-    }
+//    public CartBuilder id(UUID id) {
+//        this.id = id;
+//        return this;
+//    }
 
     public CartBuilder addCartItem(CartItem item) {
         this.cartItems.add(item);
@@ -31,7 +31,7 @@ public class CartBuilder {
     }
 
     public Cart build() {
-        return new Cart(id , customer_id , cartItems);
+        return new Cart( customer_id , cartItems);
     }
 }
 
