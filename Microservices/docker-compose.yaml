@@ -1,0 +1,10 @@
+services:
+  apiGateways:
+    build:
+      context: ./API-Gateway
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgresDB
+    restart: always
