@@ -15,10 +15,7 @@ import java.util.UUID;
 @Entity
 @Data
 @NoArgsConstructor
-@Table(name = "order_item",
-        uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"order_id", "product_id"})
-        })
+@Table(name = "orders")
 public class Order {
 
     @Id
