@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -14,13 +15,28 @@ public class AuthService {
 
     private final UserRepository userRepository;
 
+    private final JwtService jwtService;
 
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    public AuthService(UserRepository userRepository , PasswordEncoder passwordEncoder) {
+    public AuthService(UserRepository userRepository , PasswordEncoder passwordEncoder, JwtService jwtService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
+    }
+
+    public String generateToken(Map<String, Object> map, User user) {
+        return jwtService.createToken(map, user.getUsername());
+    }
+
+    public boolean validateToken(String token) {
+        try {
+            jwtService.validateToken(token);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public String registerUser(User user, String role) {
