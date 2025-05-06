@@ -23,8 +23,8 @@ public class ProductService {
         this.mongoClient = mongoClient;
     }
 
-    public Product createProduct(String type, String name, UUID sellerId, Double price) {
-        Product product = ProductFactory.createProduct(type, name, sellerId, price);
+    public Product createProduct(String type, String name, UUID sellerId, Double price, int amountSold) {
+        Product product = ProductFactory.createProduct(type, name, sellerId, price, amountSold);
         return productRepository.save(product);
     }
 

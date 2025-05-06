@@ -25,11 +25,15 @@ public abstract class Product {
     String name;
     UUID sellerId;
     Double price;
-
+    int amountSold;
 
 
     public UUID getId() {
         return id;
+    }
+
+    public int getAmountSold() {
+        return amountSold;
     }
 
     public String getName() {

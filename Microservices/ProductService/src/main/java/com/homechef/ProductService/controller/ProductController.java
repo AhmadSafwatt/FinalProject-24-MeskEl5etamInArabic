@@ -30,8 +30,8 @@ public class ProductController {
         String name = (String) request.get("name");
         Double price = ((Number) request.get("price")).doubleValue();
         UUID sellerId = UUID.fromString((String) request.get("sellerId"));
-
-        return productService.createProduct(type, name, sellerId, price);
+        int amountSold = ((Number) request.get("amountSold")).intValue();
+        return productService.createProduct(type, name, sellerId, price, amountSold);
     }
 
 }
