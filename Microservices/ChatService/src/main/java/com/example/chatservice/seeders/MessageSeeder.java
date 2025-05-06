@@ -3,7 +3,6 @@ package com.example.chatservice.seeders;
 import com.example.chatservice.enums.MessageStatus;
 import com.example.chatservice.enums.MessageType;
 import com.example.chatservice.enums.ReportType;
-import com.example.chatservice.factories.MessageFactory;
 import com.example.chatservice.models.Message;
 import com.example.chatservice.repositories.MessageRepository;
 import org.springframework.beans.factory.annotation.Autowired;

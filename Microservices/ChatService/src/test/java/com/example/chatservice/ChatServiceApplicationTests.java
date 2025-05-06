@@ -6,9 +6,7 @@ import com.example.chatservice.commands.UpdateMessageCommand;
 import com.example.chatservice.enums.MessageStatus;
 import com.example.chatservice.enums.MessageType;
 import com.example.chatservice.factories.MessageFactory;
-import com.example.chatservice.models.ImageMessage;
 import com.example.chatservice.models.Message;
-import com.example.chatservice.models.ProductMessage;
 import com.example.chatservice.models.TextMessage;
 import com.example.chatservice.repositories.MessageRepository;
 import com.example.chatservice.services.MessageService;
@@ -23,7 +21,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
 
@@ -320,7 +317,7 @@ class ChatServiceApplicationTests {
 
             Message productMessage = createTestMessage(MessageType.PRODUCT);
 
-            String responseContent = mockMvc.perform(MockMvcRequestBuilders.patch("/messages/" + message.getId())
+            mockMvc.perform(MockMvcRequestBuilders.patch("/messages/" + message.getId())
                             .contentType("application/json")
                             .content(objectMapper.writeValueAsString(productMessage))) // Use partialMessage here
                     .andExpect(MockMvcResultMatchers.status().isOk())
