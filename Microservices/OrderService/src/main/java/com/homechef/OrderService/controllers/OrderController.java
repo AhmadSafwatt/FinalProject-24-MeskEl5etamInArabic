@@ -61,10 +61,12 @@ public class OrderController {
         orderService.deleteOrder(orderId);
     }
 
-    // update order state
+    // update order state (also works for canceling an order)
     @PutMapping("/{orderId}/newState")
     public void updateOrderState(@PathVariable UUID orderId, @RequestBody String newState) {
+
         // check if new state is in one of the states written in the OrderStatus enum
+        // -------------------------------------------
         OrderStatus newStatus;
         try {
             newStatus = OrderStatus.valueOf(newState.toUpperCase());
@@ -79,14 +81,14 @@ public class OrderController {
         }
 
         // check if the current state can logically be changed to the new state
+        // -------------------------------------------
         try {
             orderService.updateOrderStatus(orderId, OrderStatus.getState(newStatus));
         } catch (IllegalArgumentException e) {
-            // will be thrown by the setOrderState method if the
-            // state transition is not allowed
+            // will be thrown by the "setOrderState" method / "cancelOrder" method
+            // in the Order class if the operation is not allowed
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     e.getMessage());
         }
-
     }
 }

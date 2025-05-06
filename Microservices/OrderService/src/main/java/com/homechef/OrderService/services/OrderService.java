@@ -3,6 +3,7 @@ package com.homechef.OrderService.services;
 import com.homechef.OrderService.models.Order;
 import com.homechef.OrderService.models.OrderItem;
 import com.homechef.OrderService.repositories.OrderRepository;
+import com.homechef.OrderService.states.CancelledState;
 import com.homechef.OrderService.states.OrderState;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,13 +74,18 @@ public class OrderService {
         orderRepository.delete(order);
     }
 
-    // update order stateus
     public void updateOrderStatus(UUID orderId, OrderState newState) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order with ID " + orderId + " does not exist"));
-
-        order.setOrderState(newState);
-        orderRepository.save(order);
+        if (!(newState instanceof CancelledState)) {
+            order.setOrderState(newState);
+            orderRepository.save(order);
+        } else {
+            order.cancelOrder();
+            orderRepository.save(order);
+            // TODO: send api request to decrease the product sales, waiting for
+            // Safwat team to implement the api
+        }
     }
 
 }
