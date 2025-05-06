@@ -8,16 +8,6 @@ import org.springframework.data.mongodb.core.mapping.FieldType;
 import java.util.List;
 import java.util.UUID;
 
-//Cart:
-//Customer ID
-//List of cartIems
-//
-//CartItem:
-//ProductID
-//        Quantity
-//DateAdded
-//        Notes
-
 @Document(collection = "carts")
 public class Cart {
 
