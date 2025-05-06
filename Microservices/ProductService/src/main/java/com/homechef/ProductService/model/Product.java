@@ -1,12 +1,24 @@
 package com.homechef.ProductService.model;
 
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.UUID;
 
 @Document(collection = "products")
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "type"
+)
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = Food.class, name = "Food"),
+        @JsonSubTypes.Type(value = Beverage.class, name = "Beverage")
+})
 public abstract class Product {
     @Id
     UUID id;
