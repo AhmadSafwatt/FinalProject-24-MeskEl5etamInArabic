@@ -28,5 +28,10 @@ public class ProductService {
         return productRepository.save(product);
     }
 
+    public Product getProductById(String id) {
+        UUID productUUID = UUID.fromString(id);
+        return productRepository.findById(productUUID).orElse(null);
+    }
+
 
 }
