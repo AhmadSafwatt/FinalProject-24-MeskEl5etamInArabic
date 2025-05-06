@@ -33,6 +33,18 @@ public class CartService {
         return cartRepository.save(cart);
     }
 
+    public Cart updatePromo(String cartID , boolean promo) {
+        Cart customerCart = getCartById(cartID);
+        Cart newCart = new Cart.Builder().from(customerCart).promo(promo).build();
+        return cartRepository.save(newCart);
+    }
+
+    public Cart updateNotes(String cartID, String notes) {
+        Cart customerCart = getCartById(cartID);
+        Cart newCart = new Cart.Builder().from(customerCart).notes(notes).build();
+        return cartRepository.save(newCart);
+    }
+
     public Cart getCartByCustomerId(String customerId) {
         UUID customerUUID = UUID.fromString(customerId);
         return cartRepository.findByCustomerId(customerUUID);

@@ -132,5 +132,13 @@ public class Cart {
         public Cart build() {
             return new Cart(this);
         }
+
+        public Builder from(Cart existing) {
+            this.id = existing.getId();
+            this.customer_id = existing.getCustomerId();
+            this.cartItems = existing.getCartItems();
+            this.notes = existing.getNotes();
+            return this;
+        }
     }
 }

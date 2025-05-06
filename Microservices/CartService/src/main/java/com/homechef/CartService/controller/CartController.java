@@ -29,6 +29,16 @@ public class CartController {
 
     }
 
+    @PutMapping("/updatePromo/{cartID}")
+    public Cart updatePromo(@PathVariable String cartID , boolean promo){
+        return cartService.updatePromo(cartID , promo);
+    }
+
+    @PutMapping("/updateNotes/{cartID}")
+    public Cart updateNotes(@PathVariable String cartID , String notes){
+        return cartService.updateNotes(cartID , notes);
+    }
+
 
     @GetMapping("/customerId/{customerId}")
     public Cart getCartByCustomerId(@PathVariable String customerId) {
