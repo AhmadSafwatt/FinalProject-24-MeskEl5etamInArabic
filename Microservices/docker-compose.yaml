@@ -4,7 +4,7 @@ services:
       context: ./API-Gateway
       dockerfile: Dockerfile
     environment:
-      spring.datasource.url: jdbc:postgresql://host.docker.internal:5432/DB_Name
+      spring.datasource.url: jdbc:postgresql://host.docker.internal:5432/auth_db
       spring.datasource.username: postgres
       spring.datasource.password: 1234
     ports:
@@ -17,7 +17,7 @@ services:
       context: ./AuthService
       dockerfile: Dockerfile
     environment:
-      spring.datasource.url: jdbc:postgresql://host.docker.internal:5432/DB_Name
+      spring.datasource.url: jdbc:postgresql://host.docker.internal:5432/auth_db
       spring.datasource.username: postgres
       spring.datasource.password: 1234
     ports:
@@ -30,6 +30,6 @@ services:
     environment:
       POSTGRES_PASSWORD: 1234
       POSTGRES_USER: postgres
-      POSTGRES_DB: DB_Name
+      POSTGRES_DB: auth_db
     ports:
       - "5432:5432"
