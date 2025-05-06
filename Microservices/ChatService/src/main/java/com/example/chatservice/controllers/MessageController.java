@@ -2,8 +2,8 @@ package com.example.chatservice.controllers;
 import com.example.chatservice.commands.UpdateMessageCommand;
 import com.example.chatservice.models.Message;
 import com.example.chatservice.services.MessageService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -52,7 +52,7 @@ public class MessageController {
      * @return Created message object
      */
     @PostMapping
-    public ResponseEntity<Message> createMessage(@RequestBody Message message) {
+    public ResponseEntity<Message> createMessage(@Valid @RequestBody Message message) {
         SendMessageCommand sendMessageCommand = new SendMessageCommand(message, messageService);
         sendMessageCommand.execute();
         return ResponseEntity.ok(message);
