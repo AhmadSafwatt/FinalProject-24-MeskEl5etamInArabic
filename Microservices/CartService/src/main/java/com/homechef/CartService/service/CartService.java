@@ -27,6 +27,12 @@ public class CartService {
         return cartRepository.save(cart);
     }
 
+    public Cart updateCart(String cartID, Cart cart) {
+        UUID cartid = UUID.fromString(cartID);
+        cart.setId(cartid);
+        return cartRepository.save(cart);
+    }
+
     public Cart getCartByCustomerId(String customerId) {
         UUID customerUUID = UUID.fromString(customerId);
         return cartRepository.findByCustomerId(customerUUID);
@@ -42,6 +48,7 @@ public class CartService {
         // Fetch product details from Product Service
         return c;
     }
+
 
 
 }

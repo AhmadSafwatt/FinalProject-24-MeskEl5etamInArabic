@@ -23,6 +23,12 @@ public class CartController {
         return cartService.createCart(cart);
     }
 
+    @PutMapping("/updateCart/{cartID}")
+    public Cart updateCart(@PathVariable String cartID , @RequestBody Cart cart){
+        return cartService.updateCart(cartID , cart);
+
+    }
+
 
     @GetMapping("/customerId/{customerId}")
     public Cart getCartByCustomerId(@PathVariable String customerId) {
