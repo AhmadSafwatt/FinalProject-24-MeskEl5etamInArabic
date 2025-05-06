@@ -7,7 +7,9 @@ import com.homechef.OrderService.services.OrderService;
 import com.homechef.OrderService.states.OrderState;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Arrays;
 import java.util.List;
@@ -69,12 +71,22 @@ public class OrderController {
         } catch (IllegalArgumentException e) {
             // the illegal argument exception is thrown when the newState is not one of the
             // possible enum values (this is the behavior of the valueOf method in any enum)
-            throw new RuntimeException("Invalid order state: " + newState + ". Valid values are: " +
-                    String.join(", ", Arrays.stream(OrderStatus.values())
-                            .map(Enum::name)
-                            .toList()));
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Invalid order state: " + newState + ". Valid values are: " +
+                            String.join(", ", Arrays.stream(OrderStatus.values())
+                                    .map(Enum::name)
+                                    .toList()));
         }
-        orderService.updateOrderStatus(orderId, OrderStatus.getState(newStatus));
+
+        // check if the current state can logically be changed to the new state
+        try {
+            orderService.updateOrderStatus(orderId, OrderStatus.getState(newStatus));
+        } catch (IllegalArgumentException e) {
+            // will be thrown by the setOrderState method if the
+            // state transition is not allowed
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    e.getMessage());
+        }
 
     }
 }
