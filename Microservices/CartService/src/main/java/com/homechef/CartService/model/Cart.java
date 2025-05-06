@@ -28,6 +28,10 @@ public class Cart {
     UUID customerId;
     List<CartItem> cartItems;
 
+    private Cart(CartBuilder builder) {
+
+    }
+
     public Cart() {
         this.id = UUID.randomUUID();
     }
