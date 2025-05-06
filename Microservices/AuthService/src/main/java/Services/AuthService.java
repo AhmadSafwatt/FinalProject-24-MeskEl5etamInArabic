@@ -74,13 +74,14 @@ public class AuthService {
     }
 
     public String emailResetPassword(String email) {
+        // TODO:
         // generate otp and store in redis along with email
-
-        // send email with reset link
+        // send email with reset link (/reset-password)
         return "TODO";
     }
 
     public String resetPassword(String email, String otp, String newPassword) {
+        // TODO:
         // check if otp is valid (compare with redis entry)
         // check if email is valid
         // check if password is valid
