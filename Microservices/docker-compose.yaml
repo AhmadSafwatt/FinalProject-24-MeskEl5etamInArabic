@@ -3,8 +3,25 @@ services:
     build:
       context: ./API-Gateway
       dockerfile: Dockerfile
+    environment:
+      spring.datasource.url: jdbc:postgresql://host.docker.internal:5432/DB_Name
+      spring.datasource.username: postgres
+      spring.datasource.password: 1234
     ports:
       - "8080:8080"
+    depends_on:
+      - postgresDB
+    restart: always
+  authService:
+    build:
+      context: ./AuthService
+      dockerfile: Dockerfile
+    environment:
+      spring.datasource.url: jdbc:postgresql://host.docker.internal:5432/DB_Name
+      spring.datasource.username: postgres
+      spring.datasource.password: 1234
+    ports:
+      - "8081:8081"
     depends_on:
       - postgresDB
     restart: always
