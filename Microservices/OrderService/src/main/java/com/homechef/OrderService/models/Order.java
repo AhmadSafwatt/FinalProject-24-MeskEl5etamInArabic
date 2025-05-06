@@ -15,7 +15,10 @@ import java.util.UUID;
 @Entity
 @Data
 @NoArgsConstructor
-@Table(name = "orders")
+@Table(name = "order_item",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"order_id", "product_id"})
+        })
 public class Order {
 
     @Id
@@ -34,7 +37,6 @@ public class Order {
     @JsonIgnore
     private OrderState state = new CreatedState();
 
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @OneToMany(mappedBy = "order", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<OrderItem> items;
 
@@ -50,6 +52,20 @@ public class Order {
         this.items = items;
         this.orderDate = LocalDateTime.now();
         items.forEach(item -> item.setOrder(this));
+    }
+
+    public Order(UUID buyerId, OrderStatus status, List<OrderItem> items) {
+        this.buyerId = buyerId;
+        this.status = status;
+        this.state = OrderStatus.getState(status);
+        this.items = items;
+        this.orderDate = LocalDateTime.now();
+        items.forEach(item -> item.setOrder(this));
+    }
+
+    @PostLoad
+    public void initState() {
+        this.state = OrderStatus.getState(this.status);
     }
 
     public void setOrderState(OrderState state) {
