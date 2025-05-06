@@ -5,6 +5,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.FieldType;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,9 +28,12 @@ public class Cart {
     @Field(targetType = FieldType.STRING)
     UUID customerId;
     List<CartItem> cartItems;
+    String notes;
+    boolean promo;
 
-    private Cart(CartBuilder builder) {
-
+    private Cart(Builder builder) {
+        this.customerId = builder.customer_id;
+        this.cartItems = builder.cartItems;
     }
 
     public Cart() {
@@ -70,5 +74,63 @@ public class Cart {
 
     public void setCartItems(List<CartItem> cartItems) {
         this.cartItems = cartItems;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
+
+    public boolean isPromo() {
+        return promo;
+    }
+
+    public void setPromo(boolean promo) {
+        this.promo = promo;
+    }
+
+    public static class Builder {
+        private UUID id;
+        private UUID customer_id;
+        private List<CartItem> cartItems = new ArrayList<>();
+        private String notes;
+        private boolean promo;
+
+        public Builder id(UUID id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder customerId(UUID customer_id) {
+            this.customer_id = customer_id;
+            return this;
+        }
+
+        public Builder addCartItem(CartItem item) {
+            this.cartItems.add(item);
+            return this;
+        }
+
+        public Builder cartItems(List<CartItem> items) {
+            this.cartItems = items;
+            return this;
+        }
+
+        public Builder notes(String notes){
+            this.notes = notes;
+            return this;
+        }
+
+        public Builder promo(boolean promo){
+            this.promo = promo;
+            return this;
+        }
+
+        public Cart build() {
+            return new Cart(this);
+        }
     }
 }

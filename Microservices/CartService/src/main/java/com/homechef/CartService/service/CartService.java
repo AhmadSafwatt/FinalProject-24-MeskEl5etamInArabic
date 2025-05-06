@@ -22,6 +22,11 @@ public class CartService {
         this.productClient = productClient;
     }
 
+
+    public Cart createCart(Cart cart) {
+        return cartRepository.save(cart);
+    }
+
     public Cart getCartByCustomerId(String customerId) {
         UUID customerUUID = UUID.fromString(customerId);
         return cartRepository.findByCustomerId(customerUUID);
@@ -37,4 +42,6 @@ public class CartService {
         // Fetch product details from Product Service
         return c;
     }
+
+
 }
