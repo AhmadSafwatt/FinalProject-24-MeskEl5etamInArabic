@@ -51,14 +51,9 @@ public class Order {
         items.forEach(item -> item.setOrder(this));
     }
 
-    public Order(UUID buyerId, OrderStatus status, List<OrderItem> items) {
-        this.buyerId = buyerId;
-        this.status = status;
-        this.state = OrderStatus.getState(status);
-        this.items = items;
-        this.orderDate = LocalDateTime.now();
-        items.forEach(item -> item.setOrder(this));
-    }
+    // setter override
+    public void setStatus(OrderStatus status) {this.status = status; initState();}
+    public void setState(OrderState state) {this.state = state; setStatus(state.getOrderStatus());}
 
     @PostLoad
     public void initState() {
