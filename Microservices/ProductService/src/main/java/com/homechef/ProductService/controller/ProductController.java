@@ -24,7 +24,7 @@ public class ProductController {
         this.productService = productService;
     }
 
-    @PostMapping("/products")
+    @PostMapping
     public Product createProduct(@RequestBody Map<String, Object> request) {
         String type = (String) request.get("type");
         String name = (String) request.get("name");

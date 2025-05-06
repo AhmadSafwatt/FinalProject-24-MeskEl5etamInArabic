@@ -3,7 +3,7 @@ package com.homechef.ProductService.model;
 import org.springframework.data.annotation.TypeAlias;
 
 import java.util.UUID;
-
+@TypeAlias("food")
 public class Food extends Product {
 
     public Food() {

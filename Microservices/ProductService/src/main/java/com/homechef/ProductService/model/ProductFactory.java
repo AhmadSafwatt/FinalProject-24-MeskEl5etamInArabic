@@ -12,7 +12,7 @@ public class ProductFactory {
                         .setSellerId(sellerId)
                         .setPrice(price)
                         .build();
-            case "snack":
+            case "food":
                 return new Food.Builder()
                         .setName(name)
                         .setSellerId(sellerId)
