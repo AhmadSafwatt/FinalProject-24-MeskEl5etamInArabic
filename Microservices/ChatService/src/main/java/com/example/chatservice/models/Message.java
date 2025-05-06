@@ -63,6 +63,7 @@ public class Message {
 
     private LocalDateTime timestamp;
 
+    @NotNull
     private MessageStatus status;
 
     @Enumerated(EnumType.STRING)
