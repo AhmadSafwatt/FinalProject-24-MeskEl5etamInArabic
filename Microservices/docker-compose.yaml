@@ -25,3 +25,11 @@ services:
     depends_on:
       - postgresDB
     restart: always
+  postgresDB:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_USER: postgres
+      POSTGRES_DB: DB_Name
+    ports:
+      - "5432:5432"
