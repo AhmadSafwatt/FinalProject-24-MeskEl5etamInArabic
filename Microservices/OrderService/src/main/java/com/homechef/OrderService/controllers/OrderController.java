@@ -31,4 +31,9 @@ public class OrderController {
     public List<OrderItem> getOrderItems(@PathVariable UUID orderId) {
         return orderService.getOrderItems(orderId);
     }
+
+    @GetMapping("/{orderId}/delete")
+    public void deleteOrder(@PathVariable UUID orderId) {
+        orderService.deleteOrder(orderId);
+    }
 }

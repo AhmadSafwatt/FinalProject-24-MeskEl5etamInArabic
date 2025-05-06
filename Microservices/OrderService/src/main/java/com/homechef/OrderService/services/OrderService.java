@@ -27,4 +27,10 @@ public class OrderService {
                 .orElseThrow(() -> new RuntimeException("Order with ID " + orderId + " not found"));
         return order.getItems();
     }
+
+    public void deleteOrder(UUID orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order with ID " + orderId + " not found"));
+        orderRepository.delete(order);
+    }
 }
