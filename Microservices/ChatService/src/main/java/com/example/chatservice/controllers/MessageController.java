@@ -1,6 +1,7 @@
 package com.example.chatservice.controllers;
 import com.example.chatservice.commands.UpdateMessageCommand;
 import com.example.chatservice.models.Message;
+import com.example.chatservice.seeders.MessageSeeder;
 import com.example.chatservice.services.MessageService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +19,12 @@ import com.example.chatservice.commands.DeleteMessageCommand;
 public class MessageController {
 
     private final MessageService messageService;
+    private final MessageSeeder messageSeeder;
 
     @Autowired
-    public MessageController(MessageService messageService) {
+    public MessageController(MessageService messageService, MessageSeeder messageSeeder) {
         this.messageService = messageService;
+        this.messageSeeder = messageSeeder;
     }
 
     /**
@@ -94,5 +97,11 @@ public class MessageController {
     @GetMapping("/{id}/seen")
     public ResponseEntity<Boolean> getMessageSeenStatus(@PathVariable UUID id) {
         return ResponseEntity.ok(messageService.isMessageSeen(id));
+    }
+
+    @GetMapping("/seed")
+    public ResponseEntity<String> seedMessages() {
+        messageSeeder.seedMessages();
+        return ResponseEntity.ok("Messages seeded successfully");
     }
 }
