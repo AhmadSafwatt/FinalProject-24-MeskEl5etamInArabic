@@ -8,6 +8,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.SimpleMailMessage;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 
 import java.util.UUID;
@@ -15,18 +19,21 @@ import java.util.UUID;
 @Service
 public class AuthService {
     private final JavaMailSender mailSender;
-
     private final UserRepository userRepository;
-
-
     private PasswordEncoder passwordEncoder;
+    private final StringRedisTemplate redisTemplate;
+
+
+
 
     @Autowired
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JavaMailSender mailSender) {
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JavaMailSender mailSender, StringRedisTemplate redisTemplate) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.mailSender = mailSender; // Initialize mailSender
+        this.mailSender = mailSender;
+        this.redisTemplate = redisTemplate; // Inject Redis template
     }
+
 
 
     public String registerUser(User user, String role) {
@@ -63,7 +70,6 @@ public class AuthService {
         //TODONE: send email verification link, the link should be the url of verifyEmail controller with value of id`
 
         // Construct the verification link URL
-
         String verifyEmailUrl = "http://localhost:8081/auth/verify-email/" + id;
 
         // Compose the email using SimpleMailMessage
