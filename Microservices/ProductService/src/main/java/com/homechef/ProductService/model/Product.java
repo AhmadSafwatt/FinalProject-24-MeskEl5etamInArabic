@@ -1,6 +1,7 @@
 package com.homechef.ProductService.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import org.springframework.data.annotation.Id;
@@ -54,7 +55,7 @@ public abstract class Product {
 
 
 
-
+    @JsonIgnore
     public abstract String getType();
 
 
