@@ -110,7 +110,38 @@ public class AuthService {
         // TODO:
         // generate otp and store in redis along with email
         // send email with reset link (/reset-password)
-        return "TODO";
+
+        // 1. Check if the user exists in the system
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            return "User with this email does not exist.";
+        }
+
+        // 2. Generate a one-time password (OTP) or token
+        String otp = UUID.randomUUID().toString();
+
+        // 3. Store the OTP in Redis with an expiration time (e.g., 10 minutes)
+        ValueOperations<String, String> valueOps = redisTemplate.opsForValue();
+        valueOps.set("RESET_PASSWORD_" + email, otp, 10, TimeUnit.MINUTES);
+
+        // 4. Send the OTP to the user's email
+        SimpleMailMessage mailMessage = new SimpleMailMessage();
+        mailMessage.setTo(email);
+        mailMessage.setSubject("Reset Your Password");
+        mailMessage.setText("Use the following OTP to reset your password: " + otp +
+                "\nNote: This OTP will expire in 10 minutes.");
+
+        try {
+            mailSender.send(mailMessage);
+        } catch (Exception e) {
+            // Log any errors that occur during email sending (if you have a logger)
+            System.err.println("Error sending password reset email: " + e.getMessage());
+            return "Failed to send reset password email. Please try again later.";
+        }
+
+        // 5. Return success message
+        return "Password reset instructions have been sent to the email.";
+
     }
 
     public String resetPassword(String email, String otp, String newPassword) {
