@@ -11,6 +11,8 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/orders")
@@ -94,4 +96,11 @@ public class OrderController {
             @RequestBody String note) {
         orderService.updateItemNote(orderId, productId, note);
     }
+
+    @GetMapping("/testMail")
+    public String testMail() {
+        orderService.testMail();
+        return "Mail sent successfully";
+    }
+
 }

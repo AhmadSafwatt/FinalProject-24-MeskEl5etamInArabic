@@ -7,6 +7,7 @@ import com.homechef.OrderService.states.OrderState;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -16,10 +17,12 @@ import java.util.UUID;
 @Service
 public class OrderService {
     private final OrderRepository orderRepository;
+    private final EmailService emailService;
 
     @Autowired
-    public OrderService(OrderRepository orderRepository) {
+    public OrderService(OrderRepository orderRepository, EmailService emailService) {
         this.orderRepository = orderRepository;
+        this.emailService = emailService;
     }
 
     public List<Order> getAllOrders() {
@@ -96,11 +99,6 @@ public class OrderService {
         }
     }
 
-    private void updateProductSales(UUID orderId) {
-        // TODO: send api request to decrease the product sales, waiting for
-        // Safwat team to implement the api
-    }
-
     public void updateItemNote(UUID orderId, UUID productId, String note) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -116,6 +114,17 @@ public class OrderService {
         orderRepository.save(order);
 
         // no need to notify anyone, this is just a note
+    }
+
+    private void updateProductSales(UUID orderId) {
+        // TODO: send api request to decrease the product sales, waiting for
+        // Safwat team to implement the api
+    }
+
+    public void testMail() {
+        emailService.sendEmail("hussain.ghoraba@gmail.com", "Test Email",
+                "This is a test email from Order Service");
+        System.out.println("Email sent successfully");
     }
 
 }

@@ -17,5 +17,18 @@ spring:
         format_sql: true
         use_sql_comments: true
 
+  # for mail sending
+  mail:
+    host: smtp.gmail.com
+    port: 587 # Or 465 for SSL
+    username: homechef477@gmail.com
+    password: oeri lagx eujh bbly
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true # Use true for port 587
+
 server:
   port: 8084
