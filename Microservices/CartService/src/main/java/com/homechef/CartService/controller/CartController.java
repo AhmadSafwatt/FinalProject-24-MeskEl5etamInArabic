@@ -18,7 +18,7 @@ public class CartController {
     private CartService cartService;
 
 
-    @PostMapping("/createCart/{customerId}")
+    @PostMapping("/{customerId}/createCart")
     public Cart createCart(@PathVariable String customerId){
         return cartService.createCart(UUID.fromString(customerId));
     }
@@ -29,23 +29,23 @@ public class CartController {
 //
 //    }
 
-    @PutMapping("/addProduct/{customerId}")
+    @PutMapping("/{customerId}/addProduct")
     public Cart addProduct(@PathVariable String customerId , @RequestBody UUID productID , @RequestBody int quantity , @RequestBody String notes ){
         return cartService.addProduct(UUID.fromString(customerId) , productID , quantity , notes);
     }
 
-    @PutMapping("/removeProduct/{customerId}/{productId}")
+    @PutMapping("/{customerId}/{productId}/removeProduct")
     public Cart removeProduct(@PathVariable String customerId , @PathVariable String productId ){
         return cartService.removeProduct(UUID.fromString(customerId) , UUID.fromString(productId));
     }
 
-    @PutMapping("/updatePromo/{cartID}")
-    public Cart updatePromo(@PathVariable String customerId ,@RequestBody boolean promo){
+    @PutMapping("/{cartID}/updatePromo")
+    public Cart updateCartPromo(@PathVariable String customerId ,@RequestBody boolean promo){
         return cartService.updatePromo(UUID.fromString(customerId) , promo);
     }
 
-    @PutMapping("/updateNotes/{cartID}")
-    public Cart updateNotes(@PathVariable String customerId , @RequestBody String notes){
+    @PutMapping("/{cartID}/updateNotes")
+    public Cart updateCartNotes(@PathVariable String customerId , @RequestBody String notes){
         return cartService.updateNotes(UUID.fromString(customerId) , notes);
     }
 
