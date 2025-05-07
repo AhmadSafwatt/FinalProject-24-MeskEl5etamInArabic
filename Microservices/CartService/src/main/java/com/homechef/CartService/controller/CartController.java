@@ -18,15 +18,20 @@ public class CartController {
     private CartService cartService;
 
 
-    @PostMapping("/createCart")
-    public Cart createCart(@RequestBody Cart cart){
-        return cartService.createCart(cart);
+    @PostMapping("/createCart/{customerId}")
+    public Cart createCart(@PathVariable String customerId){
+        return cartService.createCart(UUID.fromString(customerId));
     }
 
-    @PutMapping("/updateCart/{cartID}")
-    public Cart updateCart(@PathVariable String cartID , @RequestBody Cart cart){
-        return cartService.updateCart(cartID , cart);
+//    @PutMapping("/updateCart/{cartID}")
+//    public Cart updateCart(@PathVariable String cartID , @RequestBody Cart cart){
+//        return cartService.updateCart(cartID , cart);
+//
+//    }
 
+    @PutMapping("/removeProduct/{customerId}/{productId}")
+    public Cart updatePromo(@PathVariable String customerId , @PathVariable String productId ){
+        return cartService.removeProduct(UUID.fromString(customerId) , UUID.fromString(productId));
     }
 
     @PutMapping("/updatePromo/{cartID}")
