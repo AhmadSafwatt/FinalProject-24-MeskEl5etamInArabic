@@ -73,16 +73,13 @@ public class CartService {
             }
         }
         if(!found){
-            CartItem cartItem = new CartItem(productIDD , quantity , LocalDateTime.now() , notes , product.getSellerId() );
-            List <CartItem> oldCartItems = cart.getCartItems();
-            oldCartItems.add(cartItem);
-            cart.setCartItems(oldCartItems);
+            cart.getCartItems().add(new CartItem(productIDD, quantity, LocalDateTime.now(), notes, product.getSellerId()));
         }
         return cartRepository.save(cart);
     }
 
 
-    public Cart addNotesToCartItem(String customerId,String productID , String notes){
+    public Cart addNotesToCartItem(String customerId, String productID, String notes){
         UUID customerIDD = UUID.fromString(customerId);
         UUID productIDD = UUID.fromString(productID);
 
