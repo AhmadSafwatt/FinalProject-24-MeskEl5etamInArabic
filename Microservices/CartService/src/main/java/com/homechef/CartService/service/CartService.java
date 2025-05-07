@@ -2,6 +2,8 @@ package com.homechef.CartService.service;
 
 import com.homechef.CartService.client.ProductClient;
 import com.homechef.CartService.model.Cart;
+import com.homechef.CartService.model.CartItem;
+import com.homechef.CartService.model.ProductDTO;
 import com.homechef.CartService.repository.CartRepository;
 
 import java.util.UUID;
@@ -35,6 +37,10 @@ public class CartService {
             return null;
         }
         // Fetch product details from Product Service
+        for (CartItem item : c.getCartItems()){
+            ProductDTO product = productClient.getProductById(item.getProductId().toString());
+            item.setProduct(product);
+        }
         return c;
     }
 }
