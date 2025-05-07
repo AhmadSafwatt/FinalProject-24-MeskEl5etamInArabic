@@ -1,11 +1,8 @@
 package com.homechef.OrderService.controllers;
 
 import com.homechef.OrderService.models.Order;
-import com.homechef.OrderService.models.OrderItem;
 import com.homechef.OrderService.models.OrderStatus;
 import com.homechef.OrderService.services.OrderService;
-import com.homechef.OrderService.states.OrderState;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;

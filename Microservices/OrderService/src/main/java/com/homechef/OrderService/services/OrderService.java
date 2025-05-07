@@ -77,15 +77,25 @@ public class OrderService {
     public void updateOrderStatus(UUID orderId, OrderState newState) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order with ID " + orderId + " does not exist"));
+        OrderState oldState = order.getState();
         if (!(newState instanceof CancelledState)) {
             order.setOrderState(newState);
             orderRepository.save(order);
         } else {
             order.cancelOrder();
             orderRepository.save(order);
-            // TODO: send api request to decrease the product sales, waiting for
-            // Safwat team to implement the api
+            updateProductSales(orderId);
         }
+        notifyBuyer(orderId, oldState, newState);
+    }
+
+    private void updateProductSales(UUID orderId) {
+        // TODO: send api request to decrease the product sales, waiting for
+        // Safwat team to implement the api
+    }
+
+    private void notifyBuyer(UUID orderId, OrderState oldState, OrderState newState) {
+        // TODO: send notification to the buyer that the state of the order has changed
     }
 
 }
