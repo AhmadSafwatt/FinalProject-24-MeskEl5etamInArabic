@@ -1,5 +1,5 @@
 services:
-  apiGateways:
+  api_gateways:
     build:
       context: ./API-Gateway
       dockerfile: Dockerfile
@@ -10,9 +10,9 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - postgresDB
+      - postgres_db
     restart: always
-  authService:
+  auth_service:
     build:
       context: ./AuthService
       dockerfile: Dockerfile
@@ -20,15 +20,15 @@ services:
       spring.datasource.url: jdbc:postgresql://host.docker.internal:5432/auth_db
       spring.datasource.username: postgres
       spring.datasource.password: 1234
-      spring.data.redis.host: redisCache
+      spring.data.redis.host: redis_cache
       spring.data.redis.port: 6379
     ports:
       - "8081:8081"
     depends_on:
-      - postgresDB
-      - redisCache
+      - postgres_db
+      - redis_cache
     restart: always
-  postgresDB:
+  postgres_db:
     image: postgres
     environment:
       POSTGRES_PASSWORD: 1234
@@ -36,16 +36,16 @@ services:
       POSTGRES_DB: auth_db
     ports:
       - "5432:5432"
-  redisCache:
+  redis_cache:
     image: redis:latest
-    container_name: redisCache
+    container_name: redis_cache
     ports:
       - "6379:6379"
-  redisInsight:
+  redis_insight:
     image: redis/redisinsight:latest
-    container_name: redisInsight
+    container_name: redis_insight
     ports:
       - "5540:5540"
     depends_on:
-      - redisCache
+      - redis_cache
     restart: always
