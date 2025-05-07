@@ -35,13 +35,13 @@ public class CartController {
     }
 
     @PutMapping("/updatePromo/{cartID}")
-    public Cart updatePromo(@PathVariable String cartID , boolean promo){
-        return cartService.updatePromo(cartID , promo);
+    public Cart updatePromo(@PathVariable String customerId ,@RequestBody boolean promo){
+        return cartService.updatePromo(UUID.fromString(customerId) , promo);
     }
 
     @PutMapping("/updateNotes/{cartID}")
-    public Cart updateNotes(@PathVariable String cartID , String notes){
-        return cartService.updateNotes(cartID , notes);
+    public Cart updateNotes(@PathVariable String customerId , @RequestBody String notes){
+        return cartService.updateNotes(UUID.fromString(customerId) , notes);
     }
 
 
