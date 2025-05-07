@@ -1,6 +1,8 @@
 package com.homechef.ProductService.service;
 
 
+import com.homechef.ProductService.model.BeverageFactory;
+import com.homechef.ProductService.model.FoodFactory;
 import com.homechef.ProductService.model.Product;
 import com.homechef.ProductService.model.ProductFactory;
 import com.homechef.ProductService.repository.ProductRepository;
@@ -26,7 +28,21 @@ public class ProductService {
     }
 
     public Product createProduct(String type, String name, UUID sellerId, Double price, int amountSold) {
-        Product product = ProductFactory.createProduct(type, name, sellerId, price, amountSold);
+//        Product product = ProductFactory.createProduct(type, name, sellerId, price, amountSold);
+        ProductFactory factory;
+
+        switch (type.toLowerCase()) {
+            case "food":
+                factory = new FoodFactory();
+                break;
+            case "beverage":
+                factory = new BeverageFactory();
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown product type: " + type);
+        }
+
+        Product product = factory.createProduct(name, sellerId, price, amountSold);
         return productRepository.save(product);
     }
 
