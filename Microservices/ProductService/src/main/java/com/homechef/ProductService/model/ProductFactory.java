@@ -26,6 +26,6 @@ public abstract class ProductFactory {
 
 
     //}
-    public abstract Product createProduct(String name, UUID sellerId, Double price, int amountSold);
+    public abstract Product createProduct(String name, UUID sellerId, Double price, int amountSold,String description,Double discount);
 
 }
