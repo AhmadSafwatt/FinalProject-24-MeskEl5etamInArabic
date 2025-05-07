@@ -15,6 +15,8 @@ public class Beverage extends Product {
         this.sellerId = builder.sellerId;
         this.price = builder.price;
         this.amountSold = builder.amountSold;
+        this.description=builder.description;
+        this.discount=builder.discount;
     }
 
     @Override

@@ -30,8 +30,8 @@ public class ProductController {
         Double price = ((Number) request.get("price")).doubleValue();
         UUID sellerId = UUID.fromString((String) request.get("sellerId"));
         int amountSold = ((Number) request.get("amountSold")).intValue();
-        String description = (String) request.get("description");
-        Double discount = ((Number) request.get("discount")).doubleValue();
+        String description = request.get("description") != null ? (String) request.get("description") : "";
+        Double discount = request.get("discount") != null ? ((Number) request.get("discount")).doubleValue() : 0.0;
         return productService.createProduct(type, name, sellerId, price, amountSold,description,discount);
     }
     @GetMapping("/{id}")

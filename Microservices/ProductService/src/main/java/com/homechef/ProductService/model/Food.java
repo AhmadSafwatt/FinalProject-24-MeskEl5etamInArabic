@@ -31,7 +31,7 @@ public class Food extends Product {
         private Double price;
         private int amountSold;
         private String description;
-        private Double discount=0.0;
+        private Double discount;
 
         public Builder setName(String name) {
             this.name = name;
