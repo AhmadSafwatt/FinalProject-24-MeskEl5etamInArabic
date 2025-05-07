@@ -24,10 +24,11 @@ public class CartService {
     }
 
 
-    public Cart createCart(UUID customerId) {
+    public Cart createCart(String customerId) {
+        UUID customerIDD = UUID.fromString(customerId);
         Cart cart1=new Cart.Builder()
                 .id(UUID.randomUUID())
-                .customerId( customerId )
+                .customerId( customerIDD )
                 .cartItems(new ArrayList<>())
                 .notes("")
                 .promo(false)
@@ -41,9 +42,11 @@ public class CartService {
 //        return cartRepository.save(cart);
 //    }
 
-    public Cart addProduct(UUID customerId , UUID productID , int quantity , String notes){
-        Cart cart = cartRepository.findByCustomerId(customerId);
-        CartItem cartItem = new CartItem(productID , quantity , LocalDateTime.now() , notes , UUID.randomUUID());
+    public Cart addProduct(String customerId , String productID , int quantity , String notes){
+        UUID customerIDD = UUID.fromString(customerId);
+        UUID productIDD = UUID.fromString(productID);
+        Cart cart = cartRepository.findByCustomerId(customerIDD);
+        CartItem cartItem = new CartItem(productIDD , quantity , LocalDateTime.now() , notes , UUID.randomUUID());
         List <CartItem> oldCartItems = cart.getCartItems();
         oldCartItems.add(cartItem);
         cart.setCartItems(oldCartItems);
@@ -51,11 +54,13 @@ public class CartService {
     }
 
 
-    public Cart removeProduct(UUID customerId , UUID productId){
-        Cart cart = cartRepository.findByCustomerId(customerId);
+    public Cart removeProduct(String customerId , String productId){
+        UUID customerIDD = UUID.fromString(customerId);
+        UUID productIDD = UUID.fromString(productId);
+        Cart cart = cartRepository.findByCustomerId(customerIDD);
         List<CartItem> newCartItems = new ArrayList<>();
         for(int i = 0 ; i< cart.getCartItems().size() ; i++){
-            if(!(cart.getCartItems().get(i).getProductId().equals(productId))){
+            if(!(cart.getCartItems().get(i).getProductId().equals(productIDD))){
                 newCartItems.add(cart.getCartItems().get(i));
             }
         }
@@ -63,8 +68,9 @@ public class CartService {
         return cartRepository.save(cart);
     }
 
-    public Cart updatePromo(UUID customerId , boolean promo) {
-        Cart cart = cartRepository.findByCustomerId(customerId);
+    public Cart updatePromo(String customerId , boolean promo) {
+        UUID customerIDD = UUID.fromString(customerId);
+        Cart cart = cartRepository.findByCustomerId(customerIDD);
         cart.setPromo(promo);
         return cartRepository.save(cart);
     }
@@ -78,8 +84,9 @@ public class CartService {
 
 
 
-    public Cart updateNotes(UUID customerId, String notes) {
-        Cart cart = cartRepository.findByCustomerId(customerId);
+    public Cart updateNotes(String customerId, String notes) {
+        UUID customerIDD = UUID.fromString(customerId);
+        Cart cart = cartRepository.findByCustomerId(customerIDD);
         cart.setNotes(notes);
         return cartRepository.save(cart);
     }
