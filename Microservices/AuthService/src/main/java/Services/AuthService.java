@@ -113,4 +113,13 @@ public class AuthService {
         // remove otp entry from redis
         return "TODO";
     }
+
+    public String deleteAccount(UUID id) {
+        User user = userRepository.findById(id).orElse(null);
+        if (user == null) {
+            return "User not found";
+        }
+        userRepository.delete(user);
+        return "User deleted";
+    }
 }
