@@ -1,7 +1,6 @@
 package com.homechef.OrderService.services;
 
 import com.homechef.OrderService.models.Order;
-import com.homechef.OrderService.models.OrderItem;
 import com.homechef.OrderService.repositories.OrderRepository;
 import com.homechef.OrderService.states.CancelledState;
 import com.homechef.OrderService.states.OrderState;
@@ -29,6 +28,7 @@ public class OrderService {
 
     public Order createOrder(Order order) {
         return orderRepository.save(order);
+        // TODO: notify buyer & seller
     }
 
     public List<Order> getAllOrdersByBuyerId(UUID buyerId) {
@@ -72,6 +72,9 @@ public class OrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order with ID " + orderId + " not found"));
         orderRepository.delete(order);
+        // no need to notify anyone, because this method
+        // will not be used anyway in our system,
+        // we did not determine when would the order be deleted
     }
 
     public void updateOrderStatus(UUID orderId, OrderState newState) {
@@ -82,20 +85,18 @@ public class OrderService {
             order.cancelOrder();
             orderRepository.save(order);
             updateProductSales(orderId);
+            // TODO: notify buyer & seller
         } else {
             order.setOrderState(newState);
             orderRepository.save(order);
+            // TODO: notify buyer
+
         }
-        notifyBuyer(orderId, oldState, newState);
     }
 
     private void updateProductSales(UUID orderId) {
         // TODO: send api request to decrease the product sales, waiting for
         // Safwat team to implement the api
-    }
-
-    private void notifyBuyer(UUID orderId, OrderState oldState, OrderState newState) {
-        // TODO: send notification to the buyer that the state of the order has changed
     }
 
 }
