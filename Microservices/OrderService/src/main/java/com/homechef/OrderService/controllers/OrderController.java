@@ -11,6 +11,8 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/orders")
@@ -58,7 +60,7 @@ public class OrderController {
         orderService.deleteOrder(orderId);
     }
 
-    // update order state (also works for canceling an order)
+    // update state (you can also set new state = CANCELLED to cancel the order)
     @PutMapping("/{orderId}/newState")
     public void updateOrderState(@PathVariable UUID orderId, @RequestBody String newState) {
 
@@ -88,4 +90,17 @@ public class OrderController {
                     e.getMessage());
         }
     }
+
+    @PutMapping("/{orderId}/items/{productId}/editNote")
+    public void updateItemNote(@PathVariable UUID orderId, @PathVariable UUID productId,
+            @RequestBody String note) {
+        orderService.updateItemNote(orderId, productId, note);
+    }
+
+    @GetMapping("/sendTestMail")
+    public String sendTestMail() {
+        orderService.sendTestMail();
+        return "Mail sent successfully";
+    }
+
 }

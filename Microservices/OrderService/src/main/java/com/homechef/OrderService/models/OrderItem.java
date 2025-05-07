@@ -10,10 +10,9 @@ import java.util.UUID;
 @Entity
 @Data
 @NoArgsConstructor
-@Table(name = "order_item",
-        uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"order_id", "product_id"})
-        })
+@Table(name = "order_item", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "order_id", "product_id" })
+})
 public class OrderItem {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -31,7 +30,6 @@ public class OrderItem {
     private String notes = "";
     private Double totalPrice;
 
-
     public OrderItem(Order order, UUID productId, UUID sellerId, Integer quantity, String notes, Double totalPrice) {
         this.order = order;
         this.productId = productId;
@@ -40,4 +38,5 @@ public class OrderItem {
         this.notes = notes;
         this.totalPrice = totalPrice;
     }
+
 }

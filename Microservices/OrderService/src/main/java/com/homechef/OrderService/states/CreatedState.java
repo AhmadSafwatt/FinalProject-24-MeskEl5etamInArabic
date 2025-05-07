@@ -35,7 +35,8 @@ public class CreatedState implements OrderState {
             }
         }
         throw new IllegalArgumentException(
-                "couldn't update Item note, because item with productId " + productId + " was not found in order");
+                "couldn't update Item note, because item with productId " + productId
+                        + " was not found in order with id " + order.getId());
     }
 
     @Override
