@@ -16,6 +16,7 @@ public class CartItem {
     String notes;
     @Field(targetType = FieldType.STRING)
     UUID sellerId;
+    private ProductDTO product = null;
 
 
     public CartItem() {
@@ -69,6 +70,10 @@ public class CartItem {
 
     public void setSellerId(UUID sellerId) {
         this.sellerId = sellerId;
+    }
+
+    public void setProduct(ProductDTO product) {
+        this.product = product;
     }
 
    
