@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -45,7 +46,7 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
-    public Product updateProduct(@PathVariable String id,@RequestBody Map<String, Object> request){
+    public Optional<Product> updateProduct(@PathVariable String id, @RequestBody Map<String, Object> request){
         String name = (String) request.get("name");
         Double price = ((Number) request.get("price")).doubleValue();
         int amountSold = ((Number) request.get("amountSold")).intValue();

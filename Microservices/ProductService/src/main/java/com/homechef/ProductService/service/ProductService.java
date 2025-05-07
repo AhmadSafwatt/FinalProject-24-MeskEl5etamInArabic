@@ -13,7 +13,6 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 import org.bson.Document;
 import org.bson.conversions.Bson;
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -61,7 +60,24 @@ public class ProductService {
         return productRepository.findById(productUUID).orElse(null);
     }
 
-    public Product updateProduct(String id,String name, Double price, int amountSold){
+    public List<Product> getMostSoldProducts() {
+        int maxAmountSold = productRepository.findAll()
+                .stream()
+                .mapToInt(Product::getAmountSold)
+                .max()
+                .orElse(0);
+
+        return productRepository.findAll()
+                .stream()
+                .filter(product -> product.getAmountSold() == maxAmountSold)
+                .collect(Collectors.toList());
+    }
+
+    public void deleteProductById(String id) {
+        UUID productUUID = UUID.fromString(id);
+        productRepository.deleteById(productUUID);
+    }
+    public  Optional<Product> updateProduct(String id,String name, Double price, int amountSold){
         MongoDatabase mongoDatabase= this.mongoClient.getDatabase("elthon2yelamr7");
         MongoCollection<Document> products = mongoDatabase.getCollection("products");
 
@@ -86,26 +102,7 @@ public class ProductService {
 
 
         Optional<Product> updatedProduct = productRepository.findById(productUUID);
-        return updatedProduct.get();
+        return updatedProduct;
 
     }
-
-    public List<Product> getMostSoldProducts() {
-        int maxAmountSold = productRepository.findAll()
-                .stream()
-                .mapToInt(Product::getAmountSold)
-                .max()
-                .orElse(0);
-
-        return productRepository.findAll()
-                .stream()
-                .filter(product -> product.getAmountSold() == maxAmountSold)
-                .collect(Collectors.toList());
-    }
-
-    public void deleteProductById(String id) {
-        UUID productUUID = UUID.fromString(id);
-        productRepository.deleteById(productUUID);
-    }
-
 }
