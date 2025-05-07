@@ -88,4 +88,10 @@ public class OrderController {
                     e.getMessage());
         }
     }
+
+    @PutMapping("/{orderId}/items/{productId}/editNote")
+    public void updateItemNote(@PathVariable UUID orderId, @PathVariable UUID productId,
+            @RequestBody String note) {
+        orderService.updateItemNote(orderId, productId, note);
+    }
 }

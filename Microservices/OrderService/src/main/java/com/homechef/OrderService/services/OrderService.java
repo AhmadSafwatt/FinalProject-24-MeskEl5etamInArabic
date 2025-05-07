@@ -70,7 +70,8 @@ public class OrderService {
 
     public void deleteOrder(UUID orderId) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order with ID " + orderId + " not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Order with id " + orderId + " not found"));
         orderRepository.delete(order);
         // no need to notify anyone, because this method
         // will not be used anyway in our system,
@@ -79,7 +80,8 @@ public class OrderService {
 
     public void updateOrderStatus(UUID orderId, OrderState newState) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order with ID " + orderId + " does not exist"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Order with id " + orderId + " not found"));
         OrderState oldState = order.getState();
         if (newState instanceof CancelledState) {
             order.cancelOrder();
@@ -97,6 +99,23 @@ public class OrderService {
     private void updateProductSales(UUID orderId) {
         // TODO: send api request to decrease the product sales, waiting for
         // Safwat team to implement the api
+    }
+
+    public void updateItemNote(UUID orderId, UUID productId, String note) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Order with id " + orderId + " not found"));
+        try {
+            order.updateItemNote(productId, note);
+        } catch (IllegalArgumentException e) {
+            // will be thrown by the updateItemNote method if no product with the given id
+            // found in the given order
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    e.getMessage());
+        }
+        orderRepository.save(order);
+
+        // no need to notify anyone, this is just a note
     }
 
 }
