@@ -78,13 +78,13 @@ public class OrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order with ID " + orderId + " does not exist"));
         OrderState oldState = order.getState();
-        if (!(newState instanceof CancelledState)) {
-            order.setOrderState(newState);
-            orderRepository.save(order);
-        } else {
+        if (newState instanceof CancelledState) {
             order.cancelOrder();
             orderRepository.save(order);
             updateProductSales(orderId);
+        } else {
+            order.setOrderState(newState);
+            orderRepository.save(order);
         }
         notifyBuyer(orderId, oldState, newState);
     }
