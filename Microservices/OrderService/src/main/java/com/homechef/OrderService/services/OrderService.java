@@ -1,5 +1,6 @@
 package com.homechef.OrderService.services;
 
+import com.homechef.OrderService.clients.ProductServiceClient;
 import com.homechef.OrderService.models.Order;
 import com.homechef.OrderService.models.OrderItem;
 import com.homechef.OrderService.repositories.OrderRepository;
@@ -22,11 +23,14 @@ import java.util.stream.Collectors;
 public class OrderService {
     private final OrderRepository orderRepository;
     private final EmailService emailService;
+    private final ProductServiceClient productServiceClient;
 
     @Autowired
-    public OrderService(OrderRepository orderRepository, EmailService emailService) {
+    public OrderService(OrderRepository orderRepository, EmailService emailService,
+            ProductServiceClient productServiceClient) {
         this.orderRepository = orderRepository;
         this.emailService = emailService;
+        this.productServiceClient = productServiceClient;
     }
 
     public List<Order> getAllOrders() {
@@ -81,6 +85,7 @@ public class OrderService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Order with id " + orderId + " not found"));
         orderRepository.delete(order);
+        decreaseProductSales(order);
         sendOrderDeletionNotifications(order);
     }
 
@@ -92,8 +97,8 @@ public class OrderService {
         if (newState instanceof CancelledState) {
             order.cancelOrder();
             orderRepository.save(order);
+            decreaseProductSales(order);
             sendOrderCancellationNotification(order);
-            updateProductSales(orderId);
         } else {
             order.setOrderState(newState);
             orderRepository.save(order);
@@ -126,10 +131,13 @@ public class OrderService {
 
     // ------------------------------------------ helpers
 
-    // TODO: send api request to decrease the product sales, waiting for
-    // Safwat team to implement the api
-    private void updateProductSales(UUID orderId) {
-
+    // TODO: waiting for Safwat team to implement the api
+    private void decreaseProductSales(Order order) {
+        for (OrderItem item : order.getItems()) {
+            UUID productId = item.getProductId();
+            int quantity = item.getQuantity();
+            productServiceClient.modifyProductSales(productId, -quantity);
+        }
     }
 
     // TODO: waiting for omar nour team to tell us how to get the mail by id
@@ -139,7 +147,6 @@ public class OrderService {
 
     // -------------------------------------------notifications
     private void notifyBuyer(Order order, String subject, String msgTail) {
-        // Notify buyer
         UUID buyerId = order.getBuyerId();
         String buyerEmail = getUserMailById(buyerId);
         String msg = "Your order with id " + order.getId() + " has been " + msgTail;
