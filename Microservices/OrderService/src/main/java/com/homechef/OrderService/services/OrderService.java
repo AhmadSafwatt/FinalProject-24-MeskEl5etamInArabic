@@ -155,22 +155,21 @@ public class OrderService {
 
     private void notifySellers(Order order, String subject, String msgTail) {
         // Get unique sellers and their product ids
-        HashMap<UUID, String> sellerProductIds = new HashMap<>();
+        HashMap<UUID, List<String>> sellerProductIds = new HashMap<>();
         for (OrderItem item : order.getItems()) {
             UUID sellerId = item.getSellerId();
             String productId = item.getProductId().toString();
             if (!sellerProductIds.containsKey(sellerId)) {
-                sellerProductIds.put(sellerId, productId);
+                sellerProductIds.put(sellerId, List.of(productId));
             } else {
-                String existingProductIds = sellerProductIds.get(sellerId);
-                sellerProductIds.put(sellerId, existingProductIds + ", " + productId);
+                sellerProductIds.get(sellerId).add(productId);
             }
         }
 
         // send email to each seller
         for (UUID sellerId : sellerProductIds.keySet()) {
             String sellerEmail = getUserMailById(sellerId);
-            String productIds = sellerProductIds.get(sellerId);
+            String productIds = sellerProductIds.get(sellerId).toString();
             String msg = "Your order with id " + order.getId() + " and product ids: "
                     + productIds + " has been " + msgTail;
             emailService.sendEmail(sellerEmail, subject, msg);
