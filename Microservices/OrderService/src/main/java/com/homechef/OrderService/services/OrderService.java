@@ -162,7 +162,8 @@ public class OrderService {
             if (!sellerProductIds.containsKey(sellerId)) {
                 sellerProductIds.put(sellerId, productId);
             } else {
-                sellerProductIds.get(sellerId).concat(", " + productId);
+                String existingProductIds = sellerProductIds.get(sellerId);
+                sellerProductIds.put(sellerId, existingProductIds + ", " + productId);
             }
         }
 
