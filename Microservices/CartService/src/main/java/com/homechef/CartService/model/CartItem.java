@@ -13,7 +13,7 @@ public class CartItem {
     UUID productId;
     int quantity;
     LocalDateTime dateAdded;
-    String notes;
+    String notes = "";
     @Field(targetType = FieldType.STRING)
     UUID sellerId;
     private ProductDTO product = null;
@@ -22,12 +22,12 @@ public class CartItem {
     public CartItem() {
     }
 
-    public CartItem(UUID productId, int quantity, LocalDateTime dateAdded, UUID sellerId, String notes) {
+    public CartItem(UUID productId, int quantity, LocalDateTime dateAdded, String notes , UUID sellerId) {
         this.productId = productId;
         this.quantity = quantity;
         this.dateAdded = dateAdded;
-        this.sellerId = sellerId;
         this.notes = notes;
+        this.sellerId = sellerId;
     }
 
    
