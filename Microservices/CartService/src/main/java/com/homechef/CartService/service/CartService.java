@@ -5,6 +5,8 @@ import com.homechef.CartService.model.Cart;
 import com.homechef.CartService.model.CartItem;
 import com.homechef.CartService.repository.CartRepository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -43,9 +45,14 @@ public class CartService {
 //        return cartRepository.save(cart);
 //    }
 
-//    public Cart addProduct(UUID customerId , ){
-//
-//    }
+    public Cart addProduct(UUID customerId , UUID productID , int quantity , String notes){
+        Cart cart = cartRepository.findByCustomerId(customerId);
+        CartItem cartItem = new CartItem(productID , quantity , LocalDateTime.now() , notes , UUID.randomUUID());
+        List <CartItem> oldCartItems = cart.getCartItems();
+        oldCartItems.add(cartItem);
+        cart.setCartItems(oldCartItems);
+        return cartRepository.save(cart);
+    }
 
 
     public Cart removeProduct(UUID customerId , UUID productId){

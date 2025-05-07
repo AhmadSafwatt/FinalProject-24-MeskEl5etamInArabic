@@ -21,12 +21,12 @@ public class CartItem {
     public CartItem() {
     }
 
-    public CartItem(UUID productId, int quantity, LocalDateTime dateAdded, UUID sellerId, String notes) {
+    public CartItem(UUID productId, int quantity, LocalDateTime dateAdded, String notes , UUID sellerId) {
         this.productId = productId;
         this.quantity = quantity;
         this.dateAdded = dateAdded;
-        this.sellerId = sellerId;
         this.notes = notes;
+        this.sellerId = sellerId;
     }
 
    
