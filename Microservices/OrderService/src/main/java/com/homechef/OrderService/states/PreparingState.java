@@ -23,8 +23,9 @@ public class PreparingState implements OrderState {
                 return;
             }
         }
+        throw new IllegalArgumentException(
+                "couldn't update Item note, because item with productId " + productId + " was not found in order");
     }
-
 
     @Override
     public OrderStatus getOrderStatus() {
