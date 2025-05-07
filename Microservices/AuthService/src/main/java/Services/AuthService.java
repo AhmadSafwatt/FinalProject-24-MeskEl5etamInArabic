@@ -6,11 +6,15 @@ import Repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.SimpleMailMessage;
+
 
 import java.util.UUID;
 
 @Service
 public class AuthService {
+    private final JavaMailSender mailSender;
 
     private final UserRepository userRepository;
 
@@ -18,10 +22,12 @@ public class AuthService {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    public AuthService(UserRepository userRepository , PasswordEncoder passwordEncoder) {
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JavaMailSender mailSender) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.mailSender = mailSender; // Initialize mailSender
     }
+
 
     public String registerUser(User user, String role) {
         if (userRepository.findByUsername(user.getUsername()) != null) {
@@ -51,17 +57,27 @@ public class AuthService {
         return "Verification Email Sent";
     }
 
+
+
     public String sendEmailVerificationLink(String email, UUID id) {
         // Construct the verification link URL
         String verifyEmailUrl = "http://localhost:8081/auth/verify-email/" + id;
 
-        // Simulating sending an email (using a placeholder email service)
-        // TODO: Integrate with an actual email service like JavaMailSender
-        System.out.println("Sending email to: " + email);
-        System.out.println("Email content: Please click the link to verify your email: " + verifyEmailUrl);
+        // Compose the email using SimpleMailMessage
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(email);
+        message.setSubject("Verify Your Email");
+        message.setText("Please click the following link to verify your email: " + verifyEmailUrl);
+        message.setFrom("no-reply@yourapp.com"); // Replace with your sender address
 
-        return "Verification email sent to " + email;
-
+        // Send the email
+        try {
+            mailSender.send(message);
+            return "Verification email sent to " + email;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Failed to send verification email";
+        }
     }
 
     public String verifyEmail(UUID id) {
