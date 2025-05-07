@@ -65,7 +65,7 @@ public class AuthService {
     }
 
 
-
+    //NEEDS TESTING
     public String sendEmailVerificationLink(String email, UUID id) {
         //TODONE: send email verification link, the link should be the url of verifyEmail controller with value of id`
 
@@ -88,7 +88,6 @@ public class AuthService {
             return "Failed to send verification email";
         }
     }
-
     public String verifyEmail(UUID id) {
         User user = userRepository.findById(id).orElse(null);
         if (user == null) {
@@ -105,6 +104,7 @@ public class AuthService {
         userRepository.save(user);
         return "Email Verified";
     }
+    //STRINGREDISTEMPLATE PROBLEM Pom.XML
 
     public String emailResetPassword(String email) {
         // TODO:
@@ -143,15 +143,37 @@ public class AuthService {
         return "Password reset instructions have been sent to the email.";
 
     }
+    //STRINGREDISTEMPLATE PROBLEM Pom.XML
 
     public String resetPassword(String email, String otp, String newPassword) {
-        // TODO:
-        // check if otp is valid (compare with redis entry)
-        // check if email is valid
-        // check if password is valid
-        // hash password
-        // update password in database
-        // remove otp entry from redis
-        return "TODO";
+        // 1. Check if a user exists with the provided email
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            return "User with this email does not exist.";
+        }
+
+        // 2. Retrieve OTP from Redis and validate
+        ValueOperations<String, String> valueOps = redisTemplate.opsForValue();
+        String storedOtp = valueOps.get("RESET_PASSWORD_" + email);
+
+        if (storedOtp == null) {
+            return "OTP has expired or is invalid.";
+        }
+
+        if (!storedOtp.equals(otp)) {
+            return "Invalid OTP. Please try again.";
+        }
+
+        // 3. Encrypt the new password and update the user
+        String encodedPassword = passwordEncoder.encode(newPassword);
+        user.setPassword(encodedPassword);
+        userRepository.save(user);
+
+        // 4. Remove OTP from Redis after successful password reset
+        redisTemplate.delete("RESET_PASSWORD_" + email);
+
+        // 5. Return success message
+        return "Password has been successfully reset.";
+
     }
 }
