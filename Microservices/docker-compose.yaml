@@ -20,6 +20,8 @@ services:
       spring.datasource.url: jdbc:postgresql://host.docker.internal:5432/auth_db
       spring.datasource.username: postgres
       spring.datasource.password: 1234
+      spring.data.redis.host: redisCache
+      spring.data.redis.port: 6379
     ports:
       - "8081:8081"
     depends_on:
@@ -44,3 +46,4 @@ services:
       - "5540:5540"
     depends_on:
       - redisCache
+    restart: always
