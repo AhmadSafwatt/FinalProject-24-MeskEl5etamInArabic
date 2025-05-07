@@ -104,7 +104,7 @@ public class AuthService {
         userRepository.save(user);
         return "Email Verified";
     }
-    //STRINGREDISTEMPLATE PROBLEM Pom.XML
+    //STRINGREDISTEMPLATE PROBLEM SOLVED
 
     public String emailResetPassword(String email) {
         // TODO:
@@ -143,7 +143,7 @@ public class AuthService {
         return "Password reset instructions have been sent to the email.";
 
     }
-    //STRINGREDISTEMPLATE PROBLEM Pom.XML
+    //STRINGREDISTEMPLATE PROBLEM SOLVED
 
     public String resetPassword(String email, String otp, String newPassword) {
         // 1. Check if a user exists with the provided email
