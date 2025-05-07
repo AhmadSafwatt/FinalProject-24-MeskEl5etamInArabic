@@ -52,8 +52,16 @@ public class AuthService {
     }
 
     public String sendEmailVerificationLink(String email, UUID id) {
-        //TODO: send email verification link, the link should be the url of verifyEmail controller with value of id
-        return "TODO";
+        // Construct the verification link URL
+        String verifyEmailUrl = "http://localhost:8081/auth/verify-email/" + id;
+
+        // Simulating sending an email (using a placeholder email service)
+        // TODO: Integrate with an actual email service like JavaMailSender
+        System.out.println("Sending email to: " + email);
+        System.out.println("Email content: Please click the link to verify your email: " + verifyEmailUrl);
+
+        return "Verification email sent to " + email;
+
     }
 
     public String verifyEmail(UUID id) {
