@@ -15,6 +15,8 @@ public class Food extends Product {
         this.sellerId = builder.sellerId;
         this.price = builder.price;
         this.amountSold = builder.amountSold;
+        this.description=builder.description;
+        this.discount=builder.discount;
     }
 
     @Override
@@ -28,6 +30,8 @@ public class Food extends Product {
         private UUID sellerId;
         private Double price;
         private int amountSold;
+        private String description;
+        private Double discount=0.0;
 
         public Builder setName(String name) {
             this.name = name;
@@ -45,6 +49,16 @@ public class Food extends Product {
         }
         public Builder setAmountSold(int amountSold) {
             this.amountSold = amountSold;
+            return this;
+        }
+
+        public Builder setDescription(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public Builder setDiscount(Double discount) {
+            this.discount = discount;
             return this;
         }
 

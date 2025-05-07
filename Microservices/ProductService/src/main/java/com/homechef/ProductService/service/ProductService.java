@@ -36,7 +36,7 @@ public class ProductService {
         this.mongoClient = mongoClient;
     }
 
-    public Product createProduct(String type, String name, UUID sellerId, Double price, int amountSold) {
+    public Product createProduct(String type, String name, UUID sellerId, Double price, int amountSold,String description,Double discount) {
 //        Product product = ProductFactory.createProduct(type, name, sellerId, price, amountSold);
         ProductFactory factory;
 
@@ -51,7 +51,7 @@ public class ProductService {
                 throw new IllegalArgumentException("Unknown product type: " + type);
         }
 
-        Product product = factory.createProduct(name, sellerId, price, amountSold);
+        Product product = factory.createProduct(name, sellerId, price, amountSold,description,discount);
         return productRepository.save(product);
     }
 

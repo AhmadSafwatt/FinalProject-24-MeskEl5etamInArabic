@@ -28,6 +28,8 @@ public class Beverage extends Product {
         private UUID sellerId;
         private Double price;
         private int amountSold;
+        private String description;
+        private Double discount;
         public Builder setName(String name) {
             this.name = name;
             return this;
@@ -46,7 +48,15 @@ public class Beverage extends Product {
             this.amountSold = amountSold;
             return this;
         }
+        public Builder setDescription(String description) {
+            this.description = description;
+            return this;
+        }
 
+        public Builder setDiscount(Double discount) {
+            this.discount = discount;
+            return this;
+        }
         public Beverage build() {
             return new Beverage(this);
         }
