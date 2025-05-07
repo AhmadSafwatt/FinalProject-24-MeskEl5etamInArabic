@@ -31,6 +31,11 @@ public class CartController {
         return cartService.addProduct(customerId , productID , quantity , notes);
     }
 
+    @PutMapping("/{customerId}/{productId}/addNotesToCartItem")
+    public Cart addNotesToCartItem(@PathVariable String customerId , @PathVariable String productId , @RequestBody String notes){
+        return cartService.addNotesToCartItem(customerId, productId, notes);
+    }
+
     @PutMapping("/{customerId}/{productId}/removeProduct")
     public Cart removeProduct(@PathVariable String customerId , @PathVariable String productId ){
         return cartService.removeProduct(customerId , productId);

@@ -42,14 +42,55 @@ public class CartService {
 //        return cartRepository.save(cart);
 //    }
 
+//    public Cart addProduct(String customerId , String productID , int quantity , String notes){
+//        UUID customerIDD = UUID.fromString(customerId);
+//        UUID productIDD = UUID.fromString(productID);
+//        Cart cart = cartRepository.findByCustomerId(customerIDD);
+//        CartItem cartItem = new CartItem(productIDD , quantity , LocalDateTime.now() , notes , UUID.randomUUID());
+//        List <CartItem> oldCartItems = cart.getCartItems();
+//        oldCartItems.add(cartItem);
+//        cart.setCartItems(oldCartItems);
+//        return cartRepository.save(cart);
+//    }
+
     public Cart addProduct(String customerId , String productID , int quantity , String notes){
         UUID customerIDD = UUID.fromString(customerId);
         UUID productIDD = UUID.fromString(productID);
         Cart cart = cartRepository.findByCustomerId(customerIDD);
-        CartItem cartItem = new CartItem(productIDD , quantity , LocalDateTime.now() , notes , UUID.randomUUID());
-        List <CartItem> oldCartItems = cart.getCartItems();
-        oldCartItems.add(cartItem);
-        cart.setCartItems(oldCartItems);
+
+        if(cart == null){
+           cart =  createCart(customerId);
+        }
+
+        boolean found = false;
+        ArrayList<CartItem> newCart = new ArrayList<>();
+        for(int i = 0 ; i< cart.getCartItems().size() ; i++){
+            if((cart.getCartItems().get(i).getProductId().equals(productIDD))){
+                cart.getCartItems().get(i).setQuantity(cart.getCartItems().get(i).getQuantity()+quantity);
+                cart.getCartItems().get(i).setNotes(cart.getCartItems().get(i).getNotes() + notes);
+                found = true;
+            }
+        }
+        if(!found){
+            CartItem cartItem = new CartItem(productIDD , quantity , LocalDateTime.now() , notes , UUID.randomUUID());
+            List <CartItem> oldCartItems = cart.getCartItems();
+            oldCartItems.add(cartItem);
+            cart.setCartItems(oldCartItems);
+        }
+        return cartRepository.save(cart);
+    }
+
+
+    public Cart addNotesToCartItem(String customerId,String productID , String notes){
+        UUID customerIDD = UUID.fromString(customerId);
+        UUID productIDD = UUID.fromString(productID);
+
+        Cart cart = cartRepository.findByCustomerId(customerIDD);
+        for(int i = 0 ; i< cart.getCartItems().size() ; i++){
+            if((cart.getCartItems().get(i).getProductId().equals(productIDD))){
+                cart.getCartItems().get(i).setNotes( cart.getCartItems().get(i).getNotes() + notes);
+            }
+        }
         return cartRepository.save(cart);
     }
 
