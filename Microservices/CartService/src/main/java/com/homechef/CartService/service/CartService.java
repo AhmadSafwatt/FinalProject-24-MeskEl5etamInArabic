@@ -63,8 +63,8 @@ public class CartService {
         return cartRepository.save(cart);
     }
 
-    public Cart updatePromo(UUID cartID , boolean promo) {
-        Cart cart = cartRepository.findByCustomerId(cartID);
+    public Cart updatePromo(UUID customerId , boolean promo) {
+        Cart cart = cartRepository.findByCustomerId(customerId);
         cart.setPromo(promo);
         return cartRepository.save(cart);
     }
@@ -78,8 +78,8 @@ public class CartService {
 
 
 
-    public Cart updateNotes(UUID cartID, String notes) {
-        Cart cart = cartRepository.findByCustomerId(cartID);
+    public Cart updateNotes(UUID customerId, String notes) {
+        Cart cart = cartRepository.findByCustomerId(customerId);
         cart.setNotes(notes);
         return cartRepository.save(cart);
     }
