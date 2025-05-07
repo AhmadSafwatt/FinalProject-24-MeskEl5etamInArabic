@@ -15,10 +15,18 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-@Component
-public class JwtService {
 
-    public static final String SECRET = "${jwt.secret}";
+public class JwtService {
+    // cannot use values from application.yml because of the requirement to be a pure singleton
+    // and not a spring bean which is required for reading from .yml
+    public static final String SECRET = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
+    private static final JwtService instance = new JwtService();
+
+    private JwtService() {}
+
+    public static JwtService getInstance() {
+        return instance;
+    }
 
     public Jws<Claims> validateToken(final String token) {
         return Jwts.parser()

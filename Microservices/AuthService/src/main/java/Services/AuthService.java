@@ -15,19 +15,26 @@ public class AuthService {
 
     private final UserRepository userRepository;
 
-    private final JwtService jwtService;
+    private final JwtService jwtService = JwtService.getInstance();
 
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    public AuthService(UserRepository userRepository , PasswordEncoder passwordEncoder, JwtService jwtService) {
+    public AuthService(UserRepository userRepository , PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.jwtService = jwtService;
     }
 
-    public String generateToken(Map<String, Object> map, User user) {
-        return jwtService.createToken(map, user.getUsername());
+    public String generateUserToken(User user) {
+        Map<String, Object> claims = Map.of(
+                "id", user.getId(),
+                "username", user.getUsername(),
+                "email", user.getEmail(),
+                "address", user.getAddress(),
+                "phoneNumber", user.getPhoneNumber(),
+                "role", user.getRole()
+        );
+        return jwtService.createToken(claims, user.getUsername());
     }
 
     public boolean validateToken(String token) {
