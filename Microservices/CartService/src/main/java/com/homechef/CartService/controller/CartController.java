@@ -6,10 +6,7 @@ import com.homechef.CartService.service.CartService;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.*;
 
 
 @RestController
@@ -28,5 +25,10 @@ public class CartController {
     @GetMapping("/{cartId}")
     public Cart getCartById(@PathVariable String cartId) {
         return cartService.getCartById(cartId);
+    }
+
+    @DeleteMapping("/{cartId}")
+    public String deleteCart(@PathVariable String cartId) {
+        return cartService.deleteCartById(cartId);
     }
 }
