@@ -30,9 +30,9 @@ public class JwtService {
 
     public Jws<Claims> validateToken(final String token) {
         return Jwts.parser()
-                .verifyWith(getSignKey())  // Replaces setSigningKey()
+                .verifyWith(getSignKey())
                 .build()
-                .parseSignedClaims(token); // Replaces parseClaimsJws()
+                .parseSignedClaims(token);
     }
 
 

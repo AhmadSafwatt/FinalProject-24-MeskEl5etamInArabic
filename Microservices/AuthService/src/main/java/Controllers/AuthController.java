@@ -33,4 +33,9 @@ public class AuthController {
         return authService.resetPassword(requestBody.get("email"), requestBody.get("otp"), requestBody.get("newPassword"));
     }
 
+    @DeleteMapping("/delete-account/{userId}")
+    public String deleteAccount(@PathVariable UUID userId) {
+        return authService.deleteAccount(userId);
+    }
+
 }
