@@ -56,6 +56,7 @@ public class CartService {
     public Cart addProduct(String customerId , String productID , int quantity , String notes){
         UUID customerIDD = UUID.fromString(customerId);
         UUID productIDD = UUID.fromString(productID);
+        ProductDTO product = productClient.getProductById(productID);
         Cart cart = cartRepository.findByCustomerId(customerIDD);
 
         if(cart == null){
@@ -72,7 +73,7 @@ public class CartService {
             }
         }
         if(!found){
-            CartItem cartItem = new CartItem(productIDD , quantity , LocalDateTime.now() , notes , UUID.randomUUID());
+            CartItem cartItem = new CartItem(productIDD , quantity , LocalDateTime.now() , notes , product.getSellerId() );
             List <CartItem> oldCartItems = cart.getCartItems();
             oldCartItems.add(cartItem);
             cart.setCartItems(oldCartItems);
