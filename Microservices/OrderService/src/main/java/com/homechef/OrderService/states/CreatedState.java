@@ -6,7 +6,7 @@ import com.homechef.OrderService.models.OrderStatus;
 
 import java.util.UUID;
 
-public class CreatedState implements OrderState{
+public class CreatedState implements OrderState {
     @Override
     public void cancelOrder(Order order) {
         order.setState(OrderStatus.getState(OrderStatus.CANCELLED));
@@ -22,7 +22,8 @@ public class CreatedState implements OrderState{
             return;
         }
 
-        throw new IllegalStateException("Cannot set order state to " + state.getClass().getSimpleName() + " from " + this.getClass().getSimpleName());
+        throw new IllegalStateException("Cannot set order state to " + state.getClass().getSimpleName() + " from "
+                + this.getClass().getSimpleName());
     }
 
     @Override
@@ -33,8 +34,9 @@ public class CreatedState implements OrderState{
                 return;
             }
         }
+        throw new IllegalArgumentException(
+                "couldn't update Item note, because item with productId " + productId + " was not found in order");
     }
-
 
     @Override
     public OrderStatus getOrderStatus() {
