@@ -1,14 +1,20 @@
 package com.homechef.ProductService.model;
 
-import java.util.UUID;
+import org.springframework.data.annotation.TypeAlias;
 
+import java.util.UUID;
+@TypeAlias("beverage")
 public class Beverage extends Product {
 
-    private Beverage(Builder builder) {
-        this.id = builder.id;
+    public  Beverage(){
+        this.id = UUID.randomUUID();
+    }
+    public Beverage(Builder builder) {
+        this.id = builder.id != null ? builder.id : UUID.randomUUID();
         this.name = builder.name;
         this.sellerId = builder.sellerId;
         this.price = builder.price;
+        this.amountSold = builder.amountSold;
     }
 
     @Override
@@ -21,7 +27,7 @@ public class Beverage extends Product {
         private String name;
         private UUID sellerId;
         private Double price;
-
+        private int amountSold;
         public Builder setName(String name) {
             this.name = name;
             return this;
@@ -34,6 +40,10 @@ public class Beverage extends Product {
 
         public Builder setPrice(Double price) {
             this.price = price;
+            return this;
+        }
+        public Builder setAmountSold(int amountSold) {
+            this.amountSold = amountSold;
             return this;
         }
 
