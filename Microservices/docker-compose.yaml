@@ -38,10 +38,12 @@ services:
       - "5432:5432"
   redisCache:
     image: redis:latest
+    container_name: redisCache
     ports:
       - "6379:6379"
   redisInsight:
     image: redis/redisinsight:latest
+    container_name: redisInsight
     ports:
       - "5540:5540"
     depends_on:
