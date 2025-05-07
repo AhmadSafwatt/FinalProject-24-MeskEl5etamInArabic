@@ -6,10 +6,7 @@ import com.homechef.CartService.model.CartItem;
 import com.homechef.CartService.model.ProductDTO;
 import com.homechef.CartService.repository.CartRepository;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -74,11 +71,13 @@ public class CartService {
     }
 
     private double calculateTotalCost(Cart cart) {
-//        List<Product> products = productService.getProductsForCart(cart); // Sync call to product service
-//        return products.stream()
-//                .mapToDouble(Product::getPrice)
-//                .sum();
-        return 0.0;
+        List<CartItem> cartItems = cart.getCartItems();
+        double totalCost = 0;
+        for (CartItem item : cartItems) {
+            ProductDTO product = productClient.getProductById(item.getProductId().toString());
+            totalCost += product.getPrice() * item.getQuantity();
+        }
+        return totalCost;
     }
 
     private Map<Cart, Double> prepareCartCostMap(Cart cart, double totalCost) {
