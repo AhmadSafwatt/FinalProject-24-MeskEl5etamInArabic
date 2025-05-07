@@ -1,6 +1,7 @@
 package com.homechef.OrderService.services;
 
 import com.homechef.OrderService.models.Order;
+import com.homechef.OrderService.models.OrderItem;
 import com.homechef.OrderService.repositories.OrderRepository;
 import com.homechef.OrderService.states.CancelledState;
 import com.homechef.OrderService.states.OrderState;
@@ -11,8 +12,11 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderService {
@@ -30,8 +34,9 @@ public class OrderService {
     }
 
     public Order createOrder(Order order) {
-        return orderRepository.save(order);
-        // TODO: notify buyer & seller
+        Order createdOrder = orderRepository.save(order);
+        sendOrderCreationNotifications(createdOrder);
+        return createdOrder;
     }
 
     public List<Order> getAllOrdersByBuyerId(UUID buyerId) {
@@ -76,9 +81,7 @@ public class OrderService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Order with id " + orderId + " not found"));
         orderRepository.delete(order);
-        // no need to notify anyone, because this method
-        // will not be used anyway in our system,
-        // we did not determine when would the order be deleted
+        sendOrderDeletionNotifications(order);
     }
 
     public void updateOrderStatus(UUID orderId, OrderState newState) {
@@ -89,13 +92,12 @@ public class OrderService {
         if (newState instanceof CancelledState) {
             order.cancelOrder();
             orderRepository.save(order);
+            sendOrderCancellationNotification(order);
             updateProductSales(orderId);
-            // TODO: notify buyer & seller
         } else {
             order.setOrderState(newState);
             orderRepository.save(order);
-            // TODO: notify buyer
-
+            sendOrderStatusUpdateNotification(order, oldState, newState);
         }
     }
 
@@ -116,15 +118,76 @@ public class OrderService {
         // no need to notify anyone, this is just a note
     }
 
-    private void updateProductSales(UUID orderId) {
-        // TODO: send api request to decrease the product sales, waiting for
-        // Safwat team to implement the api
-    }
-
-    public void testMail() {
+    public void sendTestMail() {
         emailService.sendEmail("hussain.ghoraba@gmail.com", "Test Email",
                 "This is a test email from Order Service");
         System.out.println("Email sent successfully");
+    }
+
+    // ------------------------------------------ helpers
+
+    // TODO: send api request to decrease the product sales, waiting for
+    // Safwat team to implement the api
+    private void updateProductSales(UUID orderId) {
+
+    }
+
+    // TODO: waiting for omar nour team to tell us how to get the mail by id
+    private String getUserMailById(UUID id) {
+        return "hussain.ghoraba@gmail.com";
+    }
+
+    // -------------------------------------------notifications
+    private void notifyBuyer(Order order, String subject, String msgTail) {
+        // Notify buyer
+        UUID buyerId = order.getBuyerId();
+        String buyerEmail = getUserMailById(buyerId);
+        String msg = "Your order with id " + order.getId() + " has been " + msgTail;
+        emailService.sendEmail(buyerEmail, subject, msg);
+    }
+
+    private void notifySellers(Order order, String subject, String msgTail) {
+        // Get unique sellers and their product ids
+        HashMap<UUID, String> sellerProductIds = new HashMap<>();
+        for (OrderItem item : order.getItems()) {
+            UUID sellerId = item.getSellerId();
+            String productId = item.getProductId().toString();
+            if (!sellerProductIds.containsKey(sellerId)) {
+                sellerProductIds.put(sellerId, productId);
+            } else {
+                sellerProductIds.get(sellerId).concat(", " + productId);
+            }
+        }
+
+        // send email to each seller
+        for (UUID sellerId : sellerProductIds.keySet()) {
+            String sellerEmail = getUserMailById(sellerId);
+            String productIds = sellerProductIds.get(sellerId);
+            String msg = "Your order with id " + order.getId() + " and product ids: "
+                    + productIds + " has been " + msgTail;
+            emailService.sendEmail(sellerEmail, subject, msg);
+        }
+    }
+
+    private void sendOrderCreationNotifications(Order order) {
+        notifyBuyer(order, "Order Creation", "created successfully");
+        notifySellers(order, "To the kitchen!", "has been just created by a customer!");
+    }
+
+    private void sendOrderDeletionNotifications(Order order) {
+        String msgTail = "deleted from our database, this is most likely done by our customer service for some reason or another !.";
+        notifyBuyer(order, "Order Deletion", msgTail);
+        notifySellers(order, "Order Deletion", msgTail);
+    }
+
+    private void sendOrderCancellationNotification(Order order) {
+        notifyBuyer(order, "Order Cancellation", "cancelled");
+        notifySellers(order, "Order Cancellation", "cancelled");
+    }
+
+    private void sendOrderStatusUpdateNotification(Order order, OrderState oldState, OrderState newState) {
+        notifyBuyer(order, "Order Status Update", "updated from " + oldState.getOrderStatus() + " to "
+                + newState.getOrderStatus());
     }
 
 }

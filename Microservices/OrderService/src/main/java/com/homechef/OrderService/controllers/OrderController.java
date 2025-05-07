@@ -60,7 +60,7 @@ public class OrderController {
         orderService.deleteOrder(orderId);
     }
 
-    // update order state (also works for canceling an order)
+    // update state (you can also set new state = CANCELLED to cancel the order)
     @PutMapping("/{orderId}/newState")
     public void updateOrderState(@PathVariable UUID orderId, @RequestBody String newState) {
 
@@ -97,9 +97,9 @@ public class OrderController {
         orderService.updateItemNote(orderId, productId, note);
     }
 
-    @GetMapping("/testMail")
-    public String testMail() {
-        orderService.testMail();
+    @GetMapping("/sendTestMail")
+    public String sendTestMail() {
+        orderService.sendTestMail();
         return "Mail sent successfully";
     }
 
