@@ -56,7 +56,7 @@ public class OrderController {
         return orderService.getOrderById(orderId);
     }
 
-    @GetMapping("/{orderId}/delete")
+    @DeleteMapping("/{orderId}")
     public void deleteOrder(@PathVariable UUID orderId) {
         orderService.deleteOrder(orderId);
     }
