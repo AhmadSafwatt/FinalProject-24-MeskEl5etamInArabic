@@ -56,8 +56,8 @@ public class CartService {
         double totalCost = calculateTotalCost(cart);
         Map<Cart, Double> cartCostMap = prepareCartCostMap(cart, totalCost);
 
-        clearCart(cart);
         sendCartToOrderService(cartCostMap);
+        clearCart(cart);
 
         return "Checkout Successful";
     }
