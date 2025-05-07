@@ -24,7 +24,11 @@ public class CartService {
 
 
     public Cart createCart(Cart cart) {
-        return cartRepository.save(cart);
+        Cart cart1=new Cart.Builder()
+                .id(UUID.randomUUID())
+                .customerId(UUID.randomUUID())
+                .build();
+        return cartRepository.save(cart1);
     }
 
     public Cart updateCart(String cartID, Cart cart) {
@@ -32,6 +36,7 @@ public class CartService {
         cart.setId(cartid);
         return cartRepository.save(cart);
     }
+
 
     public Cart updatePromo(String cartID , boolean promo) {
         Cart customerCart = getCartById(cartID);

@@ -32,25 +32,18 @@ public class Cart {
     boolean promo;
 
     private Cart(Builder builder) {
+        this.id = builder.id;
         this.customerId = builder.customer_id;
         this.cartItems = builder.cartItems;
+        this.notes = builder.notes;
+        this.promo = builder.promo;
     }
 
     public Cart() {
-        this.id = UUID.randomUUID();
     }
 
-    public Cart(UUID customerId, List<CartItem> cartItems) {
-        this.id = UUID.randomUUID();
-        this.customerId = customerId;
-        this.cartItems = cartItems;
-    }
+//    add/remove product to cart
 
-    public Cart(UUID id, UUID customerId, List<CartItem> cartItems) {
-        this.id = id;
-        this.customerId = customerId;
-        this.cartItems = cartItems;
-    }
 
     public UUID getId() {
         return id;
