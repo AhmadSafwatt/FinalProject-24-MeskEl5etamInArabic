@@ -30,12 +30,12 @@ public class CartController {
 //    }
 
     @PutMapping("/addProduct/{customerId}")
-    public Cart updatePromo(@PathVariable String customerId , @RequestBody UUID productID , @RequestBody int quantity , @RequestBody String notes ){
+    public Cart addProduct(@PathVariable String customerId , @RequestBody UUID productID , @RequestBody int quantity , @RequestBody String notes ){
         return cartService.addProduct(UUID.fromString(customerId) , productID , quantity , notes);
     }
 
     @PutMapping("/removeProduct/{customerId}/{productId}")
-    public Cart updatePromo(@PathVariable String customerId , @PathVariable String productId ){
+    public Cart removeProduct(@PathVariable String customerId , @PathVariable String productId ){
         return cartService.removeProduct(UUID.fromString(customerId) , UUID.fromString(productId));
     }
 
