@@ -31,4 +31,9 @@ public class CartController {
     public String deleteCart(@PathVariable String cartId) {
         return cartService.deleteCartById(cartId);
     }
+
+    @PostMapping("/{cartId}/checkout")
+    public String checkout(@PathVariable String cartId) {
+        return cartService.checkoutCartById(cartId);
+    }
 }
