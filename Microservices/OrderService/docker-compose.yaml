@@ -8,6 +8,8 @@ services:
         depends_on:
             db:
                 condition: service_healthy
+            rabbitmq:
+                condition: service_healthy
         environment:
             - spring.datasource.url=jdbc:postgresql://db:5432/OrderService
             - spring.datasource.username=postgres
@@ -37,3 +39,15 @@ services:
             PGADMIN_DEFAULT_PASSWORD: admin
         ports:
             - "5054:80"
+
+
+    rabbitmq:
+        image: rabbitmq:4.0-management
+        container_name: rabbitmq
+        ports:
+            - "5676:5672"     # RabbitMQ protocol (AMQP)
+            - "15676:15672"   # Management UI
+        environment:
+            RABBITMQ_DEFAULT_USER: guest
+            RABBITMQ_DEFAULT_PASS: guest
+
