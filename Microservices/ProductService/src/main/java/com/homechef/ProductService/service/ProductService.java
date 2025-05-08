@@ -14,10 +14,14 @@ import com.mongodb.client.model.Updates;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,11 +33,13 @@ public class ProductService {
 
     ProductRepository productRepository;
     MongoClient mongoClient;
+    MongoTemplate mongoTemplate;
 
     @Autowired
-    public ProductService(ProductRepository productRepository, MongoClient mongoClient) {
+    public ProductService(ProductRepository productRepository, MongoClient mongoClient, MongoTemplate mongoTemplate) {
         this.productRepository=productRepository;
         this.mongoClient = mongoClient;
+        this.mongoTemplate = mongoTemplate;
     }
 
     public Product createProduct(String type, String name, UUID sellerId, Double price, int amountSold,String description,Double discount) {
@@ -105,4 +111,13 @@ public class ProductService {
         return updatedProduct;
 
     }
+
+
+    public void incrementAmountSold(String id, int incrementBy) {
+        UUID productUUID = UUID.fromString(id);
+        Query query = new Query(Criteria.where("_id").is(id));
+        Update update = new Update().inc("amountSold", incrementBy);
+        mongoTemplate.updateFirst(query, update, Product.class);
+    }
+
 }
