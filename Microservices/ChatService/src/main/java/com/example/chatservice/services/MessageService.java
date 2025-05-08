@@ -57,16 +57,37 @@ public class MessageService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found");
         }
 
-        if (!partialMessage.getContent().isEmpty()) {
-            existingMessage.setContent(partialMessage.getContent());
+        boolean isUpdated = false;
+
+        if (partialMessage.getContent() != null) {
+            String newContent = partialMessage.getContent().trim();
+            if (!newContent.isEmpty() && !newContent.equals(existingMessage.getContent())) {
+                existingMessage.setContent(newContent);
+                isUpdated = true;
+            } else if (newContent.isEmpty()) {
+                throw new IllegalArgumentException("Content must be a non-empty string");
+            }
         }
 
         if (partialMessage.getStatus() != null) {
-            existingMessage.setStatus(partialMessage.getStatus());
+            if (!partialMessage.getStatus().equals(existingMessage.getStatus())) {
+                existingMessage.setStatus(partialMessage.getStatus());
+                isUpdated = true;
+            }
         }
 
         if (partialMessage.getType() != null) {
-            existingMessage.setType(partialMessage.getType());
+            if (!partialMessage.getType().toString().isBlank() &&
+                    !partialMessage.getType().equals(existingMessage.getType())) {
+                existingMessage.setType(partialMessage.getType());
+                isUpdated = true;
+            } else if (partialMessage.getType().toString().isBlank()) {
+                throw new IllegalArgumentException("Type must be a non-empty string");
+            }
+        }
+
+        if (!isUpdated) {
+            throw new ResponseStatusException(HttpStatus.NO_CONTENT, "No fields were updated");
         }
 
         messageRepository.save(existingMessage);

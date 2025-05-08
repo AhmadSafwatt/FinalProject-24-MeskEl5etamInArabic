@@ -1,4 +1,7 @@
 spring:
+  # to load the secrets from the application-secrets.yml file in the resources folder
+  profiles:
+    include: secrets
   application:
     name: OrderService
   datasource:
