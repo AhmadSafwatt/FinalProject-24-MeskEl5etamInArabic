@@ -2,6 +2,8 @@ package com.homechef.CartService.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.mongodb.core.mapping.FieldType;
 
 import java.util.List;
 import java.util.UUID;
@@ -20,21 +22,25 @@ import java.util.UUID;
 public class Cart {
 
     @Id
+    @Field(targetType = FieldType.STRING)   // force mongo to store the UUID as a string
     UUID id;
-    UUID customer_id;
+    @Field(targetType = FieldType.STRING)
+    UUID customerId;
     List<CartItem> cartItems;
 
     public Cart() {
+        this.id = UUID.randomUUID();
     }
 
-    public Cart(UUID customer_id, List<CartItem> cartItems) {
-        this.customer_id = customer_id;
+    public Cart(UUID customerId, List<CartItem> cartItems) {
+        this.id = UUID.randomUUID();
+        this.customerId = customerId;
         this.cartItems = cartItems;
     }
 
-    public Cart(UUID id, UUID customer_id, List<CartItem> cartItems) {
+    public Cart(UUID id, UUID customerId, List<CartItem> cartItems) {
         this.id = id;
-        this.customer_id = customer_id;
+        this.customerId = customerId;
         this.cartItems = cartItems;
     }
 
@@ -46,12 +52,12 @@ public class Cart {
         this.id = id;
     }
 
-    public UUID getCustomer_id() {
-        return customer_id;
+    public UUID getCustomerId() {
+        return customerId;
     }
 
-    public void setCustomer_id(UUID customer_id) {
-        this.customer_id = customer_id;
+    public void setCustomerId(UUID customerId) {
+        this.customerId = customerId;
     }
 
     public List<CartItem> getCartItems() {
