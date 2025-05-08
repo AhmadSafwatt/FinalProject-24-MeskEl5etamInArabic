@@ -52,14 +52,18 @@ public class ProductController {
         return  productService.updateProduct(id,request);
     }
 
+
     @PutMapping("/discount/{id}")
     public Double applyDiscount(@PathVariable String id, @RequestParam Double discount){
         return  productService.applyDiscount(id,discount);
     }
 
-    @PutMapping("/{id}/incrementAmountSold")
-    public void incrementAmountSold(@PathVariable String id, @RequestParam int amount) {
-        productService.incrementAmountSold(id, amount);
+
+    @PutMapping("/incrementAmountSold/{id}")
+    public Product incrementAmountSold(@PathVariable String id, @RequestParam int amount) {
+
+        return productService.incrementAmountSold(id, amount);
+
     }
 
 
