@@ -24,6 +24,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -42,7 +43,13 @@ public class ProductService {
         this.mongoTemplate = mongoTemplate;
     }
 
-    public Product createProduct(String type, String name, UUID sellerId, Double price, int amountSold,String description,Double discount) {
+    public Product createProduct(String type, String name, UUID sellerId, Double price, int amountSold, String description, Double discount, Map<String, Object> request) {
+        // Validate the input parameters
+        if (type == null || name == null || sellerId == null || price == null || amountSold < 0) {
+            throw new IllegalArgumentException("Invalid input parameters");
+        }
+
+        // Create the product using the factory method
 //        Product product = ProductFactory.createProduct(type, name, sellerId, price, amountSold);
         ProductFactory factory;
 
@@ -57,7 +64,7 @@ public class ProductService {
                 throw new IllegalArgumentException("Unknown product type: " + type);
         }
 
-        Product product = factory.createProduct(name, sellerId, price, amountSold,description,discount);
+        Product product = factory.createProduct(name, sellerId, price, amountSold,description,discount,request);
         return productRepository.save(product);
     }
 
