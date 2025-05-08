@@ -32,7 +32,7 @@ public class ProductController {
         int amountSold = ((Number) request.get("amountSold")).intValue();
         String description = request.get("description") != null ? (String) request.get("description") : "";
         Double discount = request.get("discount") != null ? ((Number) request.get("discount")).doubleValue() : 0.0;
-        return productService.createProduct(type, name, sellerId, price, amountSold,description,discount);
+        return productService.createProduct(type, name, sellerId, price, amountSold,description,discount,request);
     }
     @GetMapping("/{id}")
     public Product getProductById(@PathVariable String id) {
@@ -55,5 +55,11 @@ public class ProductController {
         System.out.println(name + price + amountSold);
         return  productService.updateProduct(id,name,price,amountSold);
     }
+    @PutMapping("/{id}/incrementAmountSold")
+    public void incrementAmountSold(@PathVariable String id, @RequestParam int amount) {
+        productService.incrementAmountSold(id, amount);
+    }
+
+
 
 }

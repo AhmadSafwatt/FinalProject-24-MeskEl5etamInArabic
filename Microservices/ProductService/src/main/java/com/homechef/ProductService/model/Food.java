@@ -6,6 +6,10 @@ import java.util.UUID;
 @TypeAlias("food")
 public class Food extends Product {
 
+
+    private boolean isVegetarian;
+    private String cuisineType;
+
     public Food() {
         this.id = UUID.randomUUID();
     }
@@ -17,6 +21,14 @@ public class Food extends Product {
         this.amountSold = builder.amountSold;
         this.description=builder.description;
         this.discount=builder.discount;
+        this.isVegetarian = builder.isVegetarian;
+        this.cuisineType = builder.cuisineType;
+    }
+    public boolean isVegetarian() {
+        return isVegetarian;
+    }
+    public String getCuisineType() {
+        return cuisineType;
     }
 
     @Override
@@ -32,6 +44,8 @@ public class Food extends Product {
         private int amountSold;
         private String description;
         private Double discount;
+        private boolean isVegetarian;
+        private String cuisineType;
 
         public Builder setName(String name) {
             this.name = name;
@@ -61,6 +75,15 @@ public class Food extends Product {
             this.discount = discount;
             return this;
         }
+        public Builder setIsVegetarian(boolean isVegetarian) {
+            this.isVegetarian = isVegetarian;
+            return this;
+        }
+        public Builder setCuisineType(String cuisineType) {
+            this.cuisineType = cuisineType;
+            return this;
+        }
+
 
         public Food build() {
             return new Food(this);

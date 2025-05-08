@@ -14,12 +14,17 @@ import com.mongodb.client.model.Updates;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -29,14 +34,22 @@ public class ProductService {
 
     ProductRepository productRepository;
     MongoClient mongoClient;
+    MongoTemplate mongoTemplate;
 
     @Autowired
-    public ProductService(ProductRepository productRepository, MongoClient mongoClient) {
+    public ProductService(ProductRepository productRepository, MongoClient mongoClient, MongoTemplate mongoTemplate) {
         this.productRepository=productRepository;
         this.mongoClient = mongoClient;
+        this.mongoTemplate = mongoTemplate;
     }
 
-    public Product createProduct(String type, String name, UUID sellerId, Double price, int amountSold,String description,Double discount) {
+    public Product createProduct(String type, String name, UUID sellerId, Double price, int amountSold, String description, Double discount, Map<String, Object> request) {
+        // Validate the input parameters
+        if (type == null || name == null || sellerId == null || price == null || amountSold < 0) {
+            throw new IllegalArgumentException("Invalid input parameters");
+        }
+
+        // Create the product using the factory method
 //        Product product = ProductFactory.createProduct(type, name, sellerId, price, amountSold);
         ProductFactory factory;
 
@@ -51,7 +64,7 @@ public class ProductService {
                 throw new IllegalArgumentException("Unknown product type: " + type);
         }
 
-        Product product = factory.createProduct(name, sellerId, price, amountSold,description,discount);
+        Product product = factory.createProduct(name, sellerId, price, amountSold,description,discount,request);
         return productRepository.save(product);
     }
 
@@ -105,4 +118,13 @@ public class ProductService {
         return updatedProduct;
 
     }
+
+
+    public void incrementAmountSold(String id, int incrementBy) {
+        UUID productUUID = UUID.fromString(id);
+        Query query = new Query(Criteria.where("_id").is(id));
+        Update update = new Update().inc("amountSold", incrementBy);
+        mongoTemplate.updateFirst(query, update, Product.class);
+    }
+
 }
