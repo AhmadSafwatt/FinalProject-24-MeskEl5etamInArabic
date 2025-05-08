@@ -37,7 +37,7 @@ public class OrdersSeeder {
                 item.setSellerId((Math.random() > 0.5) ? commonSellerId : UUID.randomUUID());
                 item.setQuantity((int) (Math.random() * 10) + 1); // Random quantity between 1 and 10
                 item.setNotes("Sample note " + j);
-                item.setTotalPrice(Math.random() * 100); // Random price
+//                item.setTotalPrice(Math.random() * 100); // Random price
                 items.add(item);
             }
             order.setItems(items);

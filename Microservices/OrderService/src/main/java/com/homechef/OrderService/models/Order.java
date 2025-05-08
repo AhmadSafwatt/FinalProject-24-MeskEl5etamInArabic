@@ -29,6 +29,7 @@ public class Order {
     private OrderStatus status;
 
     private LocalDateTime orderDate;
+    private Double totalPrice = 0.0;
 
     @Transient
     @JsonIgnore
@@ -41,14 +42,21 @@ public class Order {
     @JsonCreator
     public Order(
         @JsonProperty("buyerId") UUID buyerId,
-        @JsonProperty("items") List<OrderItem> items
+        @JsonProperty("items") List<OrderItem> items,
+        @JsonProperty("totalPrice") Double totalPrice
     ) {
         this.buyerId = buyerId;
         this.status = OrderStatus.CREATED;
         this.state = new CreatedState();
         this.items = items;
         this.orderDate = LocalDateTime.now();
+        this.totalPrice = totalPrice;
         items.forEach(item -> item.setOrder(this));
+    }
+
+    public Order(UUID buyerId, OrderStatus status, List<OrderItem> items, Double totalPrice) {
+        this(buyerId, items, totalPrice);
+        setStatus(status);
     }
 
     // setter override

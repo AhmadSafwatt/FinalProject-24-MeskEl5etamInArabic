@@ -5,6 +5,7 @@ import com.homechef.CartService.model.CartItem;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import com.homechef.CartService.model.ProductDTO;
+import com.homechef.CartService.rabbitmq.CartRabbitMQProducer;
 import com.homechef.CartService.repository.CartRepository;
 import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +20,12 @@ public class CartService {
     @Autowired
     private final ProductClient productClient;
 
-    public CartService(ProductClient productClient) {
+    @Autowired
+    private final CartRabbitMQProducer cartRabbitMQProducer;
+
+    public CartService(ProductClient productClient, CartRabbitMQProducer cartRabbitMQProducer) {
         this.productClient = productClient;
+        this.cartRabbitMQProducer = cartRabbitMQProducer;
     }
 
 
@@ -172,7 +177,7 @@ public class CartService {
         double totalCost = calculateTotalCost(cart);
         Map<Cart, Double> cartCostMap = prepareCartCostMap(cart, totalCost);
 
-        sendCartToOrderService(cartCostMap);
+//        sendCartToOrderService(cartCostMap);
         clearCart(cart);
 
         return "Checkout Successful";
@@ -204,8 +209,20 @@ public class CartService {
         cartRepository.save(cart);
     }
 
-    private void sendCartToOrderService(Map<Cart, Double> cartCostMap) {
-        //orderService.sendCartCheckout(cartCostMap); // Async via RabbitMQ
+    public void sendCartToOrderService(/*Map<Cart, Double> cartCostMap*/) {
+//        orderService.sendCartCheckout(cartCostMap); // Async via RabbitMQ
+        Cart dummyCart = new Cart();
+        dummyCart.setId(UUID.fromString("12345678-1234-1234-1234-123456789012"));
+        dummyCart.setCustomerId(UUID.fromString("00000000-0000-0000-0000-000000000001"));
+        dummyCart.setCartItems(List.of(
+                new CartItem(UUID.fromString("12345678-1234-1234-1234-123456789012"), 2, LocalDateTime.now(), "Test Note", UUID.fromString("00000000-0000-0000-0000-000000000001")),
+                new CartItem(UUID.fromString("12345678-1234-1234-1234-123456789013"), 1, LocalDateTime.now(), "Test Note", UUID.fromString("00000000-0000-0000-0000-000000000002"))
+        ));
+        dummyCart.setPromo(false);
+        dummyCart.setNotes("Test Notes");
+        System.out.println("Sending cart to Order Service: " + dummyCart);
+        cartRabbitMQProducer.sendCart(dummyCart, 100.0);
+
     }
 
 

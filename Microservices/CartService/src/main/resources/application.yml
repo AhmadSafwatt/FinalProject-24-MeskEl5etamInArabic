@@ -1,6 +1,11 @@
 spring:
   application:
     name: CartService
+  rabbitmq:
+    host: localhost
+    port: 5676
+    username: guest
+    password: guest
   data:
     mongodb:
       uri: mongodb://bahy:alansary@localhost:27017/elsolasyelmare7?authSource=admin

@@ -71,4 +71,10 @@ public class CartController {
     public String checkout(@PathVariable String cartId) {
         return cartService.checkoutCartById(cartId);
     }
+
+    @PostMapping("/test/sendCartToOrderService")
+    public String sendCartToOrderService() {
+        cartService.sendCartToOrderService();
+        return "Cart sent to Order Service";
+    }
 }

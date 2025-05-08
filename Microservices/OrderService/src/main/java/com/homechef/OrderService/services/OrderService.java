@@ -1,22 +1,26 @@
 package com.homechef.OrderService.services;
 
+import com.homechef.OrderService.DTOs.CartDTO;
+import com.homechef.OrderService.DTOs.CartItemDTO;
+import com.homechef.OrderService.DTOs.CartMessage;
 import com.homechef.OrderService.clients.ProductServiceClient;
 import com.homechef.OrderService.models.Order;
 import com.homechef.OrderService.models.OrderItem;
+import com.homechef.OrderService.models.OrderStatus;
+import com.homechef.OrderService.rabbitmq.RabbitMQConfig;
 import com.homechef.OrderService.repositories.OrderRepository;
 import com.homechef.OrderService.states.CancelledState;
 import com.homechef.OrderService.states.OrderState;
 
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.mail.SimpleMailMessage;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -142,7 +146,7 @@ public class OrderService {
 
     // TODO: waiting for omar nour team to tell us how to get the mail by id
     private String getUserMailById(UUID id) {
-        return "hussain.ghoraba@gmail.com";
+        return "motammaa7@gmail.com";
     }
 
     // -------------------------------------------notifications
@@ -195,6 +199,19 @@ public class OrderService {
     private void sendOrderStatusUpdateNotification(Order order, OrderState oldState, OrderState newState) {
         notifyBuyer(order, "Order Status Update", "updated from " + oldState.getOrderStatus() + " to "
                 + newState.getOrderStatus());
+    }
+
+    @RabbitListener
+    (queues = RabbitMQConfig.CART_QUEUE)
+    public void receiveCartMessage(@Payload CartMessage cartMessage) {
+        System.out.println("Received cart message: " + cartMessage);
+        CartDTO cart = cartMessage.getCartDTO();
+        Double price = cartMessage.getTotalPrice();
+        System.out.println("Received cart: " + cart);
+        System.out.println("Received total price: " + price);
+
+        // Process the received cart
+        createOrder(cart.toOrder(price));
     }
 
 }

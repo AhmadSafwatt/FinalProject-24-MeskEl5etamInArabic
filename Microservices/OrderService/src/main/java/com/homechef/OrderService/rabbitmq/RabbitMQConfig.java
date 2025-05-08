@@ -1,12 +1,15 @@
 package com.homechef.OrderService.rabbitmq;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.homechef.OrderService.DTOs.CartDTO;
+import com.homechef.OrderService.DTOs.CartMessage;
 import org.springframework.amqp.core.*;
+import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.DefaultJackson2JavaTypeMapper;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
@@ -40,43 +43,22 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public Jackson2JsonMessageConverter messageConverter() {
-        ObjectMapper objectMapper = new ObjectMapper()
+    public Jackson2JsonMessageConverter orderMessageConverter() {
+        ObjectMapper mapper = new ObjectMapper()
                 .registerModule(new JavaTimeModule())
-                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-                .enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY);
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        // No default typing, no trusted packages, no type mapping
 
-        Jackson2JsonMessageConverter converter = new Jackson2JsonMessageConverter(objectMapper);
-
-        DefaultJackson2JavaTypeMapper typeMapper = new DefaultJackson2JavaTypeMapper() {
-            @Override
-            public JavaType toJavaType(MessageProperties properties) {
-                // Override type mapping for receiver
-                if ("cartMap".equals(properties.getHeader("__TypeId__"))) {
-                    return objectMapper.getTypeFactory().constructMapType(
-                            HashMap.class,
-                            CartDTO.class,  // Convert to CartDTO on receive
-                            Double.class
-                    );
-                }
-                return super.toJavaType(properties);
-            }
-        };
-
-        typeMapper.setTrustedPackages("com.homechef.OrderService.models", "com.homechef.OrderService.DTOs", "java.util");
-
-        // Original mapping for sender
-        Map<String, Class<?>> idClassMapping = new HashMap<>();
-        idClassMapping.put("cartMap", HashMap.class);
-        typeMapper.setIdClassMapping(idClassMapping);
-
-        converter.setJavaTypeMapper(typeMapper);
-        return converter;
+        return new Jackson2JsonMessageConverter(mapper);
     }
+
     @Bean
-    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
-        RabbitTemplate template = new RabbitTemplate(connectionFactory);
-        template.setMessageConverter(messageConverter());
-        return template;
+    public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(
+            ConnectionFactory connectionFactory,
+            Jackson2JsonMessageConverter orderMessageConverter) {
+        SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
+        factory.setConnectionFactory(connectionFactory);
+        factory.setMessageConverter(orderMessageConverter);
+        return factory;
     }
 }
