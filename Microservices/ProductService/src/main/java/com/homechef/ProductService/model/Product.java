@@ -31,6 +31,8 @@ public abstract class Product {
     UUID sellerId;
     Double price;
     int amountSold;
+    String description;
+    Double discount ;
 
 
     public UUID getId() {
@@ -52,8 +54,13 @@ public abstract class Product {
         return price;
     }
 
+    public String getDescription() {
+        return description;
+    }
 
-
+    public Double getDiscount() {
+        return discount;
+    }
 
     @JsonIgnore
     public abstract String getType();

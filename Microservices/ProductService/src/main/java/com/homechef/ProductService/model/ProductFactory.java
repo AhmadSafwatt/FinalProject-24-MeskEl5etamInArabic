@@ -1,5 +1,6 @@
 package com.homechef.ProductService.model;
 
+import java.util.Map;
 import java.util.UUID;
 
 public abstract class ProductFactory {
@@ -26,6 +27,6 @@ public abstract class ProductFactory {
 
 
     //}
-    public abstract Product createProduct(String name, UUID sellerId, Double price, int amountSold);
+    public abstract Product createProduct(String name, UUID sellerId, Double price, int amountSold,String description,Double discount, Map<String, Object> request);
 
 }

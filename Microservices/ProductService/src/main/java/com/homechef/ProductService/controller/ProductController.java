@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -29,7 +30,9 @@ public class ProductController {
         Double price = ((Number) request.get("price")).doubleValue();
         UUID sellerId = UUID.fromString((String) request.get("sellerId"));
         int amountSold = ((Number) request.get("amountSold")).intValue();
-        return productService.createProduct(type, name, sellerId, price, amountSold);
+        String description = request.get("description") != null ? (String) request.get("description") : "";
+        Double discount = request.get("discount") != null ? ((Number) request.get("discount")).doubleValue() : 0.0;
+        return productService.createProduct(type, name, sellerId, price, amountSold,description,discount,request);
     }
     @GetMapping("/{id}")
     public Product getProductById(@PathVariable String id) {
@@ -43,5 +46,21 @@ public class ProductController {
     public void deleteProductById(@PathVariable String id) {
         productService.deleteProductById(id);
     }
+
+    @PutMapping("/{id}")
+    public Optional<Product> updateProduct(@PathVariable String id, @RequestBody Map<String, Object> request){
+        String name = (String) request.get("name");
+        Double price = ((Number) request.get("price")).doubleValue();
+        int amountSold = ((Number) request.get("amountSold")).intValue();
+        System.out.println(name + price + amountSold);
+        return  productService.updateProduct(id,name,price,amountSold);
+    }
+    @PutMapping("/incrementAmountSold/{id}")
+    public Product incrementAmountSold(@PathVariable String id, @RequestParam int amount) {
+
+        return productService.incrementAmountSold(id, amount);
+    }
+
+
 
 }
