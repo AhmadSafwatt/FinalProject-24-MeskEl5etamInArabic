@@ -1,6 +1,11 @@
 spring:
   application:
     name: OrderService
+  rabbitmq:
+    host: localhost
+    port: 5676
+    username: guest
+    password: guest
   datasource:
     url: jdbc:postgresql://localhost:5436/OrderService
     username: postgres
