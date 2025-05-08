@@ -55,9 +55,10 @@ public class ProductController {
         System.out.println(name + price + amountSold);
         return  productService.updateProduct(id,name,price,amountSold);
     }
-    @PutMapping("/{id}/incrementAmountSold")
-    public void incrementAmountSold(@PathVariable String id, @RequestParam int amount) {
-        productService.incrementAmountSold(id, amount);
+    @PutMapping("/incrementAmountSold/{id}")
+    public Product incrementAmountSold(@PathVariable String id, @RequestParam int amount) {
+
+        return productService.incrementAmountSold(id, amount);
     }
 
 

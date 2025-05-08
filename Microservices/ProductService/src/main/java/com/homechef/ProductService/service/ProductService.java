@@ -130,11 +130,16 @@ public class ProductService {
     }
 
 
-    public void incrementAmountSold(String id, int incrementBy) {
+    public Product incrementAmountSold(String id, int incrementBy) {
+        if(incrementBy < 0) {
+            throw new IllegalArgumentException("Increment value must be non-negative");
+        }
         UUID productUUID = UUID.fromString(id);
         Query query = new Query(Criteria.where("_id").is(id));
         Update update = new Update().inc("amountSold", incrementBy);
         mongoTemplate.updateFirst(query, update, Product.class);
+        return mongoTemplate.findOne(query, Product.class);
+
     }
 
 }
