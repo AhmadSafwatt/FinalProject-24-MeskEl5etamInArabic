@@ -28,15 +28,13 @@ public class OrderItem {
     private UUID sellerId;
     private Integer quantity;
     private String notes = "";
-    private Double totalPrice;
 
-    public OrderItem(Order order, UUID productId, UUID sellerId, Integer quantity, String notes, Double totalPrice) {
+    public OrderItem(Order order, UUID productId, UUID sellerId, Integer quantity, String notes) {
         this.order = order;
         this.productId = productId;
         this.sellerId = sellerId;
         this.quantity = quantity;
         this.notes = notes;
-        this.totalPrice = totalPrice;
     }
 
 }

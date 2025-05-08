@@ -30,6 +30,10 @@ public class Order {
 
     private LocalDateTime orderDate;
 
+    private Double totalPrice = 0.0;
+
+    private String orderNote = "";
+
     @Transient
     @JsonIgnore
     private OrderState state = new CreatedState();
@@ -41,13 +45,17 @@ public class Order {
     @JsonCreator
     public Order(
         @JsonProperty("buyerId") UUID buyerId,
-        @JsonProperty("items") List<OrderItem> items
+        @JsonProperty("items") List<OrderItem> items,
+        @JsonProperty("totalPrice") Double totalPrice,
+        @JsonProperty("orderNote") String orderNote
     ) {
         this.buyerId = buyerId;
         this.status = OrderStatus.CREATED;
         this.state = new CreatedState();
         this.items = items;
         this.orderDate = LocalDateTime.now();
+        this.totalPrice = totalPrice;
+        this.orderNote = orderNote;
         items.forEach(item -> item.setOrder(this));
     }
 

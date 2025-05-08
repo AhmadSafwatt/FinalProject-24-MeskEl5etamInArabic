@@ -2,13 +2,22 @@ spring:
   # to load the secrets from the application-secrets.yml file in the resources folder
   profiles:
     include: secrets
+
   application:
     name: OrderService
+
+  rabbitmq:
+    host: localhost
+    port: 5676
+    username: guest
+    password: guest
+
   datasource:
     url: jdbc:postgresql://localhost:5436/OrderService
     username: postgres
     password: pass
     driver-class-name: org.postgresql.Driver
+
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
