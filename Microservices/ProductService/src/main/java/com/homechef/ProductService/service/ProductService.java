@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -27,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
@@ -73,18 +71,30 @@ public class ProductService {
         return productRepository.findById(productUUID).orElse(null);
     }
 
-    public List<Product> getMostSoldProducts() {
-        int maxAmountSold = productRepository.findAll()
-                .stream()
-                .mapToInt(Product::getAmountSold)
-                .max()
-                .orElse(0);
+//    public List<Product> getMostSoldProducts() {
+//        int maxAmountSold = productRepository.findAll()
+//                .stream()
+//                .mapToInt(Product::getAmountSold)
+//                .max()
+//                .orElse(0);
+//
+//        return productRepository.findAll()
+//                .stream()
+//                .filter(product -> product.getAmountSold() == maxAmountSold)
+//                .collect(Collectors.toList());
+//    }
 
-        return productRepository.findAll()
-                .stream()
-                .filter(product -> product.getAmountSold() == maxAmountSold)
-                .collect(Collectors.toList());
+    public List<Product> getMostSoldProducts() {
+        Product topProduct = productRepository.findFirstByOrderByAmountSoldDesc();
+        if (topProduct == null) {
+            return List.of();
+        }
+
+        int maxAmountSold = topProduct.getAmountSold();
+
+        return productRepository.findByAmountSold(maxAmountSold);
     }
+
 
     public void deleteProductById(String id) {
         UUID productUUID = UUID.fromString(id);
