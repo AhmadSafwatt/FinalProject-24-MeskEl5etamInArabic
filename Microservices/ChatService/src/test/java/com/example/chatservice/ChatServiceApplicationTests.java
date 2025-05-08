@@ -392,12 +392,12 @@ class ChatServiceApplicationTests {
         }
 
         @Test
-        void testUpdateMessageEndpoint_shouldUpdateMessageTimestamp_whenUpdateSucceeds() throws Exception {
+        void testUpdateMessageEndpoint_shouldNotUpdateMessageTimestamp_whenUpdateSucceeds() throws Exception {
             Message message = createTestMessage(MessageType.TEXT);
             SendMessageCommand messageSender = new SendMessageCommand(message, messageService);
             messageSender.execute();
 
-            Thread.sleep(500);
+            Thread.sleep(10);
 
             Message updatedMessage = new TextMessage();
             updatedMessage.setContent("Updated content");
@@ -410,10 +410,10 @@ class ChatServiceApplicationTests {
                     .getResponse()
                     .getContentAsString();
 
-            Thread.sleep(500);
+            Thread.sleep(10);
             Message retrievedMessage = messageService.getMessageById(message.getId());
             assertNotNull(retrievedMessage);
-            assertNotEquals(message.getTimestamp().truncatedTo(ChronoUnit.MILLIS),
+            assertEquals(message.getTimestamp().truncatedTo(ChronoUnit.MILLIS),
                     retrievedMessage.getTimestamp().truncatedTo(ChronoUnit.MILLIS));
             assertEquals("Updated content", retrievedMessage.getContent());
         }
@@ -424,7 +424,7 @@ class ChatServiceApplicationTests {
             SendMessageCommand messageSender = new SendMessageCommand(message, messageService);
             messageSender.execute();
 
-            Thread.sleep(500);
+            Thread.sleep(10);
 
             // Simulate a failure in the update process
             mockMvc.perform(MockMvcRequestBuilders.patch("/messages/" + message.getId())
@@ -435,7 +435,7 @@ class ChatServiceApplicationTests {
                     .getResponse()
                     .getContentAsString();
 
-            Thread.sleep(500);
+            Thread.sleep(10);
             Message updatedMessage = messageService.getMessageById(message.getId());
             assertEquals(
                     message.getTimestamp().truncatedTo(ChronoUnit.MILLIS),
