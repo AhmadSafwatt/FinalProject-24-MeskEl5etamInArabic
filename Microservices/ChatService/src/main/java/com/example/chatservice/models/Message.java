@@ -61,6 +61,7 @@ public class Message {
     @Size(max = 500, message = "Content cannot exceed 500 characters")
     private String content;
 
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private LocalDateTime timestamp;
 
     @NotNull

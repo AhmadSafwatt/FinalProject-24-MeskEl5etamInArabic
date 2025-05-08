@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
@@ -58,7 +59,7 @@ public class MessageController {
     public ResponseEntity<Message> createMessage(@Valid @RequestBody Message message) {
         SendMessageCommand sendMessageCommand = new SendMessageCommand(message, messageService);
         sendMessageCommand.execute();
-        return ResponseEntity.ok(message);
+        return ResponseEntity.created(URI.create("/messages/" + message.getId())).body(message);
     }
 
     /**
@@ -70,7 +71,7 @@ public class MessageController {
     public ResponseEntity<String> deleteMessage(@PathVariable UUID id) {
         DeleteMessageCommand deleteMessageCommand = new DeleteMessageCommand(id, messageService);
         deleteMessageCommand.execute();
-        return ResponseEntity.ok("Message deleted successfully");
+        return ResponseEntity.noContent().build();
     }
 
     /**
@@ -85,7 +86,6 @@ public class MessageController {
         updateMessageCommand.execute();
         Message updatedMessage = messageService.getMessageById(id);
         return ResponseEntity.ok(updatedMessage);
-
     }
 
     /**
