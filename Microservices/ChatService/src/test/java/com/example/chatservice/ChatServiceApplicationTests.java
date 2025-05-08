@@ -22,6 +22,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -104,7 +105,7 @@ class ChatServiceApplicationTests {
                             MockMvcRequestBuilders.post("/messages")
                                     .contentType("application/json")
                                     .content(objectMapper.writeValueAsString(message)))
-                    .andExpect(MockMvcResultMatchers.status().isOk())
+                    .andExpect(MockMvcResultMatchers.status().isCreated())
                     .andReturn()
                     .getResponse()
                     .getContentAsString();
@@ -122,7 +123,7 @@ class ChatServiceApplicationTests {
                             MockMvcRequestBuilders.post("/messages")
                                     .contentType("application/json")
                                     .content(objectMapper.writeValueAsString(message)))
-                    .andExpect(MockMvcResultMatchers.status().isOk())
+                    .andExpect(MockMvcResultMatchers.status().isCreated())
                     .andReturn()
                     .getResponse()
                     .getContentAsString();
@@ -157,7 +158,7 @@ class ChatServiceApplicationTests {
             mockMvc.perform(MockMvcRequestBuilders.post("/messages")
                             .contentType("application/json")
                             .content(objectMapper.writeValueAsString(message)))
-                    .andExpect(MockMvcResultMatchers.status().isOk())
+                    .andExpect(MockMvcResultMatchers.status().isCreated())
                     .andReturn()
                     .getResponse()
                     .getContentAsString();
@@ -182,7 +183,7 @@ class ChatServiceApplicationTests {
             mockMvc.perform(MockMvcRequestBuilders.post("/messages")
                             .contentType("application/json")
                             .content(objectMapper.writeValueAsString(message)))
-                    .andExpect(MockMvcResultMatchers.status().isOk())
+                    .andExpect(MockMvcResultMatchers.status().isCreated())
                     .andDo(MockMvcResultHandlers.print());
 
             Message savedMessage = messageService.getMessageById(message.getId());
@@ -223,7 +224,7 @@ class ChatServiceApplicationTests {
             mockMvc.perform(MockMvcRequestBuilders.post("/messages")
                             .contentType("application/json")
                             .content(objectMapper.writeValueAsString(validMessage)))
-                    .andExpect(MockMvcResultMatchers.status().isOk())
+                    .andExpect(MockMvcResultMatchers.status().isCreated())
                     .andDo(MockMvcResultHandlers.print());
         }
 
@@ -267,7 +268,7 @@ class ChatServiceApplicationTests {
             assertEquals(message.getId(), existingMessage.getId());
 
             mockMvc.perform(MockMvcRequestBuilders.delete("/messages/" + message.getId()))
-                    .andExpect(MockMvcResultMatchers.status().isOk())
+                    .andExpect(MockMvcResultMatchers.status().isNoContent())
                     .andDo(MockMvcResultHandlers.print());
 
             assertNull(messageService.getMessageById(message.getId()));
@@ -328,7 +329,6 @@ class ChatServiceApplicationTests {
             Message updatedMessage = messageService.getMessageById(message.getId());
             assertEquals(MessageType.PRODUCT, updatedMessage.getType());
             assertEquals(message.getId(), updatedMessage.getId());
-            assertNotEquals(message.getTimestamp(), updatedMessage.getTimestamp());
         }
 
         @Test
@@ -389,6 +389,58 @@ class ChatServiceApplicationTests {
                     .andReturn()
                     .getResponse()
                     .getContentAsString();
+        }
+
+        @Test
+        void testUpdateMessageEndpoint_shouldNotUpdateMessageTimestamp_whenUpdateSucceeds() throws Exception {
+            Message message = createTestMessage(MessageType.TEXT);
+            SendMessageCommand messageSender = new SendMessageCommand(message, messageService);
+            messageSender.execute();
+
+            Thread.sleep(10);
+
+            Message updatedMessage = new TextMessage();
+            updatedMessage.setContent("Updated content");
+
+            mockMvc.perform(MockMvcRequestBuilders.patch("/messages/" + message.getId())
+                            .contentType("application/json")
+                            .content(objectMapper.writeValueAsString(updatedMessage)))
+                    .andExpect(MockMvcResultMatchers.status().isOk())
+                    .andReturn()
+                    .getResponse()
+                    .getContentAsString();
+
+            Thread.sleep(10);
+            Message retrievedMessage = messageService.getMessageById(message.getId());
+            assertNotNull(retrievedMessage);
+            assertEquals(message.getTimestamp().truncatedTo(ChronoUnit.MILLIS),
+                    retrievedMessage.getTimestamp().truncatedTo(ChronoUnit.MILLIS));
+            assertEquals("Updated content", retrievedMessage.getContent());
+        }
+
+        @Test
+        void testUpdateMessageEndpoint_shouldNotUpdateMessageTimestamp_whenUpdateFails() throws Exception {
+            Message message = createTestMessage(MessageType.TEXT);
+            SendMessageCommand messageSender = new SendMessageCommand(message, messageService);
+            messageSender.execute();
+
+            Thread.sleep(10);
+
+            // Simulate a failure in the update process
+            mockMvc.perform(MockMvcRequestBuilders.patch("/messages/" + message.getId())
+                            .contentType("application/json")
+                            .content(objectMapper.writeValueAsString(null)))
+                    .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                    .andReturn()
+                    .getResponse()
+                    .getContentAsString();
+
+            Thread.sleep(10);
+            Message updatedMessage = messageService.getMessageById(message.getId());
+            assertEquals(
+                    message.getTimestamp().truncatedTo(ChronoUnit.MILLIS),
+                    updatedMessage.getTimestamp().truncatedTo(ChronoUnit.MILLIS)
+            );
         }
     }
 
