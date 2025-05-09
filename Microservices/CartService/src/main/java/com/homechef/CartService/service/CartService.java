@@ -148,10 +148,15 @@ public class CartService {
         if (c == null) {
             return null;
         }
+        List<String> ids = new ArrayList<>();
         // Fetch product details from Product Service
         for (CartItem item : c.getCartItems()){
-            ProductDTO product = productClient.getProductById(item.getProductId().toString());
-            item.setProduct(product);
+            ids.add(item.getProductId().toString());
+        }
+        List<ProductDTO> products = productClient.getProductsById(ids);
+        // Update cart items with product details
+        for (int i = 0; i < c.getCartItems().size(); i++) {
+            c.getCartItems().get(i).setProduct(products.get(i));
         }
         return c;
     }
