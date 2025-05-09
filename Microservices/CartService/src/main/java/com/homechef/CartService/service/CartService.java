@@ -68,7 +68,7 @@ public class CartService {
         for(int i = 0 ; i< cart.getCartItems().size() ; i++){
             if((cart.getCartItems().get(i).getProductId().equals(productIDD))){
                 cart.getCartItems().get(i).setQuantity(cart.getCartItems().get(i).getQuantity()+quantity);
-                cart.getCartItems().get(i).setNotes(cart.getCartItems().get(i).getNotes() + notes);
+                cart.getCartItems().get(i).setNotes(cart.getCartItems().get(i).getNotes() + ", " + notes);
                 found = true;
             }
         }
@@ -86,7 +86,7 @@ public class CartService {
         Cart cart = cartRepository.findByCustomerId(customerIDD);
         for(int i = 0 ; i< cart.getCartItems().size() ; i++){
             if((cart.getCartItems().get(i).getProductId().equals(productIDD))){
-                cart.getCartItems().get(i).setNotes( cart.getCartItems().get(i).getNotes() + notes);
+                cart.getCartItems().get(i).setNotes( cart.getCartItems().get(i).getNotes() + ", " + notes);
             }
         }
         return cartRepository.save(cart);

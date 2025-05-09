@@ -23,7 +23,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: example
       MONGO_INITDB_DATABASE: elthon2yelamr7
     ports:
-      - "27017:27017"
+      - "27018:27017"
     volumes:
       - product_volume:/data/db
 
@@ -32,7 +32,7 @@ services:
     image: mongo-express
     restart: always
     ports:
-      - "9000:8081"
+      - "9001:8081"
     environment:
       ME_CONFIG_MONGODB_ADMINUSERNAME: root
       ME_CONFIG_MONGODB_ADMINPASSWORD: example
