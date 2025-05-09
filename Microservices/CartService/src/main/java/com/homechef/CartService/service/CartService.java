@@ -118,6 +118,8 @@ public class CartService {
     public Cart updatePromo(String customerId , boolean promo) {
         UUID customerIDD = UUID.fromString(customerId);
         Cart cart = cartRepository.findByCustomerId(customerIDD);
+        if(cart == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cart does not exist");
         cart.setPromo(promo);
         return cartRepository.save(cart);
     }
@@ -134,6 +136,8 @@ public class CartService {
     public Cart updateNotes(String customerId, String notes) {
         UUID customerIDD = UUID.fromString(customerId);
         Cart cart = cartRepository.findByCustomerId(customerIDD);
+        if(cart == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST  , "Cart does not exist");
         cart.setNotes(notes);
         return cartRepository.save(cart);
     }
