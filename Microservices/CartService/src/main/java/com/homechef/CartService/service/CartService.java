@@ -12,8 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.lang.model.UnknownEntityException;
-
 @Service
 public class CartService {
 
@@ -150,7 +148,12 @@ public class CartService {
 
     public Cart getCartByCustomerId(String customerId) {
         UUID customerUUID = UUID.fromString(customerId);
-        return cartRepository.findByCustomerId(customerUUID);
+        Cart cart = cartRepository.findByCustomerId(customerUUID);
+        if (cart == null) {
+            String errorMessage = "Cart not found for customer ID: " + customerId;
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, errorMessage);
+        }
+        return cart;
     }
 
     public Cart getCartById(String cartId) {
@@ -158,7 +161,8 @@ public class CartService {
         Cart c = cartRepository.findById(cartUUID).orElse(null);
 
         if (c == null) {
-            return null;
+            String errorMessage = "Cart not found for cart ID: " + cartId;
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, errorMessage);
         }
         List<String> ids = new ArrayList<>();
         // Fetch product details from Product Service
@@ -209,8 +213,11 @@ public class CartService {
         }
         List<ProductDTO> products = productClient.getProductsById(ids);
         for (int i = 0; i < cartItems.size(); i++) {
-            totalCost += products.get(i).getPrice() * cartItems.get(i).getQuantity();
+            totalCost += (products.get(i).getPrice() * (1 - products.get(i).getDiscount())) * cartItems.get(i).getQuantity();
         }
+        if (cart.isPromo())
+            totalCost = totalCost - 0.05*totalCost;
+        System.out.println(totalCost);
         return totalCost;
     }
 
@@ -227,6 +234,7 @@ public class CartService {
 
     private void sendCartToOrderService(Map<Cart, Double> cartCostMap) {
         //orderService.sendCartCheckout(cartCostMap); // Async via RabbitMQ
+        System.out.println("SENT TO ORDER SERVICE");
     }
 
 
