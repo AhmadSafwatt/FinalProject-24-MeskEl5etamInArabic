@@ -27,7 +27,11 @@ public class CartService {
 
 
     public Cart createCart(String customerId) {
+
         UUID customerIDD = UUID.fromString(customerId);
+
+        if(!(cartRepository.findByCustomerId(customerIDD) == null))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Customer already exists");
         Cart cart1=new Cart.Builder()
                 .id(UUID.randomUUID())
                 .customerId( customerIDD )
@@ -112,6 +116,8 @@ public class CartService {
     public Cart updatePromo(String customerId , boolean promo) {
         UUID customerIDD = UUID.fromString(customerId);
         Cart cart = cartRepository.findByCustomerId(customerIDD);
+        if(cart == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cart does not exist");
         cart.setPromo(promo);
         return cartRepository.save(cart);
     }
@@ -128,6 +134,8 @@ public class CartService {
     public Cart updateNotes(String customerId, String notes) {
         UUID customerIDD = UUID.fromString(customerId);
         Cart cart = cartRepository.findByCustomerId(customerIDD);
+        if(cart == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST  , "Cart does not exist");
         cart.setNotes(notes);
         return cartRepository.save(cart);
     }
@@ -205,8 +213,11 @@ public class CartService {
         }
         List<ProductDTO> products = productClient.getProductsById(ids);
         for (int i = 0; i < cartItems.size(); i++) {
-            totalCost += products.get(i).getPrice() * cartItems.get(i).getQuantity();
+            totalCost += (products.get(i).getPrice() * (1 - products.get(i).getDiscount())) * cartItems.get(i).getQuantity();
         }
+        if (cart.isPromo())
+            totalCost = totalCost - 0.05*totalCost;
+        System.out.println(totalCost);
         return totalCost;
     }
 
@@ -223,6 +234,7 @@ public class CartService {
 
     private void sendCartToOrderService(Map<Cart, Double> cartCostMap) {
         //orderService.sendCartCheckout(cartCostMap); // Async via RabbitMQ
+        System.out.println("SENT TO ORDER SERVICE");
     }
 
 
