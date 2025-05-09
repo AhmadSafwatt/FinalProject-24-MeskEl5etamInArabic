@@ -1,6 +1,6 @@
-package Repositories;
+package com.homechef.AuthService.Repositories;
 
-import Models.User;
+import com.homechef.AuthService.Models.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
