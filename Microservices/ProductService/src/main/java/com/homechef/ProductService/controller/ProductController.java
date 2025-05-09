@@ -38,6 +38,12 @@ public class ProductController {
     public Product getProductById(@PathVariable String id) {
         return productService.getProductById(id);
     }
+
+    @GetMapping("/ids")
+    public List<Product> getProductsById(@RequestBody List<String> ids) {
+        return productService.getProductsById(ids);
+    }
+
     @GetMapping("/most-sold")
     public List<Product> getMostSoldProducts() {
         return productService.getMostSoldProducts();
