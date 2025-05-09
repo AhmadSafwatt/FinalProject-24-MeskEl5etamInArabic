@@ -76,5 +76,7 @@ public class CartItem {
         this.product = product;
     }
 
-   
+    public ProductDTO getProduct() {
+        return product;
+    }
 }

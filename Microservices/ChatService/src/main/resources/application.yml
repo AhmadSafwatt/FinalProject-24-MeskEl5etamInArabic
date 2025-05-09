@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: ChatService
+  cassandra:
+    local-datacenter: datacenter1
+    contact-points: cassandra
+    port: 9042
+
+server:
+  port: 8083
