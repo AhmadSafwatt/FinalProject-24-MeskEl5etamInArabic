@@ -197,8 +197,11 @@ public class CartService {
         }
         List<ProductDTO> products = productClient.getProductsById(ids);
         for (int i = 0; i < cartItems.size(); i++) {
-            totalCost += products.get(i).getPrice() * cartItems.get(i).getQuantity();
+            totalCost += (products.get(i).getPrice() * (1 - products.get(i).getDiscount())) * cartItems.get(i).getQuantity();
         }
+        if (cart.isPromo())
+            totalCost = totalCost - 0.05*totalCost;
+        System.out.println(totalCost);
         return totalCost;
     }
 
@@ -215,6 +218,7 @@ public class CartService {
 
     private void sendCartToOrderService(Map<Cart, Double> cartCostMap) {
         //orderService.sendCartCheckout(cartCostMap); // Async via RabbitMQ
+        System.out.println("SENT TO ORDER SERVICE");
     }
 
 
