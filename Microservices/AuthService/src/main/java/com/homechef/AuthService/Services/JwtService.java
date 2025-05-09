@@ -31,6 +31,15 @@ public class JwtService {
                 .parseSignedClaims(token);
     }
 
+    public String getUsernameFromToken(String token) {
+        return Jwts.parser()
+                .setSigningKey(getSignKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
+    }
+
 
     public String createToken(Map<String, Object> claims, String userName) {
         return Jwts.builder()

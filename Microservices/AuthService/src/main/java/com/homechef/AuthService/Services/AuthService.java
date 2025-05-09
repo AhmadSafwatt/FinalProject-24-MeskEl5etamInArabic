@@ -6,11 +6,15 @@ import com.homechef.AuthService.Repositories.UserRepository;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.authentication.AuthenticationManager;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -22,37 +26,48 @@ public class AuthService {
 
     private PasswordEncoder passwordEncoder;
 
+
+    private AuthenticationManager authenticationManager;
+
     @Autowired
-    public AuthService(UserRepository userRepository , PasswordEncoder passwordEncoder) {
+    public AuthService(UserRepository userRepository , PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.authenticationManager = authenticationManager;
     }
 
     public String login(User user) {
-        User foundUser = userRepository.findByUsername(user.getUsername());
-        if (foundUser == null) {
+        Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
+        if (authenticate.isAuthenticated()) {
+            // check if verified
+            User foundUser = userRepository.findByUsername(user.getUsername()).get();
+            if (foundUser.getRole().equals("unverified_user") || foundUser.getRole().equals("unverified_seller")) {
+                throw new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED,
+                        "User not verified using email"
+                );
+            }
+
+
+
+            return generateUserToken(user);
+        } else {
             throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "User not found"
+                    HttpStatus.UNAUTHORIZED,
+                    "Invalid username or password"
             );
         }
-        if (!passwordEncoder.matches(user.getPassword(), foundUser.getPassword())) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Invalid password"
-            );
-        }
-        return generateUserToken(foundUser);
     }
 
     public String generateUserToken(User user) {
+        User foundUser = userRepository.findByUsername(user.getUsername()).get();
         Map<String, Object> claims = Map.of(
-                "id", user.getId(),
-                "username", user.getUsername(),
-                "email", user.getEmail(),
-                "address", user.getAddress(),
-                "phoneNumber", user.getPhoneNumber(),
-                "role", user.getRole()
+                "id", foundUser.getId(),
+                "username", foundUser.getUsername(),
+                "email", foundUser.getEmail(),
+                "address", foundUser.getAddress(),
+                "phoneNumber", foundUser.getPhoneNumber(),
+                "role", foundUser.getRole()
         );
         return jwtService.createToken(claims, user.getUsername());
     }
@@ -85,32 +100,32 @@ public class AuthService {
         if (user.getPhoneNumber() == null || user.getPhoneNumber().isEmpty()) {
             return "Phone number is required";
         }
-        return "g";
+        return "good";
     }
 
     public String registerUser(User user, String role) {
         String check = checkAllUserFieldsPresent(user);
-        if (!check.equals("g")) {
+        if (!check.equals("good")) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     check
             );
         }
 
-        if (userRepository.findByUsername(user.getUsername()) != null) {
+        if (userRepository.findByUsername(user.getUsername()).isPresent()) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Username already exists"
             );
-
         }
+
         if (userRepository.findByEmail(user.getEmail()) != null) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Email already exists"
             );
-
         }
+
         // check if valid email format
         if (!user.getEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
             throw new ResponseStatusException(
@@ -181,7 +196,10 @@ public class AuthService {
     public String deleteAccount(UUID id) {
         User user = userRepository.findById(id).orElse(null);
         if (user == null) {
-            return "User not found";
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "User not found"
+            );
         }
         userRepository.delete(user);
         return "User deleted";
