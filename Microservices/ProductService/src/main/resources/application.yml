@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: ProductService
+  data:
+    mongodb:
+      uri: mongodb://root:example@localhost:27017/elthon2yelamr7?authSource=admin
+      database: elthon2yelamr7
+server:
+  port: 8085

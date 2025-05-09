@@ -1,0 +1,45 @@
+services:
+  # app
+  product_app:
+    build: .
+    container_name: product_service_container
+    image: product_service_image
+    restart: always
+    depends_on:
+      - mongo
+      - mongo-express
+    ports:
+      - "8085:8085"
+    environment:
+      spring.data.mongodb.uri: mongodb://root:example@mongo:27017/elthon2yelamr7?authSource=admin
+      spring.data.mongodb.database: elthon2yelamr7
+
+  # MongoDB
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+      MONGO_INITDB_DATABASE: elthon2yelamr7
+    ports:
+      - "27017:27017"
+    volumes:
+      - product_volume:/data/db
+
+  # Mongo Express
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - "9000:8081"
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: example
+      ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo:27017/
+      ME_CONFIG_BASICAUTH: false
+    depends_on:
+      - mongo
+
+volumes:
+  product_volume:

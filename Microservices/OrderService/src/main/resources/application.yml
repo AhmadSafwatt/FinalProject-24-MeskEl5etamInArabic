@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: OrderService
+
+server:
+  port: 8084
