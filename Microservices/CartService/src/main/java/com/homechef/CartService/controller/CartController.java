@@ -6,6 +6,8 @@ import com.homechef.CartService.service.CartService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 
 @RestController
 @RequestMapping("/carts")
@@ -27,9 +29,14 @@ public class CartController {
 //    }
 
     @PutMapping("/{customerId}/addProduct")
-    public Cart addProduct(@PathVariable String customerId , @RequestBody String productID , @RequestBody int quantity , @RequestBody String notes ){
-        return cartService.addProduct(customerId , productID , quantity , notes);
+    public Cart addProduct(@PathVariable String customerId, @RequestBody Map<String, Object> payload) {
+        String productID = (String) payload.get("productID");
+        int quantity = (int) payload.get("quantity");
+        String notes = (String) payload.get("notes");
+
+        return cartService.addProduct(customerId, productID, quantity, notes);
     }
+
 
     @PutMapping("/{customerId}/{productId}/addNotesToCartItem")
     public Cart addNotesToCartItem(@PathVariable String customerId , @PathVariable String productId , @RequestBody String notes){
