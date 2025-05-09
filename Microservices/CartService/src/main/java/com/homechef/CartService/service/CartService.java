@@ -191,9 +191,13 @@ public class CartService {
     private double calculateTotalCost(Cart cart) {
         List<CartItem> cartItems = cart.getCartItems();
         double totalCost = 0;
+        List<String> ids = new ArrayList<>();
         for (CartItem item : cartItems) {
-            ProductDTO product = productClient.getProductById(item.getProductId().toString());
-            totalCost += product.getPrice() * item.getQuantity();
+            ids.add(item.getProductId().toString());
+        }
+        List<ProductDTO> products = productClient.getProductsById(ids);
+        for (int i = 0; i < cartItems.size(); i++) {
+            totalCost += products.get(i).getPrice() * cartItems.get(i).getQuantity();
         }
         return totalCost;
     }
