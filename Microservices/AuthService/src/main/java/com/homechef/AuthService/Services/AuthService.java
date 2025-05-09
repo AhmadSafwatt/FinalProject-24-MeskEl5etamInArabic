@@ -5,8 +5,10 @@ import com.homechef.AuthService.Repositories.UserRepository;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Map;
 import java.util.UUID;
@@ -29,10 +31,16 @@ public class AuthService {
     public String login(User user) {
         User foundUser = userRepository.findByUsername(user.getUsername());
         if (foundUser == null) {
-            return "User not found";
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "User not found"
+            );
         }
         if (!passwordEncoder.matches(user.getPassword(), foundUser.getPassword())) {
-            return "Invalid password";
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Invalid password"
+            );
         }
         return generateUserToken(foundUser);
     }
@@ -54,7 +62,10 @@ public class AuthService {
             jwtService.validateToken(token);
             return true;
         } catch (Exception e) {
-            return false;
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "Invalid token"
+            );
         }
     }
 
@@ -80,18 +91,32 @@ public class AuthService {
     public String registerUser(User user, String role) {
         String check = checkAllUserFieldsPresent(user);
         if (!check.equals("g")) {
-            return check;
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    check
+            );
         }
 
         if (userRepository.findByUsername(user.getUsername()) != null) {
-            return "Username already exists";
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Username already exists"
+            );
+
         }
         if (userRepository.findByEmail(user.getEmail()) != null) {
-            return "Email already exists";
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Email already exists"
+            );
+
         }
         // check if valid email format
         if (!user.getEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
-            return "Invalid email format";
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Invalid email format"
+            );
         }
 
         // hash password
@@ -118,7 +143,10 @@ public class AuthService {
     public String verifyEmail(UUID id) {
         User user = userRepository.findById(id).orElse(null);
         if (user == null) {
-            return "User not found";
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "User not found"
+            );
         }
 
         if (user.getRole().equals("unverified_user")) {
