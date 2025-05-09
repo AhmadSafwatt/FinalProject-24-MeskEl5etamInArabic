@@ -19,6 +19,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -66,6 +67,16 @@ public class ProductService {
     public Product getProductById(String id) {
         UUID productUUID = UUID.fromString(id);
         return productRepository.findById(productUUID).orElse(null);
+    }
+
+    public List<Product> getProductsById(List<String> ids) {
+        List<Product> products = new ArrayList<>();
+        for (String id : ids){
+            UUID productUUID = UUID.fromString(id);
+            Product product = productRepository.findById(productUUID).orElse(null);
+            products.add(product);
+        }
+        return products;
     }
 
 //    public List<Product> getMostSoldProducts() {
