@@ -39,7 +39,7 @@ public class ProductController {
         return productService.getProductById(id);
     }
 
-    @GetMapping("/ids")
+    @PostMapping("/ids")
     public List<Product> getProductsById(@RequestBody List<String> ids) {
         return productService.getProductsById(ids);
     }
