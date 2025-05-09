@@ -2,7 +2,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/auth_db
     username: postgres
-    password: password
+    password: 1234
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
@@ -13,6 +13,12 @@ spring:
       hibernate:
         format_sql: true
         use_sql_comments: true
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG
+        web: DEBUG # Optional, but can be helpful for request mapping issues
 
 
 server:

@@ -1,8 +1,9 @@
-package Services;
+package com.homechef.AuthService.Services;
 
-import Models.User;
-import Repositories.UserRepository;
+import com.homechef.AuthService.Models.User;
+import com.homechef.AuthService.Repositories.UserRepository;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,17 @@ public class AuthService {
     public AuthService(UserRepository userRepository , PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+    }
+
+    public String login(User user) {
+        User foundUser = userRepository.findByUsername(user.getUsername());
+        if (foundUser == null) {
+            return "User not found";
+        }
+        if (!passwordEncoder.matches(user.getPassword(), foundUser.getPassword())) {
+            return "Invalid password";
+        }
+        return generateUserToken(foundUser);
     }
 
     public String generateUserToken(User user) {
@@ -46,7 +58,31 @@ public class AuthService {
         }
     }
 
+    public String checkAllUserFieldsPresent(User user) {
+        if (user.getUsername() == null || user.getUsername().isEmpty()) {
+            return "Username is required";
+        }
+        if (user.getPassword() == null || user.getPassword().isEmpty()) {
+            return "Password is required";
+        }
+        if (user.getEmail() == null || user.getEmail().isEmpty()) {
+            return "Email is required";
+        }
+        if (user.getAddress() == null || user.getAddress().isEmpty()) {
+            return "Address is required";
+        }
+        if (user.getPhoneNumber() == null || user.getPhoneNumber().isEmpty()) {
+            return "Phone number is required";
+        }
+        return "g";
+    }
+
     public String registerUser(User user, String role) {
+        String check = checkAllUserFieldsPresent(user);
+        if (!check.equals("g")) {
+            return check;
+        }
+
         if (userRepository.findByUsername(user.getUsername()) != null) {
             return "Username already exists";
         }
