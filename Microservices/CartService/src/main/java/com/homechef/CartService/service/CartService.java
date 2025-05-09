@@ -138,7 +138,11 @@ public class CartService {
 
     public Cart getCartByCustomerId(String customerId) {
         UUID customerUUID = UUID.fromString(customerId);
-        return cartRepository.findByCustomerId(customerUUID);
+        Cart cart = cartRepository.findByCustomerId(customerUUID);
+        if (cart == null) {
+            throw new RuntimeException("Cart not found for customer ID: " + customerId);
+        }
+        return cart;
     }
 
     public Cart getCartById(String cartId) {
@@ -146,7 +150,7 @@ public class CartService {
         Cart c = cartRepository.findById(cartUUID).orElse(null);
 
         if (c == null) {
-            return null;
+        throw new RuntimeException("Cart not found for cart ID: " + cartId);
         }
         List<String> ids = new ArrayList<>();
         // Fetch product details from Product Service
