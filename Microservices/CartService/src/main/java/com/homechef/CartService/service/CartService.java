@@ -8,7 +8,11 @@ import com.homechef.CartService.model.ProductDTO;
 import com.homechef.CartService.repository.CartRepository;
 import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
+import javax.lang.model.UnknownEntityException;
 
 @Service
 public class CartService {
@@ -25,7 +29,11 @@ public class CartService {
 
 
     public Cart createCart(String customerId) {
+
         UUID customerIDD = UUID.fromString(customerId);
+
+        if(!(cartRepository.findByCustomerId(customerIDD) == null))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Customer already exists");
         Cart cart1=new Cart.Builder()
                 .id(UUID.randomUUID())
                 .customerId( customerIDD )
