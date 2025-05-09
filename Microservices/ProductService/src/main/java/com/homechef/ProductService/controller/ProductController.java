@@ -38,6 +38,12 @@ public class ProductController {
     public Product getProductById(@PathVariable String id) {
         return productService.getProductById(id);
     }
+
+    @PostMapping("/ids")
+    public List<Product> getProductsById(@RequestBody List<String> ids) {
+        return productService.getProductsById(ids);
+    }
+
     @GetMapping("/most-sold")
     public List<Product> getMostSoldProducts() {
         return productService.getMostSoldProducts();
@@ -49,17 +55,31 @@ public class ProductController {
 
     @PutMapping("/{id}")
     public Optional<Product> updateProduct(@PathVariable String id, @RequestBody Map<String, Object> request){
-        String name = (String) request.get("name");
-        Double price = ((Number) request.get("price")).doubleValue();
-        int amountSold = ((Number) request.get("amountSold")).intValue();
-        System.out.println(name + price + amountSold);
-        return  productService.updateProduct(id,name,price,amountSold);
+        return  productService.updateProduct(id,request);
     }
+
+
+    @PutMapping("/discount/{id}")
+    public Double applyDiscount(@PathVariable String id, @RequestParam Double discount){
+        return  productService.applyDiscount(id,discount);
+    }
+
+
     @PutMapping("/incrementAmountSold/{id}")
     public Product incrementAmountSold(@PathVariable String id, @RequestParam int amount) {
 
         return productService.incrementAmountSold(id, amount);
+
     }
+
+
+
+    @PutMapping("/{id}/decrement")
+    public Product decrementAmountSold(@PathVariable String id, @RequestParam int amount) {
+       return productService.decrementAmountSold(id, amount);
+    }
+
+
 
 
 

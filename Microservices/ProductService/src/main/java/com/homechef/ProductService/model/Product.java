@@ -51,7 +51,7 @@ public abstract class Product {
         return sellerId;
     }
     public Double getPrice() {
-        return price;
+        return price  ;
     }
 
     public String getDescription() {

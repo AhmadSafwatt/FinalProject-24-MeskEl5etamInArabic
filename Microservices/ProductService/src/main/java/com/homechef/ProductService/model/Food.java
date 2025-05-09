@@ -11,9 +11,8 @@ public class Food extends Product {
     private String cuisineType;
 
     public Food() {
-        this.id = UUID.randomUUID();
     }
-    public Food(Builder builder) {
+    private Food(Builder builder) {
         this.id = builder.id != null ? builder.id : UUID.randomUUID();
         this.name = builder.name;
         this.sellerId = builder.sellerId;
