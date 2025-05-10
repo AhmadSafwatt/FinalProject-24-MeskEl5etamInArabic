@@ -28,7 +28,9 @@ public class MessageService {
         if (id == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message ID cannot be null");
         }
-        return messageRepository.findById(id).orElse(null);
+
+        return messageRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found"));
     }
 
     public void saveMessage(Message message) {
@@ -37,6 +39,7 @@ public class MessageService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message cannot be null");
         }
 
+        message.setId(UUID.randomUUID());
         messageRepository.save(message);
     }
 
