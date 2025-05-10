@@ -7,6 +7,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
@@ -48,6 +50,7 @@ class HosainTests {
         testOrder = orderRepository.save(testOrder);
     }
 
+    // ------------------------------------- get order by id
     @Test
     void testGetOrderById_OrderExists() {
         String url = baseUrl + testOrder.getId();
@@ -68,6 +71,8 @@ class HosainTests {
 
     }
 
+    // ------------------------------------- delete order
+
     @Test
     void testDeleteOrder_OrderExists() {
         String url = baseUrl + testOrder.getId();
@@ -83,8 +88,10 @@ class HosainTests {
                 "Expected HTTP status 404 NOT_FOUND, but received " + responseEntity.getStatusCode());
     }
 
+    // ------------------------------------- cancel order
+
     @Test
-    void testOrderCancellation_exists() {
+    void testOrderCancellation_OrderExists() {
         String url = baseUrl + testOrder.getId() + "/newState";
         restTemplate.put(url, OrderStatus.CANCELLED.name());
         Order updatedOrder = orderRepository.findById(testOrder.getId()).orElse(null);
@@ -93,14 +100,283 @@ class HosainTests {
     }
 
     @Test
-    void testOrderCancellation_valid() {
-        String url = baseUrl + testOrder.getId() + "/newState";
-        restTemplate.put(url, OrderStatus.CANCELLED.name());
-
-        Order updatedOrder = orderRepository.findById(testOrder.getId()).orElse(null);
-        assertNotNull(updatedOrder);
-        assertEquals(OrderStatus.CANCELLED, updatedOrder.getStatus());
+    void testOrderCancellation_OrderDoesNotExist() {
+        UUID nonExistentOrderId = UUID.randomUUID();
+        String url = baseUrl + nonExistentOrderId + "/newState";
+        HttpEntity<String> requestEntity = new HttpEntity<>(OrderStatus.CANCELLED.name());
+        ResponseEntity<String> responseEntity = restTemplate.exchange(
+                url,
+                HttpMethod.PUT,
+                requestEntity,
+                String.class);
+        assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode(),
+                "Expected HTTP status 404 NOT_FOUND when attempting to cancel a non-existent order, but received "
+                        + responseEntity.getStatusCode());
     }
+
+    // ------------------------ update order state (order exists does not exist)
+    @Test
+    void testUpdateOrderState_OrderDoesNotExist() {
+        UUID nonExistentOrderId = UUID.randomUUID();
+        String url = baseUrl + nonExistentOrderId + "/newState";
+        HttpEntity<String> requestEntity = new HttpEntity<>(OrderStatus.PREPARING.name());
+        ResponseEntity<String> responseEntity = restTemplate.exchange(
+                url,
+                HttpMethod.PUT,
+                requestEntity,
+                String.class);
+        assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode(),
+                "Expected HTTP status 404 NOT_FOUND when attempting to update state of a non-existent order, but received "
+                        + responseEntity.getStatusCode());
+    }
+
+    // ------------------------ update order state (invalid state string)
+    @Test
+    void testUpdateOrderState_InvalidStateString() {
+        String url = baseUrl + testOrder.getId() + "/newState";
+        HttpEntity<String> requestEntity = new HttpEntity<>("I_am_invlid_state_string");
+        ResponseEntity<String> responseEntity = restTemplate.exchange(
+                url,
+                HttpMethod.PUT,
+                requestEntity,
+                String.class);
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode(),
+                "Expected HTTP status 400 BAD_REQUEST when attempting to update state with an invalid state string, but received "
+                        + responseEntity.getStatusCode());
+    }
+
+    // ----------------- update order state (check state transition validity)
+    private void assertStateTransition(OrderStatus initialStatus, OrderStatus targetStatus,
+            boolean expectValidTransition) {
+        testOrder.setStatus(initialStatus);
+        orderRepository.save(testOrder);
+        String url = baseUrl + testOrder.getId() + "/newState";
+        HttpEntity<String> requestEntity = new HttpEntity<>(targetStatus.name());
+        ResponseEntity<String> responseEntity = restTemplate.exchange(
+                url,
+                HttpMethod.PUT,
+                requestEntity,
+                String.class);
+
+        if (expectValidTransition) {
+            assertEquals(HttpStatus.OK, responseEntity.getStatusCode(),
+                    "Expected HTTP OK for valid transition from " + initialStatus + " to " + targetStatus);
+            Order updatedOrder = orderRepository.findById(testOrder.getId()).orElseThrow();
+            assertEquals(targetStatus, updatedOrder.getStatus(),
+                    "Order status should be " + targetStatus + " after valid transition from " + initialStatus);
+        } else {
+            assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode(),
+                    "Expected HTTP BAD_REQUEST for invalid transition from " + initialStatus + " to " + targetStatus);
+            Order notUpdatedOrder = orderRepository.findById(testOrder.getId()).orElseThrow();
+            assertEquals(initialStatus, notUpdatedOrder.getStatus(),
+                    "Order status should remain " + initialStatus + " after invalid transition to " + targetStatus);
+        }
+    }
+
+    // --- Transitions from CREATED ---
+    @Test
+    void testUpdateOrderState_Created_to_Preparing_Valid() {
+        assertStateTransition(OrderStatus.CREATED, OrderStatus.PREPARING, true);
+    }
+
+    @Test
+    void testUpdateOrderState_Created_to_Prepared_Valid() {
+        assertStateTransition(OrderStatus.CREATED, OrderStatus.PREPARED, true);
+    }
+
+    @Test
+    void testUpdateOrderState_Created_to_OutForDelivery_Valid() {
+        assertStateTransition(OrderStatus.CREATED, OrderStatus.OUT_FOR_DELIVERY, true);
+    }
+
+    @Test
+    void testUpdateOrderState_Created_to_Cancelled_Valid() {
+        assertStateTransition(OrderStatus.CREATED, OrderStatus.CANCELLED, true);
+    }
+
+    @Test
+    void testUpdateOrderState_Created_to_Delivered_Invalid() {
+        assertStateTransition(OrderStatus.CREATED, OrderStatus.DELIVERED, false);
+    }
+
+    @Test
+    void testUpdateOrderState_Created_to_Created_Invalid() {
+        assertStateTransition(OrderStatus.CREATED, OrderStatus.CREATED, false);
+    }
+
+    // --- Transitions from PREPARING ---
+    @Test
+    void testUpdateOrderState_Preparing_to_Prepared_Valid() {
+        assertStateTransition(OrderStatus.PREPARING, OrderStatus.PREPARED, true);
+    }
+
+    @Test
+    void testUpdateOrderState_Preparing_to_Created_Invalid() {
+        assertStateTransition(OrderStatus.PREPARING, OrderStatus.CREATED, false);
+    }
+
+    @Test
+    void testUpdateOrderState_Preparing_to_OutForDelivery_Invalid() {
+        assertStateTransition(OrderStatus.PREPARING, OrderStatus.OUT_FOR_DELIVERY, false);
+    }
+
+    @Test
+    void testUpdateOrderState_Preparing_to_Delivered_Invalid() {
+        assertStateTransition(OrderStatus.PREPARING, OrderStatus.DELIVERED, false);
+    }
+
+    @Test
+    void testUpdateOrderState_Preparing_to_Cancelled_Invalid() {
+        assertStateTransition(OrderStatus.PREPARING, OrderStatus.CANCELLED, false);
+    }
+
+    @Test
+    void testUpdateOrderState_Preparing_to_Preparing_Invalid() {
+        assertStateTransition(OrderStatus.PREPARING, OrderStatus.PREPARING, false);
+    }
+
+    // --- Transitions from PREPARED ---
+    @Test
+    void testUpdateOrderState_Prepared_to_OutForDelivery_Valid() {
+        assertStateTransition(OrderStatus.PREPARED, OrderStatus.OUT_FOR_DELIVERY, true);
+    }
+
+    @Test
+    void testUpdateOrderState_Prepared_to_Created_Invalid() {
+        assertStateTransition(OrderStatus.PREPARED, OrderStatus.CREATED, false);
+    }
+
+    @Test
+    void testUpdateOrderState_Prepared_to_Preparing_Invalid() {
+        assertStateTransition(OrderStatus.PREPARED, OrderStatus.PREPARING, false);
+    }
+
+    @Test
+    void testUpdateOrderState_Prepared_to_Delivered_Invalid() {
+        assertStateTransition(OrderStatus.PREPARED, OrderStatus.DELIVERED, false);
+    }
+
+    @Test
+    void testUpdateOrderState_Prepared_to_Cancelled_Invalid() {
+        assertStateTransition(OrderStatus.PREPARED, OrderStatus.CANCELLED, false);
+    }
+
+    @Test
+    void testUpdateOrderState_Prepared_to_Prepared_Invalid() {
+        assertStateTransition(OrderStatus.PREPARED, OrderStatus.PREPARED, false);
+    }
+
+    // --- Transitions from OUT_FOR_DELIVERY ---
+    @Test
+    void testUpdateOrderState_OutForDelivery_to_Delivered_Valid() {
+        assertStateTransition(OrderStatus.OUT_FOR_DELIVERY, OrderStatus.DELIVERED, true);
+    }
+
+    @Test
+    void testUpdateOrderState_OutForDelivery_to_Cancelled_Valid() {
+        assertStateTransition(OrderStatus.OUT_FOR_DELIVERY, OrderStatus.CANCELLED, false);
+    }
+
+    @Test
+    void testUpdateOrderState_OutForDelivery_to_Created_Invalid() {
+        assertStateTransition(OrderStatus.OUT_FOR_DELIVERY, OrderStatus.CREATED, false);
+    }
+
+    @Test
+    void testUpdateOrderState_OutForDelivery_to_Preparing_Invalid() {
+        assertStateTransition(OrderStatus.OUT_FOR_DELIVERY, OrderStatus.PREPARING, false);
+    }
+
+    @Test
+    void testUpdateOrderState_OutForDelivery_to_Prepared_Invalid() {
+        assertStateTransition(OrderStatus.OUT_FOR_DELIVERY, OrderStatus.PREPARED, false);
+    }
+
+    @Test
+    void testUpdateOrderState_OutForDelivery_to_OutForDelivery_Invalid() {
+        assertStateTransition(OrderStatus.OUT_FOR_DELIVERY, OrderStatus.OUT_FOR_DELIVERY, false);
+    }
+
+    // --- Transitions from DELIVERED ---
+    @Test
+    void testUpdateOrderState_Delivered_to_Created_Invalid() {
+        assertStateTransition(OrderStatus.DELIVERED, OrderStatus.CREATED, false);
+    }
+
+    @Test
+    void testUpdateOrderState_Delivered_to_Preparing_Invalid() {
+        assertStateTransition(OrderStatus.DELIVERED, OrderStatus.PREPARING, false);
+    }
+
+    @Test
+    void testUpdateOrderState_Delivered_to_Prepared_Invalid() {
+        assertStateTransition(OrderStatus.DELIVERED, OrderStatus.PREPARED, false);
+    }
+
+    @Test
+    void testUpdateOrderState_Delivered_to_OutForDelivery_Invalid() {
+        assertStateTransition(OrderStatus.DELIVERED, OrderStatus.OUT_FOR_DELIVERY, false);
+    }
+
+    @Test
+    void testUpdateOrderState_Delivered_to_Cancelled_Invalid() {
+        assertStateTransition(OrderStatus.DELIVERED, OrderStatus.CANCELLED, false);
+    }
+
+    @Test
+    void testUpdateOrderState_Delivered_to_Delivered_Invalid() {
+        assertStateTransition(OrderStatus.DELIVERED, OrderStatus.DELIVERED, false);
+    }
+
+    // --- Transitions from CANCELLED ---
+    @Test
+    void testUpdateOrderState_Cancelled_to_Created_Invalid() {
+        assertStateTransition(OrderStatus.CANCELLED, OrderStatus.CREATED, false);
+    }
+
+    @Test
+    void testUpdateOrderState_Cancelled_to_Preparing_Invalid() {
+        assertStateTransition(OrderStatus.CANCELLED, OrderStatus.PREPARING, false);
+    }
+
+    @Test
+    void testUpdateOrderState_Cancelled_to_Prepared_Invalid() {
+        assertStateTransition(OrderStatus.CANCELLED, OrderStatus.PREPARED, false);
+    }
+
+    @Test
+    void testUpdateOrderState_Cancelled_to_OutForDelivery_Invalid() {
+        assertStateTransition(OrderStatus.CANCELLED, OrderStatus.OUT_FOR_DELIVERY, false);
+    }
+
+    @Test
+    void testUpdateOrderState_Cancelled_to_Delivered_Invalid() {
+        assertStateTransition(OrderStatus.CANCELLED, OrderStatus.DELIVERED, false);
+    }
+
+    @Test
+    void testUpdateOrderState_Cancelled_to_Cancelled_Invalid() {
+        assertStateTransition(OrderStatus.CANCELLED, OrderStatus.CANCELLED, false);
+    }
+
+    // ...existing code...
+
+    // -------------------------------- update order state (check state transition
+    // validity)
+
+    // below are all possible states, we will test changing from each state to
+    // every other state
+    //
+
+    // public enum OrderStatus {
+    // CREATED,
+    // CANCELLED,
+    // DELIVERED,
+    // OUT_FOR_DELIVERY,
+    // PREPARING,
+    // PREPARED
+    ;
+    // test changing from created to can
 
     // @Test
     // void testUpdateOrderState_InvalidState() {
