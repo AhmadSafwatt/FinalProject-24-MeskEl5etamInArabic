@@ -28,7 +28,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -283,9 +282,7 @@ class ChatServiceApplicationTests {
                     .andExpect(MockMvcResultMatchers.status().isNoContent())
                     .andDo(MockMvcResultHandlers.print());
 
-            assertThrows(ResponseStatusException.class, () -> {
-                messageService.getMessageById(message.getId());
-            });
+            assertThrows(ResponseStatusException.class, () -> messageService.getMessageById(message.getId()));
         }
 
         @Test
