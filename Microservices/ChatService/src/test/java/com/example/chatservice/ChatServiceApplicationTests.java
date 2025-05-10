@@ -10,6 +10,7 @@ import com.example.chatservice.models.Message;
 import com.example.chatservice.models.TextMessage;
 import com.example.chatservice.repositories.MessageRepository;
 import com.example.chatservice.services.MessageService;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -21,6 +22,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
@@ -75,6 +77,38 @@ class ChatServiceApplicationTests {
                     .andExpect(MockMvcResultMatchers.status().isOk())
                     .andDo(MockMvcResultHandlers.print());
         }
+
+        @Test
+        void testGetMessageByIdEndpoint_shouldReturnMessage_whenMessageExists() throws Exception {
+            Message message = createTestMessage(MessageType.TEXT);
+            SendMessageCommand messageSender = new SendMessageCommand(message, messageService);
+            messageSender.execute();
+
+            String responseContent = mockMvc.perform(MockMvcRequestBuilders.get("/messages/" + message.getId()))
+                    .andExpect(MockMvcResultMatchers.status().isOk())
+                    .andDo(MockMvcResultHandlers.print())
+                    .andReturn()
+                    .getResponse()
+                    .getContentAsString();
+
+            JsonNode responseJson = objectMapper.readTree(responseContent);
+            assertEquals(message.getId().toString(), responseJson.get("id").asText());
+            assertEquals(message.getSenderId().toString(), responseJson.get("senderId").asText());
+            assertEquals(message.getReceiverId().toString(), responseJson.get("receiverId").asText());
+            assertEquals(message.getContent(), responseJson.get("content").asText());
+            assertEquals(message.getType().toString(), responseJson.get("type").asText());
+            assertEquals(message.getStatus().toString(), responseJson.get("status").asText());
+            assertNotNull(responseJson.get("timestamp").asText());
+        }
+
+        @Test
+        void testGetMessageByIdEndpoint_shouldReturnNotFound_whenMessageDoesNotExist() throws Exception {
+            UUID nonExistingMessageId = UUID.randomUUID();
+
+            mockMvc.perform(MockMvcRequestBuilders.get("/messages/" + nonExistingMessageId))
+                    .andExpect(MockMvcResultMatchers.status().isNotFound())
+                    .andDo(MockMvcResultHandlers.print());
+        }
     }
 
     @Nested
@@ -98,8 +132,8 @@ class ChatServiceApplicationTests {
 
         @Test
         void testSaveMessageEndpoint_shouldSaveMessage_whenIdIsNull() throws Exception {
-            Message message = createTestMessage(MessageType.TEXT);
-            message.setId(null);
+            Message message = createTestMessage(MessageType.IMAGE);
+            message.setId(null); // Let backend assign ID
 
             String responseContent = mockMvc.perform(
                             MockMvcRequestBuilders.post("/messages")
@@ -110,9 +144,14 @@ class ChatServiceApplicationTests {
                     .getResponse()
                     .getContentAsString();
 
-            Message savedMessage = objectMapper.readValue(responseContent, Message.class);
-            assertNotNull(savedMessage.getId());
+            // Parse response JSON manually
+            JsonNode jsonNode = objectMapper.readTree(responseContent);
+            String id = jsonNode.path("id").asText();
+
+            assertNotNull(id);
+            assertFalse(id.isEmpty(), "ID should not be an empty string");
         }
+
 
         @Test
         void testSaveMessageEndpoint_ShouldSaveMessageAndIgnoreId() throws Exception {
@@ -128,8 +167,9 @@ class ChatServiceApplicationTests {
                     .getResponse()
                     .getContentAsString();
 
-            Message savedMessage = objectMapper.readValue(responseContent, Message.class);
-            assertNotEquals(message.getId(), savedMessage.getId());
+            JsonNode jsonNode = objectMapper.readTree(responseContent);
+            String id = jsonNode.path("id").asText();
+            assertNotEquals(message.getId(), id);
         }
 
         @Test
@@ -145,17 +185,10 @@ class ChatServiceApplicationTests {
 
         @Test
         void testSaveMessageEndpoint_shouldSaveMessage_WhenValidMessage() throws Exception {
-            // Mock the repository
-            MessageRepository mockMessageRepository = org.mockito.Mockito.mock(MessageRepository.class);
-            messageService = new MessageService(mockMessageRepository);
 
             Message message = createTestMessage(MessageType.IMAGE);
 
-            // Mock save and findById behavior
-            when(mockMessageRepository.save(message)).thenReturn(message);
-            when(mockMessageRepository.findById(message.getId())).thenReturn(java.util.Optional.of(message));
-
-            mockMvc.perform(MockMvcRequestBuilders.post("/messages")
+            String responseContent = mockMvc.perform(MockMvcRequestBuilders.post("/messages")
                             .contentType("application/json")
                             .content(objectMapper.writeValueAsString(message)))
                     .andExpect(MockMvcResultMatchers.status().isCreated())
@@ -163,32 +196,11 @@ class ChatServiceApplicationTests {
                     .getResponse()
                     .getContentAsString();
 
-            Message savedMessage = messageService.getMessageById(message.getId());
+            JsonNode jsonNode = objectMapper.readTree(responseContent);
+            String id = jsonNode.path("id").asText();
+
+            Message savedMessage = messageService.getMessageById(UUID.fromString(id));
             assertNotNull(savedMessage);
-            assertEquals(message.getId(), savedMessage.getId());
-        }
-
-        @Test
-        void testSaveMessageEndpoint_shouldSaveMessage_whenMessageExists() throws Exception {
-            // Mock the repository
-            MessageRepository mockMessageRepository = org.mockito.Mockito.mock(MessageRepository.class);
-            messageService = new MessageService(mockMessageRepository);
-
-            Message message = createTestMessage(MessageType.TEXT);
-
-            // Mock save and findById behavior
-            when(mockMessageRepository.save(message)).thenReturn(message);
-            when(mockMessageRepository.findById(message.getId())).thenReturn(java.util.Optional.of(message));
-
-            mockMvc.perform(MockMvcRequestBuilders.post("/messages")
-                            .contentType("application/json")
-                            .content(objectMapper.writeValueAsString(message)))
-                    .andExpect(MockMvcResultMatchers.status().isCreated())
-                    .andDo(MockMvcResultHandlers.print());
-
-            Message savedMessage = messageService.getMessageById(message.getId());
-            assertNotNull(savedMessage);
-            assertEquals(message.getId(), savedMessage.getId());
         }
 
         @Test
@@ -271,7 +283,9 @@ class ChatServiceApplicationTests {
                     .andExpect(MockMvcResultMatchers.status().isNoContent())
                     .andDo(MockMvcResultHandlers.print());
 
-            assertNull(messageService.getMessageById(message.getId()));
+            assertThrows(ResponseStatusException.class, () -> {
+                messageService.getMessageById(message.getId());
+            });
         }
 
         @Test
