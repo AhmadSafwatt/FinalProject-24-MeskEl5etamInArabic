@@ -3,20 +3,32 @@ package com.homechef.AuthService.Services;
 import com.homechef.AuthService.Models.User;
 import com.homechef.AuthService.Repositories.UserRepository;
 
-<<<<<<< HEAD
+
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.HttpStatus;
+import org.springframework.mail.SimpleMailMessage;
+
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+
 
 @Service
 public class AuthService {
@@ -27,13 +39,19 @@ public class AuthService {
 
     private PasswordEncoder passwordEncoder;
 
+    private final JavaMailSender mailSender;
+
+    private final StringRedisTemplate redisTemplate;
+
 
     private AuthenticationManager authenticationManager;
 
     @Autowired
-    public AuthService(UserRepository userRepository , PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager) {
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JavaMailSender mailSender, StringRedisTemplate redisTemplate, AuthenticationManager authenticationManager) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.mailSender = mailSender;
+        this.redisTemplate = redisTemplate; // Inject Redis template
         this.authenticationManager = authenticationManager;
     }
 
@@ -48,8 +66,6 @@ public class AuthService {
                         "User not verified using email"
                 );
             }
-
-
 
             return generateUserToken(user);
         } else {
@@ -133,48 +149,7 @@ public class AuthService {
                     HttpStatus.BAD_REQUEST,
                     "Invalid email format"
             );
-=======
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
-@Service
-public class AuthService {
-    private final JavaMailSender mailSender;
-    private final UserRepository userRepository;
-    private PasswordEncoder passwordEncoder;
-    private final StringRedisTemplate redisTemplate;
-
-
-
-
-    @Autowired
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JavaMailSender mailSender, StringRedisTemplate redisTemplate) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.mailSender = mailSender;
-        this.redisTemplate = redisTemplate; // Inject Redis template
-    }
-
-
-
-    public String registerUser(User user, String role) {
-        if (userRepository.findByUsername(user.getUsername()) != null) {
-            return "Username already exists";
-        }
-        if (userRepository.findByEmail(user.getEmail()) != null) {
-            return "Email already exists";
-        }
-        // check if valid email format
-        if (!user.getEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
-            return "Invalid email format";
->>>>>>> origin/Youssef_Alaa
         }
 
         // hash password
@@ -193,11 +168,6 @@ public class AuthService {
         return "Verification Email Sent";
     }
 
-<<<<<<< HEAD
-    public String sendEmailVerificationLink(String email, UUID id) {
-        //TODO: send email verification link, the link should be the url of verifyEmail controller with value of id
-        return "TODO";
-    }
 
     public String verifyEmail(UUID id) {
         User user = userRepository.findById(id).orElse(null);
@@ -206,14 +176,26 @@ public class AuthService {
                     HttpStatus.NOT_FOUND,
                     "User not found"
             );
-=======
+        }
+
+        if (user.getRole().equals("unverified_user")) {
+            user.setRoleCustomer();
+        }
+        else {
+            user.setRoleSeller();
+        }
+
+        userRepository.save(user);
+        return "Email Verified";
+    }
+
 
     //NEEDS TESTING
     public String sendEmailVerificationLink(String email, UUID id) {
         //TODONE: send email verification link, the link should be the url of verifyEmail controller with value of id`
 
         // Construct the verification link URL
-        String verifyEmailUrl = "http://localhost:8081/auth/verify-email/" + id;
+        String verifyEmailUrl = "http://localhost:8081/auth/verify-email?userid=" + id;
 
         // Compose the email using SimpleMailMessage
         SimpleMailMessage message = new SimpleMailMessage();
@@ -231,59 +213,14 @@ public class AuthService {
             return "Failed to send verification email";
         }
     }
-    public String verifyEmail(UUID id) {
-        User user = userRepository.findById(id).orElse(null);
-        if (user == null) {
-            return "User not found";
->>>>>>> origin/Youssef_Alaa
-        }
 
-        if (user.getRole().equals("unverified_user")) {
-            user.setRoleCustomer();
-        }
-        else {
-            user.setRoleSeller();
-        }
 
-        userRepository.save(user);
-        return "Email Verified";
-    }
-<<<<<<< HEAD
-=======
+
+
     //STRINGREDISTEMPLATE PROBLEM SOLVED
->>>>>>> origin/Youssef_Alaa
+
 
     public String emailResetPassword(String email) {
-        // TODO:
-        // generate otp and store in redis along with email
-        // send email with reset link (/reset-password)
-<<<<<<< HEAD
-        return "TODO";
-    }
-
-    public String resetPassword(String email, String otp, String newPassword) {
-        // TODO:
-        // check if otp is valid (compare with redis entry)
-        // check if email is valid
-        // check if password is valid
-        // hash password
-        // update password in database
-        // remove otp entry from redis
-        return "TODO";
-    }
-
-    public String deleteAccount(UUID id) {
-        User user = userRepository.findById(id).orElse(null);
-        if (user == null) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "User not found"
-            );
-        }
-        userRepository.delete(user);
-        return "User deleted";
-=======
-
         // 1. Check if the user exists in the system
         User user = userRepository.findByEmail(email);
         if (user == null) {
@@ -316,7 +253,7 @@ public class AuthService {
         return "Password reset instructions have been sent to the email.";
 
     }
-    //STRINGREDISTEMPLATE PROBLEM SOLVED
+
 
     public String resetPassword(String email, String otp, String newPassword) {
         // 1. Check if a user exists with the provided email
@@ -348,6 +285,22 @@ public class AuthService {
         // 5. Return success message
         return "Password has been successfully reset.";
 
->>>>>>> origin/Youssef_Alaa
     }
+
+    public String deleteAccount(UUID id) {
+        User user = userRepository.findById(id).orElse(null);
+        if (user == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "User not found"
+            );
+        }
+        userRepository.delete(user);
+        return "User deleted";
+    }
+
+
+    //STRINGREDISTEMPLATE PROBLEM SOLVED
+
+
 }

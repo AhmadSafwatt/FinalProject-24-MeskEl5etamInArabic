@@ -38,7 +38,7 @@ public class AuthController {
         return authService.validateToken(token) ? "Valid token" : "Invalid token";
     }
 
-    @PutMapping("/verify-email")
+    @GetMapping("/verify-email")
     public String verifyEmail(@RequestParam UUID userId) {
         return authService.verifyEmail(userId);
     }
