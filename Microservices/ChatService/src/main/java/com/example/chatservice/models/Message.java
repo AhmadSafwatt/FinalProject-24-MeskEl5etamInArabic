@@ -10,6 +10,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.cassandra.core.mapping.Indexed;
 import org.springframework.data.cassandra.core.mapping.PrimaryKey;
 import org.springframework.data.cassandra.core.mapping.Table;
 
@@ -59,6 +60,7 @@ public class Message {
     @NotNull(message = "Content cannot be null")
     @NotBlank(message = "Content cannot be blank")
     @Size(max = 500, message = "Content cannot exceed 500 characters")
+    @Indexed
     private String content;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)

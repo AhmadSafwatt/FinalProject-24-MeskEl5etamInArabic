@@ -102,4 +102,8 @@ public class MessageService {
 
         return message.getStatus() == MessageStatus.SEEN;
     }
+
+    public List<Message> getMessagesByContent(String content) {
+        return messageRepository.findByContent(content);
+    }
 }

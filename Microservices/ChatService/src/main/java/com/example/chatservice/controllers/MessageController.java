@@ -104,4 +104,10 @@ public class MessageController {
         messageSeeder.seedMessages();
         return ResponseEntity.ok("Messages seeded successfully");
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<Message>> getMessagesByContent(@RequestParam String content) {
+        List<Message> messages = messageService.getMessagesByContent(content);
+        return ResponseEntity.ok(messages);
+    }
 }
