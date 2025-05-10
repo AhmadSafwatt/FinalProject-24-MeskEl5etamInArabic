@@ -15,7 +15,7 @@ public class RouteValidator {
     // to authenticate the user for
     // because asking the user to authenticate while authenticating/registering
     // makes no sense
-    public static final List<String> apiEndpoints = List.of(
+    public static final List<String> authlessApiEndpoints = List.of(
             "auth/register",
             "auth/token",
             "auth/validate-token",
@@ -27,7 +27,7 @@ public class RouteValidator {
 
     public Predicate<ServerHttpRequest> isSecured = request -> {
         // check if the request is for a secured endpoint
-        return apiEndpoints.stream().anyMatch(uri -> request.getURI().getPath().contains(uri));
+        return !authlessApiEndpoints.stream().anyMatch(uri -> request.getURI().getPath().contains(uri));
     };
 
 
