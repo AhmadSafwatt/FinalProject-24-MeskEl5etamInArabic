@@ -2,7 +2,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/auth_db
     username: postgres
-    password: password
+    password: 1234
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
@@ -13,11 +13,18 @@ spring:
       hibernate:
         format_sql: true
         use_sql_comments: true
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG
+        web: DEBUG # Optional, but can be helpful for request mapping issues
 
 
 server:
   port: 8081
 
+
 jwt:
-  secret: your-256-bit-secret-key-here
+  secret: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
   expiration: 86400000 # 24 hours in milliseconds
