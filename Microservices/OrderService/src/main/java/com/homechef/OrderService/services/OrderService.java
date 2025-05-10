@@ -114,9 +114,10 @@ public class OrderService {
                         "Order with id " + orderId + " not found"));
         try {
             order.updateItemNote(productId, note);
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | IllegalStateException e) {
             // will be thrown by the updateItemNote method if no product with the given id
-            // found in the given order
+            // found in the given order, or if the state can't of the order
+            // does not allow note editing
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     e.getMessage());
         }

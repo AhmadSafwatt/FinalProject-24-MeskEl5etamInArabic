@@ -14,10 +14,7 @@ public class CreatedState implements OrderState {
 
     @Override
     public void setOrderState(Order order, OrderState state) {
-        if (state instanceof PreparingState
-                || state instanceof OutForDeliveryState
-                || state instanceof PreparedState
-                || state instanceof CancelledState) {
+        if (state instanceof PreparingState) {
             order.setState(state);
             return;
         }

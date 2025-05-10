@@ -181,12 +181,12 @@ class HosainTests {
 
     @Test
     void testUpdateOrderState_Created_to_Prepared_Valid() {
-        assertStateTransition(OrderStatus.CREATED, OrderStatus.PREPARED, true);
+        assertStateTransition(OrderStatus.CREATED, OrderStatus.PREPARED, false);
     }
 
     @Test
     void testUpdateOrderState_Created_to_OutForDelivery_Valid() {
-        assertStateTransition(OrderStatus.CREATED, OrderStatus.OUT_FOR_DELIVERY, true);
+        assertStateTransition(OrderStatus.CREATED, OrderStatus.OUT_FOR_DELIVERY, false);
     }
 
     @Test
@@ -359,10 +359,7 @@ class HosainTests {
         assertStateTransition(OrderStatus.CANCELLED, OrderStatus.CANCELLED, false);
     }
 
-    // ...existing code...
-
-    // -------------------------------- update order state (check state transition
-    // validity)
+    // update item note (order does not exists)
 
     // below are all possible states, we will test changing from each state to
     // every other state
