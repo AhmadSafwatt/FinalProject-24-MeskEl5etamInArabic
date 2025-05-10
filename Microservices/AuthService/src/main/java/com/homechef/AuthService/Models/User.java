@@ -1,4 +1,4 @@
-package Models;
+package com.homechef.AuthService.Models;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.GenericGenerator;

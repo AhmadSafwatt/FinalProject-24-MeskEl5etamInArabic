@@ -1,7 +1,7 @@
-package Services;
+package com.homechef.AuthService.Services;
 
-import Models.User;
-import Repositories.UserRepository;
+import com.homechef.AuthService.Models.User;
+import com.homechef.AuthService.Repositories.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -12,9 +12,6 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-
-
-import java.util.UUID;
 
 @Service
 public class AuthService {

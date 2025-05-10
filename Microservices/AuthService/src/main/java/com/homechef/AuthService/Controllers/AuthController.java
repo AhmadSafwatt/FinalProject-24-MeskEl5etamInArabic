@@ -1,6 +1,6 @@
-package Controllers;
+package com.homechef.AuthService.Controllers;
 
-import Services.AuthService;
+import com.homechef.AuthService.Services.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
