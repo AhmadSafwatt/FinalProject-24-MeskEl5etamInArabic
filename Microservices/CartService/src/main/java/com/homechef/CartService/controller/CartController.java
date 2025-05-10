@@ -6,6 +6,7 @@ import com.homechef.CartService.service.CartService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
 
 
@@ -54,7 +55,8 @@ public class CartController {
     }
 
     @PutMapping("/{customerId}/updateNotes")
-    public Cart updateCartNotes(@PathVariable String customerId, @RequestBody String notes){
+    public Cart updateCartNotes(@PathVariable String customerId, @RequestBody HashMap<String, String> payload) {
+        String notes = payload.get("notes");
         return cartService.updateNotes(customerId, notes);
     }
 
