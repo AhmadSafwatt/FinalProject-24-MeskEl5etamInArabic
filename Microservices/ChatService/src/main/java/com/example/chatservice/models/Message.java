@@ -48,7 +48,7 @@ public class Message {
 
     @PrimaryKey
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private UUID id = UUID.randomUUID();
+    private UUID id;
 
     @NotNull(message = "Sender ID cannot be null")
     private UUID senderId;
@@ -64,6 +64,7 @@ public class Message {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private LocalDateTime timestamp;
 
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @NotNull
     private MessageStatus status;
 
@@ -71,8 +72,11 @@ public class Message {
     @NotNull(message = "Message type cannot be null")
     private MessageType type;
 
+    @JsonProperty(value = "reported", access = JsonProperty.Access.READ_ONLY)
     private boolean isReported;
 
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Enumerated(EnumType.STRING)
     private ReportType reportType;
+
 }
