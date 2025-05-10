@@ -1,5 +1,7 @@
 package com.example.chatservice.controllers;
+import com.example.chatservice.commands.ReportMessageCommand;
 import com.example.chatservice.commands.UpdateMessageCommand;
+import com.example.chatservice.enums.ReportType;
 import com.example.chatservice.models.Message;
 import com.example.chatservice.seeders.MessageSeeder;
 import com.example.chatservice.services.MessageService;
@@ -103,5 +105,18 @@ public class MessageController {
     public ResponseEntity<String> seedMessages() {
         messageSeeder.seedMessages();
         return ResponseEntity.ok("Messages seeded successfully");
+    }
+
+    /**
+     * Endpoint to report a message.
+     *
+     * @param messageId Message ID
+     * @param reportType Report type
+     */
+    @PatchMapping("/report/{id}")
+    public Message reportMessage(@PathVariable UUID messageId, @RequestParam ReportType reportType) {
+        ReportMessageCommand reportCommand = new ReportMessageCommand(messageId, reportType, messageService);
+        reportCommand.execute();
+        return messageService.getMessageById(messageId);
     }
 }
