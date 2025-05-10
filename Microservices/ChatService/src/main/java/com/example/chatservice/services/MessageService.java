@@ -39,7 +39,10 @@ public class MessageService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message cannot be null");
         }
 
-        message.setId(UUID.randomUUID());
+        if (message.getId() == null) {
+            message.setId(UUID.randomUUID());
+        }
+
         messageRepository.save(message);
     }
 
