@@ -15,12 +15,14 @@ public class RouteValidator {
     // to authenticate the user for
     // because asking the user to authenticate while authenticating/registering
     // makes no sense
-    //TODO: modify names of routes as needed
     public static final List<String> apiEndpoints = List.of(
             "auth/register",
             "auth/token",
+            "auth/validate-token",
+            "auth/verify-email",
+            "auth/reset-password",
+            "auth/update-password",
             "/kubernetes"
-
     );
 
     public Predicate<ServerHttpRequest> isSecured = request -> {
