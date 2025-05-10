@@ -70,6 +70,8 @@ public class OrderController {
     }
 
     // update state (you can also set new state = CANCELLED to cancel the order)
+    // and extra procedures for cancellation will be handled by the order 
+    // service automatically
     @PutMapping("/{orderId}/newState")
     public void updateOrderState(@PathVariable UUID orderId, @RequestBody String newState) {
 
