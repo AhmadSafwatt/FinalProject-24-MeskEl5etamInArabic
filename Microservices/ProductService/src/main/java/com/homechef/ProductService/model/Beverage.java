@@ -10,9 +10,9 @@ public class Beverage extends Product {
     private boolean isHot;
 
     public  Beverage(){
-        this.id = UUID.randomUUID();
+
     }
-    public Beverage(Builder builder) {
+    private Beverage(Builder builder) {
         this.id = builder.id != null ? builder.id : UUID.randomUUID();
         this.name = builder.name;
         this.sellerId = builder.sellerId;

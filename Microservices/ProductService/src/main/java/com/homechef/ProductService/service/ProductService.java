@@ -19,6 +19,8 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 
+import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -39,13 +41,18 @@ public class ProductService {
     }
 
     public Product createProduct(String type, String name, UUID sellerId, Double price, int amountSold, String description, Double discount, Map<String, Object> request) {
-        // Validate the input parameters
-        if (type == null || name == null || sellerId == null || price == null || amountSold < 0) {
-            throw new IllegalArgumentException("Invalid input parameters");
+
+
+        if (!request.containsKey("type") || !request.containsKey("name") || !request.containsKey("sellerId") ||
+                !request.containsKey("price")|| !request.containsKey("amountSold")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Missing required fields for Product");
         }
 
-        // Create the product using the factory method
-//        Product product = ProductFactory.createProduct(type, name, sellerId, price, amountSold);
+
+
+
+
+
         ProductFactory factory;
 
         switch (type.toLowerCase()) {
@@ -65,21 +72,24 @@ public class ProductService {
 
     public Product getProductById(String id) {
         UUID productUUID = UUID.fromString(id);
+
+        if (!productRepository.existsById(productUUID)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
+        }
         return productRepository.findById(productUUID).orElse(null);
     }
 
-//    public List<Product> getMostSoldProducts() {
-//        int maxAmountSold = productRepository.findAll()
-//                .stream()
-//                .mapToInt(Product::getAmountSold)
-//                .max()
-//                .orElse(0);
-//
-//        return productRepository.findAll()
-//                .stream()
-//                .filter(product -> product.getAmountSold() == maxAmountSold)
-//                .collect(Collectors.toList());
-//    }
+    public List<Product> getProductsById(List<String> ids) {
+        List<Product> products = new ArrayList<>();
+        for (String id : ids){
+            UUID productUUID = UUID.fromString(id);
+            Product product = productRepository.findById(productUUID).orElse(null);
+            products.add(product);
+        }
+        return products;
+    }
+
+
 
     public List<Product> getMostSoldProducts() {
         Product topProduct = productRepository.findFirstByOrderByAmountSoldDesc();
@@ -95,25 +105,17 @@ public class ProductService {
 
     public void deleteProductById(String id) {
         UUID productUUID = UUID.fromString(id);
+
+        if(!productRepository.existsById(productUUID)){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
+        }
+
         productRepository.deleteById(productUUID);
     }
 
 
 
-//    public Product updateProduct(UUID productId, Map<String, Object> updates) {
-//        Product product = productRepository.findById(productId)
-//                .orElseThrow(() -> new IllegalArgumentException("Product not found"));
-//
-//        if (updates.containsKey("name")) {
-//            product. = (String) updates.get("name");
-//        }
-//        if (updates.containsKey("price")) {
-//            product.price = (Double) updates.get("price");
-//        }
-//        // Update other fields as needed...
-//
-//        return productRepository.save(product);
-//    }
+
     public Optional<Product> updateProduct(String id, Map<String, Object> updates) {
         MongoDatabase mongoDatabase = this.mongoClient.getDatabase("elthon2yelamr7");
         MongoCollection<Document> products = mongoDatabase.getCollection("products");
@@ -203,10 +205,19 @@ public class ProductService {
 
 
     public Product incrementAmountSold(String id, int incrementBy) {
-        if(incrementBy < 0) {
-            throw new IllegalArgumentException("Increment value must be non-negative");
-        }
+
         UUID productUUID = UUID.fromString(id);
+
+
+        if(!productRepository.existsById(productUUID))
+        {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
+        }
+
+        if(incrementBy < 0 ) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Increment value must be non-negative");
+        }
+
         Query query = new Query(Criteria.where("_id").is(id));
         Update update = new Update().inc("amountSold", incrementBy);
         mongoTemplate.updateFirst(query, update, Product.class);
@@ -216,10 +227,24 @@ public class ProductService {
 
     public Product decrementAmountSold(String id, int decrementBy) {
 
-        if(decrementBy < 0) {
-            throw new IllegalArgumentException("decrement value must be non-negative");
-        }
+
+
         UUID productUUID = UUID.fromString(id);
+
+
+        if(!productRepository.existsById(productUUID))
+        {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
+        }
+        int productAmountSold = productRepository.findById(productUUID).get().getAmountSold();
+        if( productAmountSold< decrementBy) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"decrement value must be less than amount sold");
+        }
+
+        if(decrementBy < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"decrement value must be non-negative");
+        }
+
         Query query = new Query(Criteria.where("_id").is(id));
         Update update = new Update().inc("amountSold", -decrementBy);
         mongoTemplate.updateFirst(query, update, Product.class);
