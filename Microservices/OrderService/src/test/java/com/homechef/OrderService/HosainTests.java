@@ -1,6 +1,7 @@
 package com.homechef.OrderService;
 
 import com.homechef.OrderService.models.Order;
+import com.homechef.OrderService.models.OrderItem;
 import com.homechef.OrderService.models.OrderStatus;
 import com.homechef.OrderService.repositories.OrderRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
+
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -35,18 +37,25 @@ class HosainTests {
     private Order testOrder;
 
     private String baseUrl;
+    private UUID fixedProductId;
 
     @BeforeEach
     void setUp() {
         baseUrl = "http://localhost:" + port + "/orders/";
+        fixedProductId = UUID.randomUUID();
 
-        // Clear the database before each test
         orderRepository.deleteAll();
 
-        // Create a sample order
         testOrder = new Order();
         testOrder.setBuyerId(UUID.randomUUID());
         testOrder.setStatus(OrderStatus.CREATED);
+
+        OrderItem item = new OrderItem();
+        item.setProductId(fixedProductId);
+        item.setQuantity(1);
+        item.setNotes("Initial Note");
+        testOrder.addItem(item);
+
         testOrder = orderRepository.save(testOrder);
     }
 
@@ -88,32 +97,6 @@ class HosainTests {
                 "Expected HTTP status 404 NOT_FOUND, but received " + responseEntity.getStatusCode());
     }
 
-    // ------------------------------------- cancel order
-
-    @Test
-    void testOrderCancellation_OrderExists() {
-        String url = baseUrl + testOrder.getId() + "/newState";
-        restTemplate.put(url, OrderStatus.CANCELLED.name());
-        Order updatedOrder = orderRepository.findById(testOrder.getId()).orElse(null);
-        assertNotNull(updatedOrder);
-        assertEquals(OrderStatus.CANCELLED, updatedOrder.getStatus());
-    }
-
-    @Test
-    void testOrderCancellation_OrderDoesNotExist() {
-        UUID nonExistentOrderId = UUID.randomUUID();
-        String url = baseUrl + nonExistentOrderId + "/newState";
-        HttpEntity<String> requestEntity = new HttpEntity<>(OrderStatus.CANCELLED.name());
-        ResponseEntity<String> responseEntity = restTemplate.exchange(
-                url,
-                HttpMethod.PUT,
-                requestEntity,
-                String.class);
-        assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode(),
-                "Expected HTTP status 404 NOT_FOUND when attempting to cancel a non-existent order, but received "
-                        + responseEntity.getStatusCode());
-    }
-
     // ------------------------ update order state (order exists does not exist)
     @Test
     void testUpdateOrderState_OrderDoesNotExist() {
@@ -145,7 +128,8 @@ class HosainTests {
                         + responseEntity.getStatusCode());
     }
 
-    // ----------------- update order state (check state transition validity)
+    // ----------------- update order state & cancel order (check state transition
+    // validity)
     private void assertStateTransition(OrderStatus initialStatus, OrderStatus targetStatus,
             boolean expectValidTransition) {
         testOrder.setStatus(initialStatus);
@@ -360,65 +344,112 @@ class HosainTests {
     }
 
     // update item note (order does not exists)
+    @Test
+    void testUpdateItemNote_OrderDoesNotExist() {
+        UUID nonExistentOrderId = UUID.randomUUID();
+        String url = baseUrl + nonExistentOrderId + "/items/" + fixedProductId + "/editNote";
+        HttpEntity<String> requestEntity = new HttpEntity<>("New Note");
+        ResponseEntity<String> responseEntity = restTemplate.exchange(
+                url,
+                HttpMethod.PUT,
+                requestEntity,
+                String.class);
+        assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode(),
+                "Expected HTTP status 404 NOT_FOUND when attempting to update item note for a non-existent order, but received "
+                        + responseEntity.getStatusCode());
+    }
 
-    // below are all possible states, we will test changing from each state to
-    // every other state
-    //
+    // update item note (order exists, item does not exist)
+    @Test
+    void testUpdateItemNote_ItemDoesNotExist() {
+        String url = baseUrl + testOrder.getId() + "/items/" + UUID.randomUUID() + "/editNote";
+        HttpEntity<String> requestEntity = new HttpEntity<>("New Note");
+        ResponseEntity<String> responseEntity = restTemplate.exchange(
+                url,
+                HttpMethod.PUT,
+                requestEntity,
+                String.class);
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode(),
+                "Expected HTTP status 400 BAD_REQUEST when attempting to update item note for a non-existent item, but received "
+                        + responseEntity.getStatusCode());
+    }
 
-    // public enum OrderStatus {
-    // CREATED,
-    // CANCELLED,
-    // DELIVERED,
-    // OUT_FOR_DELIVERY,
-    // PREPARING,
-    // PREPARED
-    ;
-    // test changing from created to can
+    // ---------------------- update item note (check state while updating)
+    private void assertItemNoteUpdateAttempt(OrderStatus orderStatus, String newNote, boolean expectSuccess) {
+        Order orderForTestSetup = orderRepository.findByIdWithItems(this.testOrder.getId())
+                .orElseThrow(() -> new AssertionError(
+                        "Initial testOrder not found in DB (with items) before setting status. ID: "
+                                + this.testOrder.getId()));
 
-    // @Test
-    // void testUpdateOrderState_InvalidState() {
-    // // Call the API with an invalid state
-    // String url = baseUrl + testOrder.getId() + "/newState";
+        String oldNote = orderForTestSetup.getItems().stream()
+                .filter(i -> i.getProductId().equals(fixedProductId))
+                .findFirst()
+                .map(OrderItem::getNotes)
+                .orElseThrow(
+                        () -> new AssertionError("Test item for oldNote not found. Product ID: " + fixedProductId));
 
-    // // Verify the response throws a 400 error
-    // ResponseEntity<String> responseEntity = restTemplate.postForEntity(url,
-    // "INVALID_STATE", String.class);
-    // assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode(),
-    // "Expected HTTP status 400 BAD_REQUEST, but received " +
-    // responseEntity.getStatusCode());
-    // }
+        assertNotEquals(oldNote, newNote,
+                "in testing, Old note should not be the same as new note, so please enter a different input note for testing");
 
-    // @Test
-    // void testUpdateItemNote_OrderExists() {
-    // // Add an item to the order
-    // UUID productId = UUID.randomUUID();
-    // testOrder.setItems(List.of(new OrderItem(testOrder, productId,
-    // UUID.randomUUID(), 1, "Old Note")));
-    // orderRepository.save(testOrder);
+        orderForTestSetup.setStatus(orderStatus);
+        orderRepository.save(orderForTestSetup);
 
-    // // Call the API to update the item note
-    // String url = baseUrl + testOrder.getId() + "/items/" + productId +
-    // "/editNote";
-    // restTemplate.put(url, "New Note");
+        String url = baseUrl + orderForTestSetup.getId() + "/items/" + fixedProductId + "/editNote";
+        HttpEntity<String> requestEntity = new HttpEntity<>(newNote);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(
+                url,
+                HttpMethod.PUT,
+                requestEntity,
+                String.class);
 
-    // // Verify the item note is updated
-    // Order updatedOrder =
-    // orderRepository.findById(testOrder.getId()).orElse(null);
-    // assertNotNull(updatedOrder);
-    // assertEquals("New Note", updatedOrder.getItems().get(0).getNotes());
-    // }
+        HttpStatus expected_HttpStatus = expectSuccess ? HttpStatus.OK : HttpStatus.BAD_REQUEST;
+        assertEquals(expected_HttpStatus, responseEntity.getStatusCode(),
+                "Expected HTTP status " + expected_HttpStatus + " when updating note for order in " + orderStatus
+                        + " state, but received " + responseEntity.getStatusCode());
 
-    // @Test
-    // void testUpdateItemNote_OrderDoesNotExist() {
-    // // Call the API with a non-existent order ID
-    // String url = baseUrl + UUID.randomUUID() + "/items/" + UUID.randomUUID()
-    // + "/editNote";
+        Order updatedOrderFromDb = orderRepository.findByIdWithItems(orderForTestSetup.getId())
+                .orElseThrow(() -> new AssertionError(
+                        "Order not found in DB (with items) after API call. ID: " + orderForTestSetup.getId()));
 
-    // // Verify the response throws a 404 error
-    // HttpClientErrorException exception =
-    // assertThrows(HttpClientErrorException.class, () -> {
-    // restTemplate.put(url, "New Note");
-    // });
-    // assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
-    // }
+        OrderItem updatedItem = updatedOrderFromDb.getItems().stream()
+                .filter(item -> item.getProductId().equals(fixedProductId))
+                .findFirst()
+                .orElseThrow(
+                        () -> new AssertionError("Test item not found after update. Product ID: " + fixedProductId));
+
+        String expectedNoteInDb = expectSuccess ? newNote : oldNote;
+        assertEquals(expectedNoteInDb, updatedItem.getNotes(),
+                "Item note in DB should be '" + expectedNoteInDb + "' for order in " + orderStatus + " state. Actual: '"
+                        + updatedItem.getNotes() + "'");
+    }
+
+    @Test
+    void testUpdateItemNote_When_OrderIs_Created_ShouldSucceed() {
+        assertItemNoteUpdateAttempt(OrderStatus.CREATED, "Note updated in CREATED state", true);
+    }
+
+    @Test
+    void testUpdateItemNote_When_OrderIs_Preparing_ShouldFail() {
+        assertItemNoteUpdateAttempt(OrderStatus.PREPARING, "Note updated in PREPARING state", false);
+    }
+
+    @Test
+    void testUpdateItemNote_When_OrderIs_Prepared_ShouldFail() {
+        assertItemNoteUpdateAttempt(OrderStatus.PREPARED, "Note updated in PREPARED state", false);
+    }
+
+    @Test
+    void testUpdateItemNote_When_OrderIs_OutForDelivery_ShouldFail() {
+        assertItemNoteUpdateAttempt(OrderStatus.OUT_FOR_DELIVERY, "Note updated in OUT_FOR_DELIVERY state", false);
+    }
+
+    @Test
+    void testUpdateItemNote_When_OrderIs_Delivered_ShouldFail() {
+        assertItemNoteUpdateAttempt(OrderStatus.DELIVERED, "Note updated in DELIVERED state", false);
+    }
+
+    @Test
+    void testUpdateItemNote_When_OrderIs_Cancelled_ShouldFail() {
+        assertItemNoteUpdateAttempt(OrderStatus.CANCELLED, "Note updated in CANCELLED state", false);
+    }
 }

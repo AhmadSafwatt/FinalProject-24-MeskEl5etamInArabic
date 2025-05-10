@@ -99,7 +99,8 @@ public class OrderService {
         if (newState instanceof CancelledState) {
             order.cancelOrder();
             orderRepository.save(order);
-            decreaseProductSales(order);
+            // TODO: uncomment this line when the api is ready
+            // decreaseProductSales(order);
             sendOrderCancellationNotification(order);
         } else {
             order.setOrderState(newState);

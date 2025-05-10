@@ -85,4 +85,20 @@ public class Order {
     public void updateItemNote(UUID productId, String note) {
         this.state.updateItemNote(this, productId, note);
     }
+
+    // setter override
+    public void setItems(List<OrderItem> items) {
+        this.items = items;
+        for (OrderItem item : items) {
+            item.setOrder(this);
+        }
+    }
+
+    public void addItem(OrderItem item) {
+        if (items == null) {
+            items = new java.util.ArrayList<>();
+        }
+        items.add(item);
+        item.setOrder(this);
+    }
 }
