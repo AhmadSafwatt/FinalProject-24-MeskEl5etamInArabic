@@ -16,12 +16,12 @@ public class RouteValidator {
     // because asking the user to authenticate while authenticating/registering
     // makes no sense
     public static final List<String> apiEndpoints = List.of(
-            "auth/register",
-            "auth/token",
-            "auth/validate-token",
-            "auth/verify-email",
-            "auth/reset-password",
-            "auth/update-password",
+            "/auth/register",
+            "/auth/token",
+            "/auth/validate-token",
+            "/auth/verify-email",
+            "/auth/reset-password",
+            "/auth/update-password",
             "/kubernetes"
     );
 
