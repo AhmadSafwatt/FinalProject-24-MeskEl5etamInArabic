@@ -348,6 +348,8 @@ class ChatServiceApplicationTests {
             SendMessageCommand messageSender = new SendMessageCommand(message, messageService);
             messageSender.execute();
 
+            int messageCountBefore = messageService.getMessages().size();
+
             Message textMessage = createTestMessage(MessageType.TEXT);
             textMessage.setContent("Updated content");
 
@@ -359,10 +361,14 @@ class ChatServiceApplicationTests {
                     .getResponse()
                     .getContentAsString();
 
-            Message updatedMessage = objectMapper.readValue(responseContent, Message.class);
-            assertEquals(message.getType(), updatedMessage.getType());
-            assertEquals("Updated content", updatedMessage.getContent());
-            assertNotEquals(message.getContent(), updatedMessage.getContent());
+            JsonNode responseJson = objectMapper.readTree(responseContent);
+            String id = responseJson.path("id").asText();
+            String content = responseJson.path("content").asText();
+
+            assertEquals(id, message.getId().toString());
+            assertEquals(content, textMessage.getContent());
+            assertEquals(messageCountBefore, messageService.getMessages().size());
+
         }
 
         @Test
