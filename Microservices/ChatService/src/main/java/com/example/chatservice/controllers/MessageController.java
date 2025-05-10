@@ -114,7 +114,7 @@ public class MessageController {
      * @param reportType Report type
      */
     @PatchMapping("/report/{id}")
-    public Message reportMessage(@PathVariable UUID messageId, @RequestParam ReportType reportType) {
+    public Message reportMessage(@PathVariable("id") UUID messageId, @RequestParam ReportType reportType) {
         ReportMessageCommand reportCommand = new ReportMessageCommand(messageId, reportType, messageService);
         reportCommand.execute();
         return messageService.getMessageById(messageId);

@@ -22,9 +22,7 @@ public class ReportMessageCommand implements Command {
     public void execute() {
         Message message = messageService.getMessageById(messageId);
         if (message != null) {
-            message.setReported(true);
-            message.setReportType(reportType);
-            messageService.saveMessage(message);
+            messageService.reportMessage(messageId, reportType);
         } else {
             throw new IllegalArgumentException("Message not found");
         }

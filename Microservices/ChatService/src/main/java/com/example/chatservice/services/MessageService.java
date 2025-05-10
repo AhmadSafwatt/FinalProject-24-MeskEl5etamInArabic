@@ -1,5 +1,6 @@
 package com.example.chatservice.services;
 
+import com.example.chatservice.enums.ReportType;
 import com.example.chatservice.models.Message;
 import com.example.chatservice.repositories.MessageRepository;
 import org.springframework.http.HttpStatus;
@@ -105,4 +106,14 @@ public class MessageService {
 
         return message.getStatus() == MessageStatus.SEEN;
     }
+
+    public Message reportMessage(UUID messageId, ReportType reportType) {
+        Message message = getMessageById(messageId);
+
+        message.setReported(true);
+        message.setReportType(reportType);
+
+        return messageRepository.save(message);
+    }
+
 }

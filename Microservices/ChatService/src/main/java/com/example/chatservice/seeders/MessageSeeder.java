@@ -51,6 +51,8 @@ public class MessageSeeder {
                 MessageType.values()[(int) (Math.random() * MessageType.values().length)]
         );
 
+        message.setId(sender);
+
         // Rnadomly set the message as reported or not
         if (Math.random() < 0.5) {
             message.setReported(true);
