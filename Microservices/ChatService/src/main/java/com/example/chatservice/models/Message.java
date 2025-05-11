@@ -28,6 +28,8 @@ import com.example.chatservice.enums.MessageType;
 @NoArgsConstructor
 public class Message {
 
+    public static final int MAX_CONTENT_LENGTH = 500;
+
     public Message(MessageType type) {
         this.type = type;
     }
@@ -64,7 +66,7 @@ public class Message {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private LocalDateTime timestamp;
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+
     @NotNull
     private MessageStatus status;
 
@@ -72,10 +74,9 @@ public class Message {
     @NotNull(message = "Message type cannot be null")
     private MessageType type;
 
-    @JsonProperty(value = "reported", access = JsonProperty.Access.READ_ONLY)
+
     private boolean isReported;
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Enumerated(EnumType.STRING)
     private ReportType reportType;
 
