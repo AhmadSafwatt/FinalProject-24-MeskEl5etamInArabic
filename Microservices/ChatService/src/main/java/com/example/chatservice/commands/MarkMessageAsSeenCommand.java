@@ -4,20 +4,20 @@ import com.example.chatservice.enums.MessageStatus;
 import com.example.chatservice.models.Message;
 import com.example.chatservice.services.MessageService;
 
-public class MarkMessageAsSeenCommand implements Command {
-    private final Message message;
+import java.util.UUID;
+
+public class MarkMessageAsSeenCommand implements Command<Void> {
+    private final UUID messageId;
     private final MessageService messageService;
 
-    public MarkMessageAsSeenCommand(Message message, MessageService messageService) {
-        this.message = message;
+    public MarkMessageAsSeenCommand(UUID messageId, MessageService messageService) {
+        this.messageId = messageId;
         this.messageService = messageService;
     }
 
     @Override
-    public void execute() {
-        if (message != null) {
-            message.setStatus(MessageStatus.SEEN);
-            messageService.saveMessage(message);
-        }
+    public Void execute() {
+        messageService.markMessageAsSeen(messageId);
+        return null;
     }
 }
