@@ -321,12 +321,11 @@ class ChatServiceApplicationTests {
                     .getResponse()
                     .getContentAsString();
 
-            JsonNode responseJson = objectMapper.readTree(responseContent);
-            String id = responseJson.path("id").asText();
-            String content = responseJson.path("content").asText();
+            Message responseMessage = objectMapper.readValue(responseContent, Message.class);
 
-            assertEquals(id, message.getId().toString());
-            assertEquals(content, textMessage.getContent());
+            assertEquals(message.getId(), responseMessage.getId());
+            assertEquals(textMessageDTO.getType(), responseMessage.getType());
+            assertEquals(textMessageDTO.getContent(), responseMessage.getContent());
             assertEquals(messageCountBefore, messageService.getMessages().size());
 
         }
