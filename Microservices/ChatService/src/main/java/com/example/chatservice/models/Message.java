@@ -49,7 +49,6 @@ public class Message {
     }
 
     @PrimaryKey
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private UUID id;
 
     @NotNull(message = "Sender ID cannot be null")
@@ -63,7 +62,7 @@ public class Message {
     @Size(max = 500, message = "Content cannot exceed 500 characters")
     private String content;
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+
     private LocalDateTime timestamp;
 
 
@@ -76,6 +75,7 @@ public class Message {
 
 
     private boolean isReported;
+
 
     @Enumerated(EnumType.STRING)
     private ReportType reportType;
