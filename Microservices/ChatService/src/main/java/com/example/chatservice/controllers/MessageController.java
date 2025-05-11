@@ -40,7 +40,9 @@ public class MessageController {
     @GetMapping
     public ResponseEntity<List<Message>> getMessages() {
         log.info("Getting all messages from /messages endpoint");
-        return ResponseEntity.ok(messageService.getMessages());
+        List<Message> messages = messageService.getMessages();
+        log.info("Retrieved {} messages from /messages endpoint", messages.size());
+        return ResponseEntity.ok(messages);
     }
 
     /**
@@ -52,7 +54,9 @@ public class MessageController {
     @GetMapping("/{id}")
     public ResponseEntity<Message> getMessageById(@PathVariable UUID id) {
         log.info("Getting message with ID {} from /messages/{} endpoint", id, id);
-        return ResponseEntity.ok(messageService.getMessageById(id));
+        Message message = messageService.getMessageById(id);
+        log.info("Retrieved message with ID {} from /messages/{} endpoint", id, id);
+        return ResponseEntity.ok(message);
     }
 
     /**
@@ -63,10 +67,10 @@ public class MessageController {
      */
     @PostMapping
     public ResponseEntity<Message> createMessage(@Valid @RequestBody CreateMessageDTO createMessageDTO) {
-        log.info("Creating a new message at /messages endpoint");
+        log.info("Creating message at /messages endpoint");
         SendMessageCommand sendMessageCommand = new SendMessageCommand(createMessageDTO, messageService);
         Message createdMessage = sendMessageCommand.execute();
-        log.info("Created a new message at /messages endpoint {}", createdMessage);
+        log.info("Created message at /messages endpoint {}", createdMessage);
         return ResponseEntity.created(URI.create("/messages/" + createdMessage.getId())).body(createdMessage);
     }
 
@@ -80,6 +84,7 @@ public class MessageController {
         log.info("Deleting message with ID {} at /messages/{} endpoint", id, id);
         DeleteMessageCommand deleteMessageCommand = new DeleteMessageCommand(id, messageService);
         deleteMessageCommand.execute();
+        log.info("Deleted message with ID {} at /messages/{} endpoint", id, id);
         return ResponseEntity.noContent().build();
     }
 
@@ -92,7 +97,7 @@ public class MessageController {
      */
     @PatchMapping("/{id}")
     public ResponseEntity<Message> updateMessage(@PathVariable UUID id, @Valid @RequestBody UpdateMessageDTO updateMessageDTO) {
-        log.info("Updating message with ID {} at /messages/{} endpoint", id, id);
+        log.info("Updating message with ID {} at /messages/{} endpoint {}", id, id, updateMessageDTO);
         UpdateMessageCommand updateMessageCommand = new UpdateMessageCommand(id, updateMessageDTO, messageService);
         Message updatedMessage = updateMessageCommand.execute();
         log.info("Updated message with ID {} at /messages/{} endpoint {}", id, id, updatedMessage);
@@ -107,9 +112,10 @@ public class MessageController {
      */
     @PatchMapping("/{id}/seen")
     public ResponseEntity<Message> markMessageAsSeen(@PathVariable UUID id) {
-        Message message = messageService.markMessageAsSeen(id);
+        log.info("Marking message with ID {} as seen at /messages/{}/seen endpoint", id, id);
+        Message updatedMessage = messageService.markMessageAsSeen(id);
         log.info("Marked message with ID {} as seen at /messages/{}/seen endpoint", id, id);
-        return ResponseEntity.ok(message);
+        return ResponseEntity.ok(updatedMessage);
     }
 
     /**
@@ -120,12 +126,15 @@ public class MessageController {
      */
     @GetMapping("/{id}/seen")
     public ResponseEntity<Boolean> getMessageSeenStatus(@PathVariable UUID id) {
-        log.info("Getting seen status for message with ID {} at /messages/{}/seen endpoint", id, id);
-        return ResponseEntity.ok(messageService.isMessageSeen(id));
+        log.info("Getting message seen status for ID {} at /messages/{}/seen endpoint", id, id);
+        boolean seenStatus = messageService.isMessageSeen(id);
+        log.info("Retrieved message seen status for ID {} at /messages/{}/seen endpoint", id, id);
+        return ResponseEntity.ok(seenStatus);
     }
 
     @GetMapping("/seed")
     public ResponseEntity<String> seedMessages() {
+        log.info("Seeding messages at /messages/seed endpoint");
         messageSeeder.seedMessages();
         log.info("Seeded messages at /messages/seed endpoint");
         return ResponseEntity.ok("Messages seeded successfully");
