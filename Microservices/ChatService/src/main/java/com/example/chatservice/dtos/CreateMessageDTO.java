@@ -5,23 +5,23 @@ import com.example.chatservice.models.Message;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.UUID;
 
-@Setter
 @Getter
+@Setter
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class CreateMessageDTO {
 
     private static final int MAX_CONTENT_LENGTH = Message.MAX_CONTENT_LENGTH;
 
-    @NotNull(message = "senderId cannot be null")
+    @NotNull
     private UUID senderId;
 
-    @NotNull(message = "receiverId cannot be null")
+    @NotNull
     private UUID receiverId;
 
     @NotNull
@@ -31,11 +31,4 @@ public class CreateMessageDTO {
 
     @NotNull
     private MessageType type;
-
-    public CreateMessageDTO(UUID senderId, UUID receiverId, String content, MessageType type) {
-        this.content = content;
-        this.senderId = senderId;
-        this.receiverId = receiverId;
-        this.type = type;
-    }
 }
