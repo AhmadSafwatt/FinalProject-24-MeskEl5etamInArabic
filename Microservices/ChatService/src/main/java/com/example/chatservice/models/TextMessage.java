@@ -12,7 +12,11 @@ public class TextMessage extends Message {
         super(sender, receiver, content, MessageType.TEXT);
     }
 
-    public TextMessage() {
-        super(MessageType.TEXT);
-    }
+//    public TextMessage() {
+//        super(MessageType.TEXT);
+//    }
+//    @Override
+//    public String message(){
+//        return "Text Message";
+//    }
 }
