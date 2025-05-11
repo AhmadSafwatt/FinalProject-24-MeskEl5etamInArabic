@@ -1,9 +1,10 @@
 package com.example.chatservice.commands;
 
+import com.example.chatservice.models.Message;
 import com.example.chatservice.services.MessageService;
 import java.util.UUID;
 
-public class DeleteMessageCommand implements Command {
+public class DeleteMessageCommand implements Command<Void> {
     private final UUID messageId;
     private final MessageService messageService;
 
@@ -13,7 +14,8 @@ public class DeleteMessageCommand implements Command {
     }
 
     @Override
-    public void execute() {
+    public Void execute() {
         messageService.deleteMessage(messageId);
+        return null;
     }
 }

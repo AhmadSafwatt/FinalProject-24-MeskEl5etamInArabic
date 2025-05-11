@@ -1,5 +1,5 @@
 package com.example.chatservice.commands;
 
-public interface Command {
-    void execute();
+public interface Command<T> {
+    T execute();
 }
