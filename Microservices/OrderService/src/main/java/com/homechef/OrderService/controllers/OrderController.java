@@ -3,6 +3,7 @@ package com.homechef.OrderService.controllers;
 import com.homechef.OrderService.models.Order;
 import com.homechef.OrderService.models.OrderStatus;
 import com.homechef.OrderService.services.OrderService;
+import com.homechef.OrderService.services.OrdersSeeder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -18,10 +19,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequestMapping("/orders")
 public class OrderController {
     private final OrderService orderService;
+    private final OrdersSeeder ordersSeeder;
 
     @Autowired
-    public OrderController(OrderService orderService) {
+    public OrderController(OrderService orderService, OrdersSeeder ordersSeeder) {
         this.orderService = orderService;
+        this.ordersSeeder = ordersSeeder;
+    }
+
+    @GetMapping("/seed")
+    public String seedOrders() {
+        ordersSeeder.seed();
+        return "Orders seeded successfully";
     }
 
     @GetMapping
