@@ -1,5 +1,7 @@
 package com.example.chatservice.controllers;
 import com.example.chatservice.commands.UpdateMessageCommand;
+import com.example.chatservice.dtos.CreateMessageDTO;
+import com.example.chatservice.dtos.UpdateMessageDTO;
 import com.example.chatservice.models.Message;
 import com.example.chatservice.seeders.MessageSeeder;
 import com.example.chatservice.services.MessageService;
@@ -52,14 +54,14 @@ public class MessageController {
     /**
      * Create a new message.
      *
-     * @param message Message object
+     * @param createMessageDTO CreateMessageDTO object
      * @return Created message object
      */
     @PostMapping
-    public ResponseEntity<Message> createMessage(@Valid @RequestBody Message message) {
-        SendMessageCommand sendMessageCommand = new SendMessageCommand(message, messageService);
-        sendMessageCommand.execute();
-        return ResponseEntity.created(URI.create("/messages/" + message.getId())).body(message);
+    public ResponseEntity<Message> createMessage(@Valid @RequestBody CreateMessageDTO createMessageDTO) {
+        SendMessageCommand sendMessageCommand = new SendMessageCommand(createMessageDTO, messageService);
+        Message createdMessage = sendMessageCommand.execute();
+        return ResponseEntity.created(URI.create("/messages/" + createdMessage.getId())).body(createdMessage);
     }
 
     /**
@@ -78,14 +80,26 @@ public class MessageController {
      * Update a message.
      *
      * @param id      Message ID
-     * @param partialMessage Updated message object
+     * @param updateMessageDTO UpdateMessageDTO object
+     * @return Updated message object
      */
     @PatchMapping("/{id}")
-    public ResponseEntity<Message> updateMessage(@PathVariable UUID id, @RequestBody Message partialMessage) {
-        UpdateMessageCommand updateMessageCommand = new UpdateMessageCommand(id, partialMessage, messageService);
-        updateMessageCommand.execute();
-        Message updatedMessage = messageService.getMessageById(id);
+    public ResponseEntity<Message> updateMessage(@PathVariable UUID id, @Valid @RequestBody UpdateMessageDTO updateMessageDTO) {
+        UpdateMessageCommand updateMessageCommand = new UpdateMessageCommand(id, updateMessageDTO, messageService);
+        Message updatedMessage = updateMessageCommand.execute();
         return ResponseEntity.ok(updatedMessage);
+    }
+
+    /**
+     * Mark a message as seen.
+     *
+     * @param id Message ID
+     * @return Updated message object
+     */
+    @PatchMapping("/{id}/seen")
+    public ResponseEntity<Message> markMessageAsSeen(@PathVariable UUID id) {
+        Message message = messageService.markMessageAsSeen(id);
+        return ResponseEntity.ok(message);
     }
 
     /**
