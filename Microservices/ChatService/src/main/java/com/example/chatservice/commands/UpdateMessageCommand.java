@@ -1,24 +1,25 @@
 package com.example.chatservice.commands;
 
+import com.example.chatservice.dtos.UpdateMessageDTO;
 import com.example.chatservice.models.Message;
 import com.example.chatservice.services.MessageService;
 
 import java.util.UUID;
 
-public class UpdateMessageCommand implements Command {
+public class UpdateMessageCommand implements Command<Message> {
 
     private final UUID messageId;
-    private final Message partialMessage;
+    private final UpdateMessageDTO updateMessageDTO;
     private final MessageService messageService;
 
-    public UpdateMessageCommand(UUID messageId, Message partialMessage, MessageService messageService) {
+    public UpdateMessageCommand(UUID messageId, UpdateMessageDTO updateMessageDTO, MessageService messageService) {
         this.messageId = messageId;
-        this.partialMessage = partialMessage;
+        this.updateMessageDTO = updateMessageDTO;
         this.messageService = messageService;
     }
 
     @Override
-    public void execute() {
-        messageService.updateMessage(messageId, partialMessage);
+    public Message execute() {
+        return messageService.updateMessage(messageId, updateMessageDTO);
     }
 }

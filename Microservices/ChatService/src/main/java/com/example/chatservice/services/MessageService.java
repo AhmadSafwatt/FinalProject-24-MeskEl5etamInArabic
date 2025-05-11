@@ -2,13 +2,14 @@ package com.example.chatservice.services;
 
 import com.example.chatservice.enums.MessageType;
 import com.example.chatservice.enums.ReportType;
+import com.example.chatservice.dtos.CreateMessageDTO;
+import com.example.chatservice.dtos.UpdateMessageDTO;
 import com.example.chatservice.factories.MessageFactory;
 import com.example.chatservice.models.Message;
 import com.example.chatservice.repositories.MessageRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -37,14 +38,25 @@ public class MessageService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found"));
     }
 
-    public void saveMessage(Message message) {
+    public Message saveMessage(CreateMessageDTO createMessageDTO) {
 
-        if (message == null) {
+        if (createMessageDTO == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message cannot be null");
         }
 
-        message.setId(UUID.randomUUID());
-        messageRepository.save(message);
+        Message message = MessageFactory.createMessage(
+                createMessageDTO.getSenderId(),
+                createMessageDTO.getReceiverId(),
+                createMessageDTO.getContent(),
+                createMessageDTO.getType()
+        );
+
+        if (message.getId() == null) {
+            message.setId(UUID.randomUUID());
+        }
+
+        return messageRepository.save(message);
+
     }
 
     public void deleteMessage(UUID id) {
@@ -57,47 +69,53 @@ public class MessageService {
         messageRepository.deleteById(id);
     }
 
-    public void updateMessage(UUID id, Message partialMessage) {
+    public Message updateMessage(UUID id, UpdateMessageDTO partialMessage) {
         Message existingMessage = getMessageById(id);
-
-        if (existingMessage == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found");
-        }
 
         boolean isUpdated = false;
 
         if (partialMessage.getContent() != null) {
             String newContent = partialMessage.getContent().trim();
-            if (!newContent.isEmpty() && !newContent.equals(existingMessage.getContent())) {
+            if (!newContent.isEmpty() && newContent.length() <= Message.MAX_CONTENT_LENGTH
+                    && !newContent.equals(existingMessage.getContent())) {
                 existingMessage.setContent(newContent);
                 isUpdated = true;
-            } else if (newContent.isEmpty()) {
-                throw new IllegalArgumentException("Content must be a non-empty string");
             }
         }
 
-        if (partialMessage.getStatus() != null) {
-            if (!partialMessage.getStatus().equals(existingMessage.getStatus())) {
-                existingMessage.setStatus(partialMessage.getStatus());
-                isUpdated = true;
-            }
+        if (partialMessage.getStatus() != null && !partialMessage.getStatus().equals(existingMessage.getStatus())) {
+            existingMessage.setStatus(partialMessage.getStatus());
+            isUpdated = true;
         }
 
         if (partialMessage.getType() != null) {
-            if (!partialMessage.getType().toString().isBlank() &&
-                    !partialMessage.getType().equals(existingMessage.getType())) {
+            String newType = partialMessage.getType().toString();
+            if (!newType.isBlank() && !partialMessage.getType().equals(existingMessage.getType())) {
                 existingMessage.setType(partialMessage.getType());
                 isUpdated = true;
-            } else if (partialMessage.getType().toString().isBlank()) {
-                throw new IllegalArgumentException("Type must be a non-empty string");
             }
         }
 
         if (!isUpdated) {
-            throw new ResponseStatusException(HttpStatus.NO_CONTENT, "No fields were updated");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No valid fields to update");
         }
 
-        messageRepository.save(existingMessage);
+        return messageRepository.save(existingMessage);
+    }
+
+    public Message markMessageAsSeen(UUID messageId) {
+        Message message = getMessageById(messageId);
+
+        if (message == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found");
+        }
+
+        if (message.getStatus() == MessageStatus.SEEN) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message status is already marked as seen");
+        }
+
+        message.setStatus(MessageStatus.SEEN);
+        return messageRepository.save(message);
     }
 
     public boolean isMessageSeen(UUID messageId) {
