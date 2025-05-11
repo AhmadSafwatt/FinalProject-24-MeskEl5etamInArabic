@@ -42,7 +42,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<String> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
-        assert ex.getRequiredType() != null;
+        if (ex.getRequiredType() == null) {
+            throw new IllegalArgumentException("Required type for parameter '" + ex.getName() + "' is null.");
+        }
         String errorMessage = "Invalid value for parameter '" + ex.getName() + "': " + ex.getValue() +
                 ". Expected type: " + ex.getRequiredType().getSimpleName();
         ExceptionLoggingUtil.logStructuredError("MethodArgumentTypeMismatchException", errorMessage, request, ex);
