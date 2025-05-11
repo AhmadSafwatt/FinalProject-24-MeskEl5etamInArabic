@@ -27,8 +27,4 @@ public class UpdateMessageDTO {
         this.status = status;
         this.type = type;
     }
-
-    public static UpdateMessageDTO createMessageDTO(String content, MessageStatus status, MessageType type) {
-        return new UpdateMessageDTO(content, type, status);
-    }
 }

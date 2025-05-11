@@ -38,9 +38,4 @@ public class CreateMessageDTO {
         this.receiverId = receiverId;
         this.type = type;
     }
-
-    public static CreateMessageDTO createMessageDTO(UUID senderId, UUID receiverId, String content, MessageType type) {
-        return new CreateMessageDTO(senderId, receiverId, content, type);
-    }
-
 }
