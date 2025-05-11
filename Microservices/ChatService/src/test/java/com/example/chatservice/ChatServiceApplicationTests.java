@@ -20,8 +20,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.temporal.ChronoUnit;
@@ -56,11 +56,16 @@ class ChatServiceApplicationTests {
     }
 
     private CreateMessageDTO createTestCreateMessageDTO(MessageType type) {
-        return new CreateMessageDTO(senderId, receiverId, "Test message content", type);
+        return CreateMessageDTO.builder()
+                .senderId(senderId)
+                .receiverId(receiverId)
+                .content("Test content")
+                .type(type)
+                .build();
     }
 
     private UpdateMessageDTO createTestUpdateMessageDTO() {
-        return new UpdateMessageDTO();
+        return UpdateMessageDTO.builder().build();
     }
 
     @Test

@@ -2,14 +2,16 @@ package com.example.chatservice.dtos;
 
 import com.example.chatservice.enums.MessageStatus;
 import com.example.chatservice.enums.MessageType;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.annotation.Nullable;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Setter
 @Getter
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UpdateMessageDTO {
 
     @Nullable
@@ -20,11 +22,4 @@ public class UpdateMessageDTO {
 
     @Nullable
     private MessageStatus status;
-
-
-    public UpdateMessageDTO(String content, MessageType type, MessageStatus status) {
-        this.content = content;
-        this.status = status;
-        this.type = type;
-    }
 }
