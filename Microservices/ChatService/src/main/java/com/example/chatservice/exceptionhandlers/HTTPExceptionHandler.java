@@ -1,9 +1,10 @@
-package com.example.chatservice.exceptions;
+package com.example.chatservice.exceptionhandlers;
 
 import com.example.chatservice.utils.ExceptionLoggingUtil;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -11,19 +12,13 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Arrays;
 
 @Slf4j
+@Order(1)
 @ControllerAdvice
-public class GlobalExceptionHandler {
-
-    @ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<String> handleResponseStatusException(ResponseStatusException ex, HttpServletRequest request) {
-        ExceptionLoggingUtil.logStructuredError("ResponseStatusException", ex.getReason(), request, ex);
-        return ResponseEntity.status(ex.getStatusCode()).body(ex.getReason());
-    }
+public class HTTPExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<String> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex, HttpServletRequest request) {

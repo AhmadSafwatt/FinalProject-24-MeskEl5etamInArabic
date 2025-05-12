@@ -132,11 +132,28 @@ public class MessageController {
         return ResponseEntity.ok(seenStatus);
     }
 
-    @GetMapping("/seed")
-    public ResponseEntity<String> seedMessages() {
+    /**
+     * Seeds the database with a specified number of messages.
+     *
+     * @param numberOfMessages The number of messages to seed
+     */
+
+    @GetMapping("/seed/{numberOfMessages}")
+    public ResponseEntity<String> seedMessages(@PathVariable int numberOfMessages) {
         log.info("Seeding messages at /messages/seed endpoint");
-        messageSeeder.seedMessages();
+        messageSeeder.seedMessages(numberOfMessages);
         log.info("Seeded messages at /messages/seed endpoint");
-        return ResponseEntity.ok("Messages seeded successfully");
+        return ResponseEntity.ok("Seeded " + numberOfMessages + " messages successfully");
+    }
+
+    /**
+     * Clear all messages.
+     */
+    @DeleteMapping("/")
+    public ResponseEntity<String> clearMessages() {
+        log.info("Deleting all messages at /messages/clear endpoint");
+        messageService.deleteAllMessages();
+        log.info("Deleted all messages at /messages/clear endpoint");
+        return ResponseEntity.noContent().build();
     }
 }

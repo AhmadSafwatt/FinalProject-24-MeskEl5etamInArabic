@@ -1,10 +1,11 @@
 package com.example.chatservice.seeders;
 
+import com.example.chatservice.dtos.CreateMessageDTO;
+import com.example.chatservice.dtos.UpdateMessageDTO;
 import com.example.chatservice.enums.MessageStatus;
 import com.example.chatservice.enums.MessageType;
-import com.example.chatservice.enums.ReportType;
 import com.example.chatservice.models.Message;
-import com.example.chatservice.repositories.MessageRepository;
+import com.example.chatservice.services.MessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -12,19 +13,17 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
-import static com.example.chatservice.factories.MessageFactory.createMessage;
-
 @Component
 public class MessageSeeder {
 
-    private final MessageRepository messageRepository;
+    private final MessageService messageService;
 
     @Autowired
-    public MessageSeeder(MessageRepository messageRepository) {
-        this.messageRepository = messageRepository;
+    public MessageSeeder(MessageService messageService) {
+        this.messageService = messageService;
     }
 
-    private Message createRandomMessage() {
+    private CreateMessageDTO createRandomCreateMessageDTO() {
         UUID sender = UUID.randomUUID();
         UUID receiver = UUID.randomUUID();
 
@@ -44,31 +43,28 @@ public class MessageSeeder {
                 "Make sure to eat this dish while it's hot."
         );
 
-        Message message = createMessage(
+
+        return new CreateMessageDTO(
                 sender,
                 receiver,
                 messages.get(new Random().nextInt(messages.size())),
-                MessageType.values()[(int) (Math.random() * MessageType.values().length)]
+                MessageType.values()[new Random().nextInt(MessageType.values().length)]
         );
-
-        // Rnadomly set the message as reported or not
-        if (Math.random() < 0.5) {
-            message.setReported(true);
-            ReportType reportType = ReportType.values()[(int) (Math.random() * ReportType.values().length)];
-            message.setReportType(reportType);
-        }
-
-        // Randomly set the message status
-        MessageStatus status = MessageStatus.values()[(int) (Math.random() * MessageStatus.values().length)];
-        message.setStatus(status);
-
-        return message;
     }
 
-    public void seedMessages() {
-        for (int i = 0; i < 50; i++) {
-            Message message = createRandomMessage();
-            messageRepository.save(message);
+    public void seedMessages(int numberOfMessages) {
+        for (int i = 0; i < numberOfMessages; i++) {
+            CreateMessageDTO createMessageDTO = createRandomCreateMessageDTO();
+            Message message = messageService.saveMessage(createMessageDTO);
+
+            // Set half of the messages to a random status other than SENT
+            if (Math.random() < 0.5) {
+                UpdateMessageDTO updateMessageDTO = new UpdateMessageDTO();
+                MessageStatus[] statuses = MessageStatus.values();
+                MessageStatus randomStatus = statuses[new Random().nextInt(statuses.length - 1) + 1]; // Excludes SENT
+                updateMessageDTO.setStatus(randomStatus);
+                messageService.updateMessage(message.getId(), updateMessageDTO);
+            }
         }
     }
 }
