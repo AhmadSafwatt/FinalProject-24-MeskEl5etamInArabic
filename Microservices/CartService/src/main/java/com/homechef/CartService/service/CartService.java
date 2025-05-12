@@ -42,23 +42,6 @@ public class CartService {
         return cartRepository.save(cart1);
     }
 
-//    public Cart updateCart(String cartID, Cart cart) {
-//        UUID cartid = UUID.fromString(cartID);
-//        cart.setId(cartid);
-//        return cartRepository.save(cart);
-//    }
-
-//    public Cart addProduct(String customerId , String productID , int quantity , String notes){
-//        UUID customerIDD = UUID.fromString(customerId);
-//        UUID productIDD = UUID.fromString(productID);
-//        Cart cart = cartRepository.findByCustomerId(customerIDD);
-//        CartItem cartItem = new CartItem(productIDD , quantity , LocalDateTime.now() , notes , UUID.randomUUID());
-//        List <CartItem> oldCartItems = cart.getCartItems();
-//        oldCartItems.add(cartItem);
-//        cart.setCartItems(oldCartItems);
-//        return cartRepository.save(cart);
-//    }
-
     public Cart addProduct(String customerId , String productID , int quantity , String notes){
         UUID customerIDD = UUID.fromString(customerId);
         UUID productIDD = UUID.fromString(productID);
@@ -84,7 +67,6 @@ public class CartService {
         return cartRepository.save(cart);
     }
 
-
     public Cart addNotesToCartItem(String customerId, String productID, String notes){
         UUID customerIDD = UUID.fromString(customerId);
         UUID productIDD = UUID.fromString(productID);
@@ -97,7 +79,6 @@ public class CartService {
         }
         return cartRepository.save(cart);
     }
-
 
     public Cart removeProduct(String customerId , String productId){
         UUID customerIDD = UUID.fromString(customerId);
@@ -122,15 +103,6 @@ public class CartService {
         return cartRepository.save(cart);
     }
 
-
-//    public Cart updatePromo(String cartID , boolean promo) {
-//        Cart customerCart = getCartById(cartID);
-//        Cart newCart = new Cart.Builder().from(customerCart).promo(promo).build();
-//        return cartRepository.save(newCart);
-//    }
-
-
-
     public Cart updateNotes(String customerId, String notes) {
         UUID customerIDD = UUID.fromString(customerId);
         Cart cart = cartRepository.findByCustomerId(customerIDD);
@@ -139,12 +111,6 @@ public class CartService {
         cart.setNotes(notes);
         return cartRepository.save(cart);
     }
-
-//    public Cart updateNotes(String cartID, String notes) {
-//        Cart customerCart = getCartById(cartID);
-//        Cart newCart = new Cart.Builder().from(customerCart).notes(notes).build();
-//        return cartRepository.save(newCart);
-//    }
 
     public Cart getCartByCustomerId(String customerId) {
         UUID customerUUID = UUID.fromString(customerId);
@@ -177,23 +143,22 @@ public class CartService {
         return c;
     }
 
-
     public String deleteCartById(String cartId) {
         UUID cartUUID = UUID.fromString(cartId);
         if (!cartRepository.existsById(cartUUID))
-            return "Cart Not Found";
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Cart not found for cart ID: %s", cartId));
+
         cartRepository.deleteById(cartUUID);
         return "Cart Deleted Successfully";
     }
 
     public String checkoutCartById(String cartId) { // facade design pattern
         Cart cart = findCart(cartId);
-        if (cart == null) return "Cart Not Found";
 
         double totalCost = calculateTotalCost(cart);
-        Map<Cart, Double> cartCostMap = prepareCartCostMap(cart, totalCost);
 
-        sendCartToOrderService(cartCostMap);
+        sendCartToOrderService(prepareCartCostMap(cart, totalCost));
+
         clearCart(cart);
 
         return "Checkout Successful";
@@ -201,11 +166,18 @@ public class CartService {
 
     private Cart findCart(String cartId) {
         UUID cartUUID = UUID.fromString(cartId);
-        return cartRepository.findById(cartUUID).orElse(null);
+        Cart c = cartRepository.findById(cartUUID).orElse(null);
+        if (c == null)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Cart not found for cart ID: %s", cartId));
+
+        return c;
     }
 
     private double calculateTotalCost(Cart cart) {
         List<CartItem> cartItems = cart.getCartItems();
+        if (cartItems == null || cartItems.isEmpty())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cart is empty");
+
         double totalCost = 0;
         List<String> ids = new ArrayList<>();
         for (CartItem item : cartItems) {
@@ -213,11 +185,13 @@ public class CartService {
         }
         List<ProductDTO> products = productClient.getProductsById(ids);
         for (int i = 0; i < cartItems.size(); i++) {
+            if (products.get(i) == null)
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("No product exists with ID: %s", products.get(i).getId()));
+
             totalCost += (products.get(i).getPrice() * (1 - products.get(i).getDiscount())) * cartItems.get(i).getQuantity();
         }
         if (cart.isPromo())
             totalCost = totalCost - 0.05*totalCost;
-        System.out.println(totalCost);
         return totalCost;
     }
 
@@ -236,6 +210,5 @@ public class CartService {
         //orderService.sendCartCheckout(cartCostMap); // Async via RabbitMQ
         System.out.println("SENT TO ORDER SERVICE");
     }
-
 
 }

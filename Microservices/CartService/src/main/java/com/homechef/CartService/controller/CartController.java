@@ -4,6 +4,7 @@ import com.homechef.CartService.model.Cart;
 import com.homechef.CartService.model.CartItem;
 import com.homechef.CartService.service.CartService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -72,12 +73,12 @@ public class CartController {
     }
 
     @DeleteMapping("/{cartId}")
-    public String deleteCart(@PathVariable String cartId) {
-        return cartService.deleteCartById(cartId);
+    public ResponseEntity<String> deleteCart(@PathVariable String cartId) {
+        return ResponseEntity.ok(cartService.deleteCartById(cartId));
     }
 
     @PostMapping("/{cartId}/checkout")
-    public String checkout(@PathVariable String cartId) {
-        return cartService.checkoutCartById(cartId);
+    public ResponseEntity<String> checkout(@PathVariable String cartId) {
+        return ResponseEntity.ok(cartService.checkoutCartById(cartId));
     }
 }
