@@ -1,6 +1,7 @@
-package com.example.chatservice.exceptions;
+package com.example.chatservice.exceptionhandlers;
 
 import com.example.chatservice.utils.ExceptionLoggingUtil;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -56,5 +57,26 @@ public class GlobalExceptionHandler {
         String errorMessage = "HTTP method " + ex.getMethod() + " is not supported for this endpoint. Supported methods are: " + ex.getSupportedHttpMethods();
         ExceptionLoggingUtil.logStructuredError("HttpRequestMethodNotSupportedException", errorMessage, request, ex);
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(errorMessage);
+    }
+
+    @ExceptionHandler(InvalidFormatException.class)
+    public ResponseEntity<String> handleInvalidFormatException(InvalidFormatException ex, HttpServletRequest request) {
+        String errorMessage = "Invalid format for value: " + ex.getValue() + ". Expected type: " + ex.getTargetType().getSimpleName();
+        ExceptionLoggingUtil.logStructuredError("InvalidFormatException", errorMessage, request, ex);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
+    }
+
+    @ExceptionHandler(JsonParseException.class)
+    public ResponseEntity<String> handleJsonParseException(JsonParseException ex, HttpServletRequest request) {
+        String errorMessage = "JSON parsing error: " + ex.getOriginalMessage();
+        ExceptionLoggingUtil.logStructuredError("JsonParseException", errorMessage, request, ex);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> handleGenericException(Exception ex, HttpServletRequest request) {
+        String errorMessage = "An unexpected error occurred: " + ex.getMessage();
+        ExceptionLoggingUtil.logStructuredError("GenericException", errorMessage, request, ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorMessage);
     }
 }

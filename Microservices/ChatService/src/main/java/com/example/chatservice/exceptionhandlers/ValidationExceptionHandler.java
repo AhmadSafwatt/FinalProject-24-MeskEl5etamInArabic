@@ -1,4 +1,4 @@
-package com.example.chatservice.exceptions;
+package com.example.chatservice.exceptionhandlers;
 
 import com.example.chatservice.utils.ExceptionLoggingUtil;
 import jakarta.servlet.http.HttpServletRequest;
