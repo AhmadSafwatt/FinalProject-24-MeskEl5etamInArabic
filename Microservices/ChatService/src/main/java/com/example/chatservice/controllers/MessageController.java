@@ -107,7 +107,7 @@ public class MessageController {
 
     @GetMapping("/search")
     public ResponseEntity<List<Message>> getMessagesByContent(@RequestParam String content) {
-        List<Message> messages = messageService.getMessagesByContent(content);
+        List<Message> messages = messageService.searchMessagesByContent(content);
         return ResponseEntity.ok(messages);
     }
 }

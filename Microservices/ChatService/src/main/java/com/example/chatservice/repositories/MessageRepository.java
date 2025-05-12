@@ -11,6 +11,4 @@ import java.util.UUID;
 @Repository
 public interface MessageRepository extends CassandraRepository<Message, UUID> {
 
-    List<Message> findByContent(String content);
-
 }

@@ -8,6 +8,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import com.example.chatservice.enums.MessageStatus;
 
@@ -103,7 +104,11 @@ public class MessageService {
         return message.getStatus() == MessageStatus.SEEN;
     }
 
-    public List<Message> getMessagesByContent(String content) {
-        return messageRepository.findByContent(content);
+    public List<Message> searchMessagesByContent(String searchString) {
+        List<Message> allMessages = messageRepository.findAll();
+
+        return allMessages.stream()
+                .filter(message -> message.getContent() != null && message.getContent().toLowerCase().contains(searchString.toLowerCase()))
+                .collect(Collectors.toList());
     }
 }
