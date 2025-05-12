@@ -255,7 +255,7 @@ class ChatServiceApplicationTests {
         void testDeleteMessage_shouldReturnNotFound_whenMessageDoesNotExist() throws Exception {
             UUID nonExistingMessageId = UUID.randomUUID();
 
-            mockMvc.perform(MockMvcRequestBuilders.delete("/messages/delete/" + nonExistingMessageId))
+            mockMvc.perform(MockMvcRequestBuilders.delete("/messages/" + nonExistingMessageId))
                     .andExpect(MockMvcResultMatchers.status().isNotFound())
                     .andDo(MockMvcResultHandlers.print());
         }
