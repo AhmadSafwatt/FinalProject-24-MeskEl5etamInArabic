@@ -27,6 +27,7 @@ public class MessageService {
     }
 
     public Message getMessageById(UUID id) {
+
         if (id == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message ID cannot be null");
         }
@@ -36,10 +37,6 @@ public class MessageService {
     }
 
     public Message saveMessage(CreateMessageDTO createMessageDTO) {
-
-        if (createMessageDTO == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message cannot be null");
-        }
 
         Message message = MessageFactory.createMessage(
                 createMessageDTO.getSenderId(),
@@ -57,9 +54,7 @@ public class MessageService {
     }
 
     public void deleteMessage(UUID id) {
-
         getMessageById(id);
-
         messageRepository.deleteById(id);
     }
 
@@ -109,7 +104,14 @@ public class MessageService {
     }
 
     public boolean isMessageSeen(UUID messageId) {
-        Message message = getMessageById(messageId);
-        return message.getStatus() == MessageStatus.SEEN;
+        return getMessageById(messageId).getStatus() == MessageStatus.SEEN;
+    }
+
+    public void deleteAllMessages() {
+        int messageCount = (int) messageRepository.count();
+        if (messageCount == 0) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No messages to delete");
+        }
+        messageRepository.deleteAll();
     }
 }
