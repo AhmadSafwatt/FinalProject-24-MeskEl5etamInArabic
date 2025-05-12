@@ -12,7 +12,7 @@ public class MessageFactory {
 
     private static final Map<MessageType, Class<? extends Message>> messageTypeClassMap = new HashMap<>();
 
-    static {
+    static { // Message Types
         messageTypeClassMap.put(MessageType.TEXT, getClassByName("com.example.chatservice.models.TextMessage"));
         messageTypeClassMap.put(MessageType.IMAGE, getClassByName("com.example.chatservice.models.ImageMessage"));
         messageTypeClassMap.put(MessageType.PRODUCT, getClassByName("com.example.chatservice.models.ProductMessage"));
