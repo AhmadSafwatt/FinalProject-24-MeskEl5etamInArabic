@@ -2,6 +2,7 @@ package com.example.chatservice.services;
 
 import com.example.chatservice.dtos.CreateMessageDTO;
 import com.example.chatservice.dtos.UpdateMessageDTO;
+import com.example.chatservice.enums.MessageStatus;
 import com.example.chatservice.factories.MessageFactory;
 import com.example.chatservice.models.Message;
 import com.example.chatservice.repositories.MessageRepository;
@@ -11,8 +12,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.UUID;
-
-import com.example.chatservice.enums.MessageStatus;
 
 @Service
 public class MessageService {
@@ -33,7 +32,7 @@ public class MessageService {
         }
 
         return messageRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No message with id " + id + " found"));
     }
 
     public Message saveMessage(CreateMessageDTO createMessageDTO) {
@@ -59,10 +58,7 @@ public class MessageService {
 
     public void deleteMessage(UUID id) {
 
-        Message message = getMessageById(id);
-        if (message == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found");
-        }
+        getMessageById(id);
 
         messageRepository.deleteById(id);
     }
@@ -104,12 +100,8 @@ public class MessageService {
     public Message markMessageAsSeen(UUID messageId) {
         Message message = getMessageById(messageId);
 
-        if (message == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found");
-        }
-
         if (message.getStatus() == MessageStatus.SEEN) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message status is already marked as seen");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message with id " + messageId + " is already marked as seen");
         }
 
         message.setStatus(MessageStatus.SEEN);
@@ -118,11 +110,6 @@ public class MessageService {
 
     public boolean isMessageSeen(UUID messageId) {
         Message message = getMessageById(messageId);
-
-        if (message == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found");
-        }
-
         return message.getStatus() == MessageStatus.SEEN;
     }
 }
