@@ -1,8 +1,9 @@
 package com.example.chatservice.controllers;
-
+import com.example.chatservice.commands.ReportMessageCommand;
+import com.example.chatservice.commands.UpdateMessageCommand;
+import com.example.chatservice.enums.ReportType;
 import com.example.chatservice.commands.DeleteMessageCommand;
 import com.example.chatservice.commands.SendMessageCommand;
-import com.example.chatservice.commands.UpdateMessageCommand;
 import com.example.chatservice.dtos.CreateMessageDTO;
 import com.example.chatservice.dtos.UpdateMessageDTO;
 import com.example.chatservice.models.Message;
@@ -161,5 +162,18 @@ public class MessageController {
     public ResponseEntity<List<Message>> getMessagesByContent(@RequestParam String content) {
         List<Message> messages = messageService.searchMessagesByContent(content);
         return ResponseEntity.ok(messages);
+    }
+
+    /**
+     * Endpoint to report a message.
+     *
+     * @param messageId Message ID
+     * @param reportType Report type
+     */
+    @PatchMapping("/report/{id}")
+    public Message reportMessage(@PathVariable("id") UUID messageId, @RequestParam ReportType reportType) {
+        ReportMessageCommand reportCommand = new ReportMessageCommand(messageId, reportType, messageService);
+        reportCommand.execute();
+        return messageService.getMessageById(messageId);
     }
 }

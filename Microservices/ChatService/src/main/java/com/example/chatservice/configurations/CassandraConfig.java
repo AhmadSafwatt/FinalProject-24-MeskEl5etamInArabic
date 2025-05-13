@@ -10,10 +10,12 @@ import org.springframework.data.cassandra.config.CqlSessionFactoryBean;
 import org.springframework.data.cassandra.config.SchemaAction;
 import org.springframework.data.cassandra.core.cql.keyspace.CreateKeyspaceSpecification;
 import org.springframework.data.cassandra.core.cql.keyspace.KeyspaceOption;
+import org.springframework.data.cassandra.repository.config.EnableCassandraRepositories;
 
 import java.util.List;
 
 @Configuration
+@EnableCassandraRepositories(basePackages = "com.example.chatservice.repositories")
 public class CassandraConfig extends AbstractCassandraConfiguration {
 
     @Value("${spring.cassandra.keyspace-name}")
