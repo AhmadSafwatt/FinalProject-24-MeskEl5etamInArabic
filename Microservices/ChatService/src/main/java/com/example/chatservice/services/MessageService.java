@@ -4,6 +4,7 @@ import com.example.chatservice.enums.MessageType;
 import com.example.chatservice.enums.ReportType;
 import com.example.chatservice.dtos.CreateMessageDTO;
 import com.example.chatservice.dtos.UpdateMessageDTO;
+import com.example.chatservice.enums.MessageStatus;
 import com.example.chatservice.factories.MessageFactory;
 import com.example.chatservice.models.Message;
 import com.example.chatservice.repositories.MessageRepository;
@@ -13,8 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-
-import com.example.chatservice.enums.MessageStatus;
+import java.util.stream.Collectors;
 
 @Service
 public class MessageService {
@@ -30,19 +30,16 @@ public class MessageService {
     }
 
     public Message getMessageById(UUID id) {
+
         if (id == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message ID cannot be null");
         }
 
         return messageRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No message with id " + id + " found"));
     }
 
     public Message saveMessage(CreateMessageDTO createMessageDTO) {
-
-        if (createMessageDTO == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message cannot be null");
-        }
 
         Message message = MessageFactory.createMessage(
                 createMessageDTO.getSenderId(),
@@ -60,12 +57,7 @@ public class MessageService {
     }
 
     public void deleteMessage(UUID id) {
-
-        Message message = getMessageById(id);
-        if (message == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found");
-        }
-
+        getMessageById(id);
         messageRepository.deleteById(id);
     }
 
@@ -106,12 +98,8 @@ public class MessageService {
     public Message markMessageAsSeen(UUID messageId) {
         Message message = getMessageById(messageId);
 
-        if (message == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found");
-        }
-
         if (message.getStatus() == MessageStatus.SEEN) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message status is already marked as seen");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message with id " + messageId + " is already marked as seen");
         }
 
         message.setStatus(MessageStatus.SEEN);
@@ -119,13 +107,23 @@ public class MessageService {
     }
 
     public boolean isMessageSeen(UUID messageId) {
-        Message message = getMessageById(messageId);
+        return getMessageById(messageId).getStatus() == MessageStatus.SEEN;
+    }
 
-        if (message == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found");
+    public void deleteAllMessages() {
+        int messageCount = (int) messageRepository.count();
+        if (messageCount == 0) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No messages to delete");
         }
+        messageRepository.deleteAll();
+    }
 
-        return message.getStatus() == MessageStatus.SEEN;
+    public List<Message> searchMessagesByContent(String searchString) {
+        List<Message> allMessages = messageRepository.findAll();
+
+        return allMessages.stream()
+                .filter(message -> message.getContent() != null && message.getContent().toLowerCase().contains(searchString.toLowerCase()))
+                .collect(Collectors.toList());
     }
 
     public Message reportMessage(UUID messageId, ReportType reportType) {

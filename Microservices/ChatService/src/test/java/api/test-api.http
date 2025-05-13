@@ -1,0 +1,46 @@
+### Get the base URL
+GET {{baseUrl}}
+
+### Seed the database with the specified number of messages (replace 50 with the desired number)
+GET {{baseUrl}}/messages/seed/50
+
+### Get All Messages
+GET {{baseUrl}}/messages
+
+### Get a message by id (replace {id} with an actual ID)
+GET {{baseUrl}}/messages/{id}
+
+
+### Create a new message
+POST {{baseUrl}}/messages
+Content-Type: application/json
+
+{
+  "senderId": "c843b0e1-77b4-4a5d-b601-b17879071f1c",
+  "receiverId": "cca07896-caf9-42b4-9db4-57ea899cab7a",
+  "content": "Hello, how are you?",
+  "type": "TEXT"
+}
+
+### Update an existing message (replace {id} with an actual ID)
+PATCH{{baseUrl}}/messages/{id}
+Content-Type: application/json
+
+{
+  "content": "Updated Content",
+  "status": "FAILED",
+  "type": "PRODUCT"
+}
+
+### Delete a message (replace {id} with an actual ID)
+DELETE {{baseUrl}}/messages/{id}
+
+### Check if a message is seen (replace {id} with an actual ID)
+GET {{baseUrl}}/messages/{id}/seen
+
+### Set a message as seen (replace {id} with an actual ID)
+PATCH {{baseUrl}}/messages/{id}/seen
+
+### Delete all messages
+DELETE {{baseUrl}}/messages
+
