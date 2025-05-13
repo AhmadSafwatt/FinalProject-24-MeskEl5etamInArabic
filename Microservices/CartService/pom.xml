@@ -69,6 +69,8 @@
 			<scope>test</scope>
 		</dependency>
 
+		<!-- ================================ AUTH DEPENDENCIES ====================================-->
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
@@ -98,6 +100,8 @@
 			<version>0.12.6</version>
 			<scope>runtime</scope>
 		</dependency>
+
+		<!-- ================================ END AUTH DEPENDENCIES ====================================-->
 
 	</dependencies>
 	<dependencyManagement>
