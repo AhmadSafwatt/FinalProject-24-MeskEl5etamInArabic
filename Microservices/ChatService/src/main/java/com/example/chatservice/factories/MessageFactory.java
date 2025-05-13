@@ -41,13 +41,4 @@ public class MessageFactory {
         }
     }
 
-//    public static void main (String[]args){
-//        UUID senderId = UUID.randomUUID();
-//        UUID receiverId = UUID.randomUUID();
-//        String content = "Hello, this is a test message!";
-//        MessageType type = MessageType.IMAGE;
-//
-//        Message message = createMessage(senderId, receiverId, content, type);
-//        System.out.println("Message is a: " + message.message());
-//    }
 }

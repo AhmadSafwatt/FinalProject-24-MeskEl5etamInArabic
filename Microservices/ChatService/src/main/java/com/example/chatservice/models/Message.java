@@ -82,8 +82,4 @@ public class Message {
     @Enumerated(EnumType.STRING)
     private ReportType reportType;
 
-//    public String message(){
-//        return "Message";
-//    }
-
 }

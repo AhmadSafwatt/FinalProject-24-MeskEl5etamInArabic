@@ -16,8 +16,4 @@ public class ImageMessage extends Message {
         super(MessageType.IMAGE);
     }
 
-//    @Override
-//    public String message() {
-//        return "Image Message";
-//    }
 }

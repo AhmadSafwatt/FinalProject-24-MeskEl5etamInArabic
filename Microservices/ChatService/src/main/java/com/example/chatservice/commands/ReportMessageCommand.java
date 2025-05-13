@@ -19,12 +19,13 @@ public class ReportMessageCommand implements Command {
     }
 
     @Override
-    public void execute() {
+    public Void execute() {
         Message message = messageService.getMessageById(messageId);
         if (message != null) {
             messageService.reportMessage(messageId, reportType);
         } else {
             throw new IllegalArgumentException("Message not found");
         }
+        return null;
     }
 }

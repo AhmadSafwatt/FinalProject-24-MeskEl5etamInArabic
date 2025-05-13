@@ -12,11 +12,4 @@ public class ProductMessage extends Message {
         super(sender, receiver, content, MessageType.PRODUCT);
     }
 
-//    public ProductMessage() {
-//        super(MessageType.PRODUCT);
-//    }
-//    @Override
-//    public String message() {
-//        return "Product Message";
-//    }
 }

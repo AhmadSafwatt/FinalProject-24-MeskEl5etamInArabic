@@ -52,6 +52,7 @@ public class MessageSeeder {
         );
     }
 
+
     public void seedMessages(int numberOfMessages) {
         for (int i = 0; i < numberOfMessages; i++) {
             CreateMessageDTO createMessageDTO = createRandomCreateMessageDTO();
