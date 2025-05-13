@@ -12,6 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class MessageService {
@@ -113,5 +114,13 @@ public class MessageService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No messages to delete");
         }
         messageRepository.deleteAll();
+    }
+
+    public List<Message> searchMessagesByContent(String searchString) {
+        List<Message> allMessages = messageRepository.findAll();
+
+        return allMessages.stream()
+                .filter(message -> message.getContent() != null && message.getContent().toLowerCase().contains(searchString.toLowerCase()))
+                .collect(Collectors.toList());
     }
 }
