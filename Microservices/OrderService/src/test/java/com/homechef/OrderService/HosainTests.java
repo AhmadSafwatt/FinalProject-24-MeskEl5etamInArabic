@@ -170,7 +170,7 @@ class HosainTests {
 
     @Test
     void testUpdateOrderState_Created_to_OutForDelivery_Valid() {
-        assertStateTransition(OrderStatus.CREATED, OrderStatus.OUT_FOR_DELIVERY, false);
+        assertStateTransition(OrderStatus.CREATED, OrderStatus.OUT_FOR_DELIVERY, true);
     }
 
     @Test
