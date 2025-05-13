@@ -1,10 +1,15 @@
 package com.homechef.CartService.controller;
 
+import com.homechef.CartService.config.JwtUtil;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+
 import com.homechef.CartService.model.Cart;
 import com.homechef.CartService.model.CartItem;
 import com.homechef.CartService.service.CartService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import com.homechef.CartService.config.JwtUtil.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,9 +23,22 @@ public class CartController {
     private CartService cartService;
 
 
-    @PostMapping("/{customerId}/createCart")
-    public Cart createCart(@PathVariable String customerId){
-        return cartService.createCart( customerId );
+    private JwtUtil jwtUtil = JwtUtil.getInstance();
+
+
+    @PostMapping("/createCart")
+    public Cart createCart(@RequestHeader("Authorization") String authHeader){
+        String jwt = authHeader.replace("Bearer ", "");
+
+        //Map<String, Object> claims = Map.of(
+        //                "id", foundUser.getId(),
+        //                "username", foundUser.getUsername(),
+        //                "email", foundUser.getEmail(),
+        //                "address", foundUser.getAddress(),
+        //                "phoneNumber", foundUser.getPhoneNumber(),
+        //                "role", foundUser.getRole()
+        //        );
+        return cartService.createCart(jwtUtil.getUserClaims(jwt).get("id").toString());
     }
 
 //    @PutMapping("/updateCart/{cartID}")
