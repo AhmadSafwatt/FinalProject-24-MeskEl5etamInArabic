@@ -429,8 +429,8 @@ class HosainTests {
     }
 
     @Test
-    void testUpdateItemNote_When_OrderIs_Preparing_ShouldFail() {
-        assertItemNoteUpdateAttempt(OrderStatus.PREPARING, "Note updated in PREPARING state", false);
+    void testUpdateItemNote_When_OrderIs_Preparing_ShouldSucceed() {
+        assertItemNoteUpdateAttempt(OrderStatus.PREPARING, "Note updated in PREPARING state", true);
     }
 
     @Test
