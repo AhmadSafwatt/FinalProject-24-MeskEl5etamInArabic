@@ -40,7 +40,7 @@ public class AuthConfig {
                         .requestMatchers(
                                 "/auth/register",
                                 "/auth/token",
-                                "/auth/verify-email",
+                                "/auth/verify-email**",
                                 "/auth/reset-password",
                                 "/auth/update-password",
                                 "/auth/validate-token"
@@ -52,8 +52,10 @@ public class AuthConfig {
                 )
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
-                    config.addAllowedOrigin("*");
+                    config.addAllowedOrigin("*"); // Or your frontend origin
                     config.addAllowedMethod("GET");
+                    config.addAllowedHeader("*");
+                    config.setAllowCredentials(false); // or true if needed and origin is not "*"
                     return config;
                 }))
                 // Add JWT filter before Spring Security's default auth filter

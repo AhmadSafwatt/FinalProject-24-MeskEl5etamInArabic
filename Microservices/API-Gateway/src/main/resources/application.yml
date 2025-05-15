@@ -14,9 +14,9 @@ spring:
                 - AuthenticationFilter
 
             - id: cart-service
-              uri: lb://cart-service
+              uri: http://localhost:8082/
               predicates:
-                - Path=/cart/**
+                - Path=/carts/**
               filters:
                 - AuthenticationFilter
 

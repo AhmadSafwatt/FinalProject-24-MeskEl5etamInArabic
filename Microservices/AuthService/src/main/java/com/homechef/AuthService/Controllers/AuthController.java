@@ -3,6 +3,7 @@ package com.homechef.AuthService.Controllers;
 import com.homechef.AuthService.Models.User;
 import com.homechef.AuthService.Services.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -39,9 +40,11 @@ public class AuthController {
     }
 
     @GetMapping("/verify-email")
-    public String verifyEmail(@RequestParam UUID userId) {
-        return authService.verifyEmail(userId);
+    public ResponseEntity<Map<String, String>> verifyEmail(@RequestParam UUID userId) {
+        authService.verifyEmail(userId);
+        return ResponseEntity.ok(Map.of("message", "Email verified successfully"));
     }
+
 
 
     @PutMapping("/reset-password")
