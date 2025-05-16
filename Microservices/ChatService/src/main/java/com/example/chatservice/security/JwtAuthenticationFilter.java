@@ -26,24 +26,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         String authHeader = request.getHeader("Authorization");
         String jwt = null;
-        String username = null;
+        String id = null;
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             jwt = authHeader.substring(7);
             try {
-                username = JwtUtil.extractUsername(jwt);
+                id = JwtUtil.extractUserId(jwt);
             } catch (Exception e) {
-                logger.warn("Failed to extract userId from JWT: {}", e.getMessage());
+                logger.warn("Failed to extract id from JWT: {}", e.getMessage());
             }
         }
 
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        if (id != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             if (JwtUtil.validateToken(jwt)) {
                 UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(username, null, Collections.emptyList());
+                        new UsernamePasswordAuthenticationToken(id, null, Collections.emptyList());
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
-                logger.debug("JWT authentication set for username: {}", username);
+                logger.debug("JWT authentication set for id: {}", id);
             } else {
                 logger.warn("Invalid JWT token");
             }
