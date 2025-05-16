@@ -3,6 +3,7 @@ package com.homechef.OrderService.services;
 import com.homechef.OrderService.DTOs.CartDTO;
 import com.homechef.OrderService.DTOs.CartMessage;
 import com.homechef.OrderService.clients.ProductServiceClient;
+import com.homechef.OrderService.clients.AuthServiceClient;
 import com.homechef.OrderService.models.Order;
 import com.homechef.OrderService.models.OrderItem;
 import com.homechef.OrderService.rabbitmq.OrderRabbitMQConfig;
@@ -19,6 +20,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -26,13 +28,15 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final EmailService emailService;
     private final ProductServiceClient productServiceClient;
+    private final AuthServiceClient authServiceClient;
 
     @Autowired
     public OrderService(OrderRepository orderRepository, EmailService emailService,
-            ProductServiceClient productServiceClient) {
+            ProductServiceClient productServiceClient, AuthServiceClient authServiceClient) {
         this.orderRepository = orderRepository;
         this.emailService = emailService;
         this.productServiceClient = productServiceClient;
+        this.authServiceClient = authServiceClient;
     }
 
     public List<Order> getAllOrders() {
@@ -82,15 +86,6 @@ public class OrderService {
                         "Order with id " + orderId + " not found"));
     }
 
-    public void deleteOrder(UUID orderId) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Order with id " + orderId + " not found"));
-        orderRepository.delete(order);
-        decreaseProductSales(order);
-        sendOrderDeletionNotifications(order);
-    }
-
     public void updateOrderStatus(UUID orderId, OrderState newState) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -127,15 +122,9 @@ public class OrderService {
         // no need to notify anyone, this is just a note
     }
 
-    public void sendTestMail() {
-        emailService.sendEmail("hussain.ghoraba@gmail.com", "Test Email",
-                "This is a test email from Order Service");
-        System.out.println("Email sent successfully");
-    }
-
     // ------------------------------------------ helpers
 
-    // TODO: waiting for Safwat team to implement the api
+    // TODO: should be Async ?
     private void decreaseProductSales(Order order) {
         for (OrderItem item : order.getItems()) {
             UUID productId = item.getProductId();
@@ -144,9 +133,15 @@ public class OrderService {
         }
     }
 
-    // TODO: waiting for omar nour team to tell us how to get the mail by id
     private String getUserMailById(UUID id) {
-        return "hussain.ghoraba@gmail.com";
+        // the api called in the feign client takes a list of ids,
+        // and returns a map of ids to emails
+        Map<String, String> emails = authServiceClient.getUsersEmails(List.of(id));
+        if (emails.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "fetched mail of user with id " + id + " is empty");
+        }
+        return emails.get(id.toString());
     }
 
     // -------------------------------------------notifications
@@ -183,12 +178,6 @@ public class OrderService {
     private void sendOrderCreationNotifications(Order order) {
         notifyBuyer(order, "Order Creation", "created successfully");
         notifySellers(order, "To the kitchen!", "has been just created by a customer!");
-    }
-
-    private void sendOrderDeletionNotifications(Order order) {
-        String msgTail = "deleted from our database, this is most likely done by our customer service for some reason or another !.";
-        notifyBuyer(order, "Order Deletion", msgTail);
-        notifySellers(order, "Order Deletion", msgTail);
     }
 
     private void sendOrderCancellationNotification(Order order) {
