@@ -16,8 +16,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.data.cassandra.core.CassandraTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
@@ -31,6 +34,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@Import(TestSecurityConfig.class)
+@EnableAutoConfiguration
 class ChatServiceApplicationTests {
 
     @Autowired
@@ -42,6 +47,9 @@ class ChatServiceApplicationTests {
     @Autowired
     private MessageRepository messageRepository;
 
+    @Autowired
+    private CassandraTemplate cassandraTemplate;
+
     private ObjectMapper objectMapper;
     private UUID senderId;
     private UUID receiverId;
@@ -52,7 +60,7 @@ class ChatServiceApplicationTests {
         objectMapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
         senderId = UUID.randomUUID();
         receiverId = UUID.randomUUID();
-        messageService = new MessageService(messageRepository);
+        messageService = new MessageService(messageRepository, cassandraTemplate);
     }
 
     private CreateMessageDTO createTestCreateMessageDTO(MessageType type) {
@@ -259,6 +267,20 @@ class ChatServiceApplicationTests {
                     .andExpect(MockMvcResultMatchers.status().isNotFound())
                     .andDo(MockMvcResultHandlers.print());
         }
+
+//        @Test
+//        void testQueryMessageByContentEndpoint_shouldReturnMessages_whenContentMatches() throws Exception {
+//            CreateMessageDTO createMessageDTO = createTestCreateMessageDTO(MessageType.TEXT);
+//            createMessageDTO.setContent("Query");
+//
+//            SendMessageCommand messageSender = new SendMessageCommand(createMessageDTO, messageService);
+//            messageSender.execute();
+//
+//            mockMvc.perform(MockMvcRequestBuilders.get("/messages/search/query?content=Query"))
+//                    .andExpect(MockMvcResultMatchers.status().isOk())
+//                    .andExpect(MockMvcResultMatchers.jsonPath("$[0].content").value("Query"))
+//                    .andDo(MockMvcResultHandlers.print());
+//        }
     }
 
 

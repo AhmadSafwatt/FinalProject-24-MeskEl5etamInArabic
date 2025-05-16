@@ -1,18 +1,26 @@
 ### Get the base URL
 GET {{baseUrl}}
 
-### Seed the database with the specified number of messages (replace 50 with the desired number)
-GET {{baseUrl}}/messages/seed/50
+### !!! Make sure to replace token in http-client.env.json with a valid token !!! ###
+## A valid token will be generated and printed in the console every time the application starts. ###
+
+### Seed the database with the specified number of messages. Takes a query parameter `count` to specify the number of messages to seed. If no count is provided, it defaults to 50.
+GET {{baseUrl}}/messages/seed?count=7
+Authorization: Bearer {{token}}
 
 ### Get All Messages
-GET {{baseUrl}}/messages
+GET {{baseUrl}}/messages?size=1&pagingState=Y2Fzc2FuZHJhLXJhbmdlLXBhc3MtMTIzNDU2
+Authorization: Bearer {{token}}
+
 
 ### Get a message by id (replace {id} with an actual ID)
 GET {{baseUrl}}/messages/{id}
+Authorization: Bearer {{token}}
 
 
 ### Create a new message
 POST {{baseUrl}}/messages
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
@@ -24,6 +32,7 @@ Content-Type: application/json
 
 ### Update an existing message (replace {id} with an actual ID)
 PATCH{{baseUrl}}/messages/{id}
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
@@ -34,13 +43,17 @@ Content-Type: application/json
 
 ### Delete a message (replace {id} with an actual ID)
 DELETE {{baseUrl}}/messages/{id}
+Authorization: Bearer {{token}}
 
 ### Check if a message is seen (replace {id} with an actual ID)
 GET {{baseUrl}}/messages/{id}/seen
+Authorization: Bearer {{token}}
 
 ### Set a message as seen (replace {id} with an actual ID)
 PATCH {{baseUrl}}/messages/{id}/seen
+Authorization: Bearer {{token}}
 
 ### Delete all messages
 DELETE {{baseUrl}}/messages
+Authorization: Bearer {{token}}
 
