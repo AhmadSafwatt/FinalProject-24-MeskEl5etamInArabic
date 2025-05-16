@@ -5,6 +5,7 @@ import com.homechef.CartService.model.Cart;
 import com.homechef.CartService.model.CartItem;
 import com.homechef.CartService.service.CartService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.homechef.CartService.config.JwtUtil.*;
 
@@ -85,13 +86,15 @@ public class CartController {
         return cartService.getCartById(cartId, customerId);
     }
 
-    @DeleteMapping("/{cartId}")
-    public String deleteCart(@PathVariable String cartId) {
-        return cartService.deleteCartById(cartId);
+    @DeleteMapping
+    public ResponseEntity<String> deleteCart(@RequestHeader("Authorization") String authHeader) {
+        String jwt = authHeader.replace("Bearer ", "");
+        return ResponseEntity.ok(cartService.deleteCartByCustomerID(jwtUtil.getUserClaims(jwt).get("id").toString()));
     }
 
-    @PostMapping("/{cartId}/checkout")
-    public String checkout(@PathVariable String cartId) {
-        return cartService.checkoutCartById(cartId);
+    @PostMapping("/checkout")
+    public ResponseEntity<String> checkout(@RequestHeader("Authorization") String authHeader) {
+        String jwt = authHeader.replace("Bearer ", "");
+        return ResponseEntity.ok(cartService.checkoutCartByCustomerId(jwtUtil.getUserClaims(jwt).get("id").toString()));
     }
 }
