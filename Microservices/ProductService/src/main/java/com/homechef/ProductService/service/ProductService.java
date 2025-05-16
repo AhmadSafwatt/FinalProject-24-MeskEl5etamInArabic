@@ -103,7 +103,7 @@ public class ProductService {
     }
 
 
-    public void deleteProductById(String id) {
+    public void deleteProductById(String id,UUID sellerId) {
         UUID productUUID = UUID.fromString(id);
 
         if(!productRepository.existsById(productUUID)){
