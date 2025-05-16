@@ -24,10 +24,13 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -300,7 +303,20 @@ public class AuthService {
     }
 
 
-    //STRINGREDISTEMPLATE PROBLEM SOLVED
+    public Map<String, String> getUsersEmails(List<UUID> ids) {
+        List<User> users = userRepository.findAllById(ids);
+        if (users.isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "No users found"
+            );
+        }
+        return users.stream()
+                .collect(Collectors.toMap(
+                        user -> user.getId().toString(),  // Convert UUID (or any ID) to String
+                        User::getEmail
+                ));
+    }
 
 
 }

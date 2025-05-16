@@ -43,7 +43,8 @@ public class AuthConfig {
                                 "/auth/verify-email**",
                                 "/auth/reset-password",
                                 "/auth/update-password",
-                                "/auth/validate-token"
+                                "/auth/validate-token",
+                                "/auth/fetch-emails"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

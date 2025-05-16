@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -62,6 +63,11 @@ public class AuthController {
     @DeleteMapping("/delete-account/{userId}")
     public String deleteAccount(@PathVariable UUID userId) {
         return authService.deleteAccount(userId);
+    }
+
+    @PostMapping("/fetch-emails")
+    public ResponseEntity<Map<String, String>> fetchEmails(@RequestBody List<UUID> requestBody) {
+        return ResponseEntity.ok(authService.getUsersEmails(requestBody));
     }
 
 }
