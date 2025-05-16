@@ -19,9 +19,6 @@ public class CreateMessageDTO {
     private static final int MAX_CONTENT_LENGTH = Message.MAX_CONTENT_LENGTH;
 
     @NotNull
-    private UUID senderId;
-
-    @NotNull
     private UUID receiverId;
 
     @NotNull
