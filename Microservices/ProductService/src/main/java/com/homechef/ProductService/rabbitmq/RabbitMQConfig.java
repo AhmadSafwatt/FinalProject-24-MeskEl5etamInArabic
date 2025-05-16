@@ -20,8 +20,10 @@ public class RabbitMQConfig {
     public static final String INCREMENT_QUEUE = "product-increment-queue";
     public static final String DECREMENT_QUEUE = "product-decrement-queue";
     public static final String PRODUCT_EXCHANGE = "product-exchange";
+
     public static final String INCREMENT_ROUTING_KEY = "product.increment";
     public static final String DECREMENT_ROUTING_KEY = "product.decrement";
+
 
     @Bean
     public Queue incrementQueue() {
