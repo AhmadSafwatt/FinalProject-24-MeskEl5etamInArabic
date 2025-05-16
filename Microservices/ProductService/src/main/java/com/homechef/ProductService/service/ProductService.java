@@ -116,7 +116,7 @@ public class ProductService {
 
 
 
-    public Optional<Product> updateProduct(String id, Map<String, Object> updates) {
+    public Optional<Product> updateProduct(String id, Map<String, Object> updates,UUID sellerId) {
         MongoDatabase mongoDatabase = this.mongoClient.getDatabase("elthon2yelamr7");
         MongoCollection<Document> products = mongoDatabase.getCollection("products");
 
@@ -128,6 +128,10 @@ public class ProductService {
         }
 
         Product product = productOptional.get();
+
+        if(!product.getSellerId().equals(sellerId)){
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"user not authorised to update this product");
+        }
 
         if (updates.containsKey("name")) {
             products.updateOne(Filters.eq("_id", id),
@@ -183,7 +187,7 @@ public class ProductService {
         return productRepository.findById(productUUID);
     }
 
-    public Double applyDiscount(String id,Double discount){
+    public Double applyDiscount(String id,Double discount,UUID sellerId){
 
         if (discount == null || discount < 0.0 || discount > 1.0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Discount must be between 0 and 1");
@@ -195,10 +199,15 @@ public class ProductService {
         Optional<Product> productOptional = productRepository.findById(productUUID);
 
         if (productOptional.isEmpty()) {
+
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
         }
 
         Product product = productOptional.get();
+        if(!product.getSellerId().equals(sellerId)){
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"user not authorised to apply discount for this product");
+        }
+
         return  product.getPrice() * (1-discount);
 
     }
