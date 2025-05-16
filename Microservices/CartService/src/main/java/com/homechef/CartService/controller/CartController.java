@@ -1,11 +1,13 @@
 package com.homechef.CartService.controller;
 
+import com.homechef.CartService.config.JwtUtil;
 import com.homechef.CartService.model.Cart;
 import com.homechef.CartService.model.CartItem;
 import com.homechef.CartService.service.CartService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.homechef.CartService.config.JwtUtil.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,17 +20,14 @@ public class CartController {
     @Autowired
     private CartService cartService;
 
+    private JwtUtil jwtUtil = JwtUtil.getInstance();
 
-    @PostMapping("/{customerId}/createCart")
-    public Cart createCart(@PathVariable String customerId){
-        return cartService.createCart( customerId );
+    @PostMapping("/createCart")
+    public Cart createCart(@RequestHeader("Authorization") String authHeader){
+        String jwt = authHeader.replace("Bearer ", "");
+        return cartService.createCart(jwtUtil.getUserClaims(jwt).get("id").toString());
+        // "id", "username", "email", "address", "phoneNumber", "role"
     }
-
-//    @PutMapping("/updateCart/{cartID}")
-//    public Cart updateCart(@PathVariable String cartID , @RequestBody Cart cart){
-//        return cartService.updateCart(cartID , cart);
-//
-//    }
 
     @PutMapping("/{customerId}/addProduct")
     public Cart addProduct(@PathVariable String customerId, @RequestBody Map<String, Object> payload) {
