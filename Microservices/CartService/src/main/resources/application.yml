@@ -6,7 +6,7 @@ spring:
       uri: mongodb://bahy:alansary@localhost:27017/elsolasyelmare7?authSource=admin
       database: elsolasyelmare7
     redis:
-      host: redis_cache
+      host: localhost
       port: 6379
   cache:
     type: redis

@@ -153,7 +153,9 @@ public class CartService {
         for (CartItem item : c.getCartItems()){
             ids.add(item.getProductId().toString());
         }
-        List<ProductDTO> products = productClient.getProductsById(ids);
+        List<ProductDTO> products = new ArrayList<>();
+        if (!ids.isEmpty())
+            products = productClient.getProductsById(ids);
         // Update cart items with product details
         for (int i = 0; i < c.getCartItems().size(); i++) {
             c.getCartItems().get(i).setProduct(products.get(i));
