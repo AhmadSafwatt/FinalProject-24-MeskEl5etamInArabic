@@ -228,12 +228,8 @@ public class ProductService {
     }
 
     @RabbitListener(queues = RabbitMQConfig.INCREMENT_QUEUE)
-    public Product incrementAmountSold(ProductMessage message) {
-
-
+    public void incrementAmountSold(ProductMessage message) {
         UUID productUUID = message.getProductId();
-
-
         if(!productRepository.existsById(productUUID))
         {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
@@ -246,17 +242,10 @@ public class ProductService {
         Query query = new Query(Criteria.where("_id").is(message.getProductId().toString()));
         Update update = new Update().inc("amountSold", message.getAmount());
         mongoTemplate.updateFirst(query, update, Product.class);
-        return mongoTemplate.findOne(query, Product.class);
-
     }
     @RabbitListener(queues = RabbitMQConfig.DECREMENT_QUEUE)
-    public Product decrementAmountSold(ProductMessage message) {
-
-
-
+    public void decrementAmountSold(ProductMessage message) {
         UUID productUUID = message.getProductId();
-
-
         if(!productRepository.existsById(productUUID))
         {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
@@ -273,6 +262,5 @@ public class ProductService {
         Query query = new Query(Criteria.where("_id").is(message.getProductId().toString()));
         Update update = new Update().inc("amountSold",-1*message.getAmount());
         mongoTemplate.updateFirst(query, update, Product.class);
-        return mongoTemplate.findOne(query, Product.class);
     }
 }
