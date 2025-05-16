@@ -223,6 +223,7 @@ public class AuthService {
             valueOps.increment(key);
         }
     }
+    
 
     public void resetAttempts(String email) {
         redisTemplate.delete(email + ":attempts");
