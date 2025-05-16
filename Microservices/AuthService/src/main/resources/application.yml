@@ -24,6 +24,19 @@ spring:
           auth: true
           starttls:
             enable: true
+  otp:
+    expiration: 300000 # Expiration time in milliseconds (e.g., 5 minutes)
+    token-length: 6     # Number of digits in the OTP
+    algorithm: HmacSHA256 # Algorithm for generating OTP (e.g., HmacSHA256)
+    max-attempts: 3
+    block-duration: 600000
+  data:
+    redis:
+      host: localhost
+      password: redis-password
+      port: 6379
+      timeout: 60000
+      database: 0
 
 logging:
   level:
@@ -33,10 +46,8 @@ logging:
         web: DEBUG # Optional, but can be helpful for request mapping issues
 
 
-
 server:
   port: 8081
-
 
 jwt:
   secret: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
