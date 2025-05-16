@@ -10,6 +10,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+
+import java.security.SecureRandom;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -101,76 +103,133 @@ public class AuthService {
         userRepository.save(user);
         return "Email Verified";
     }
-    //STRINGREDISTEMPLATE PROBLEM SOLVED
+
 
     public String emailResetPassword(String email) {
         // TODO:
         // generate otp and store in redis along with email
         // send email with reset link (/reset-password)
 
-        // 1. Check if the user exists in the system
+        // Check if the user exists
         User user = userRepository.findByEmail(email);
         if (user == null) {
-            return "User with this email does not exist.";
+            return "No account associated with this email.";
         }
 
-        // 2. Generate a one-time password (OTP) or token
-        String otp = UUID.randomUUID().toString();
+        // Generate a 6-digit OTP
+        String otp = generateOTP(6);
 
-        // 3. Store the OTP in Redis with an expiration time (e.g., 10 minutes)
-        ValueOperations<String, String> valueOps = redisTemplate.opsForValue();
-        valueOps.set("RESET_PASSWORD_" + email, otp, 10, TimeUnit.MINUTES);
+        // Save OTP in Redis with an expiration time (5 minutes)
+        saveOtpToRedis(email, otp, 300000); // 300000ms = 5 minutes
 
-        // 4. Send the OTP to the user's email
-        SimpleMailMessage mailMessage = new SimpleMailMessage();
-        mailMessage.setTo(email);
-        mailMessage.setSubject("Reset Your Password");
-        mailMessage.setText("Use the following OTP to reset your password: " + otp +
-                "\nNote: This OTP will expire in 10 minutes.");
+        // Send OTP via email to the user
+        sendOtpEmail(email, otp);
 
-        try {
-            mailSender.send(mailMessage);
-        } catch (Exception e) {
-            // Log any errors that occur during email sending (if you have a logger)
-            System.err.println("Error sending password reset email: " + e.getMessage());
-            return "Failed to send reset password email. Please try again later.";
-        }
-
-        // 5. Return success message
-        return "Password reset instructions have been sent to the email.";
-
+        return "OTP has been sent to your registered email address.";
     }
-    //STRINGREDISTEMPLATE PROBLEM SOLVED
+
+
 
     public String resetPassword(String email, String otp, String newPassword) {
-        // 1. Check if a user exists with the provided email
+        // Check if the user is blocked
+        if (isBlocked(email)) {
+            return "Too many invalid attempts. Please try again later.";
+        }
+
+        // Validate the OTP
+        boolean isOtpValid = validateOtp(email, otp);
+
+        if (!isOtpValid) {
+            incrementFailedAttempts(email); // Track failed attempts
+            return "Invalid or expired OTP. Please request a new one.";
+        }
+
+        // Reset attempts after successful validation
+        resetAttempts(email);
+
+        // Update the user password
         User user = userRepository.findByEmail(email);
         if (user == null) {
-            return "User with this email does not exist.";
+            return "User not found with the provided email.";
         }
 
-        // 2. Retrieve OTP from Redis and validate
-        ValueOperations<String, String> valueOps = redisTemplate.opsForValue();
-        String storedOtp = valueOps.get("RESET_PASSWORD_" + email);
-
-        if (storedOtp == null) {
-            return "OTP has expired or is invalid.";
-        }
-
-        if (!storedOtp.equals(otp)) {
-            return "Invalid OTP. Please try again.";
-        }
-
-        // 3. Encrypt the new password and update the user
-        String encodedPassword = passwordEncoder.encode(newPassword);
-        user.setPassword(encodedPassword);
+        user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
 
-        // 4. Remove OTP from Redis after successful password reset
-        redisTemplate.delete("RESET_PASSWORD_" + email);
-
-        // 5. Return success message
-        return "Password has been successfully reset.";
-
+        return "Password has been successfully updated.";
     }
+
+
+
+    //OTP Generation Method
+    public String generateOTP(int length) {
+        SecureRandom random = new SecureRandom();
+        StringBuilder otp = new StringBuilder();
+
+        for (int i = 0; i < length; i++) {
+            otp.append(random.nextInt(10)); // Generates a random number (0-9)
+        }
+        return otp.toString();
+    }
+
+    //Storing OTP in Redis
+    public void saveOtpToRedis(String email, String otp, long expirationMillis) {
+        ValueOperations<String, String> valueOps = redisTemplate.opsForValue();
+        valueOps.set(email, otp, expirationMillis, TimeUnit.MILLISECONDS); // Save in Redis with expiration
+    }
+
+    //OTP Validation Method
+    public boolean validateOtp(String email, String userInputOtp) {
+        ValueOperations<String, String> valueOps = redisTemplate.opsForValue();
+        String storedOtp = valueOps.get(email);
+
+        if (storedOtp == null) {
+            return false; // OTP expired or does not exist
+        }
+
+        if (storedOtp.equals(userInputOtp)) {
+            redisTemplate.delete(email); // Remove OTP after successful validation
+            return true;
+        }
+        return false; // OTP does not match
+    }
+
+    //sending OTP via email
+
+    public void sendOtpEmail(String email, String otp) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(email);
+        message.setSubject("Your OTP Code");
+        message.setText("Your OTP code is: " + otp + ". It is valid for 5 minutes. " +
+                "Do not share this code with anyone.");
+
+        mailSender.send(message);
+    }
+
+    public boolean isBlocked(String email) {
+        ValueOperations<String, String> valueOps = redisTemplate.opsForValue();
+        String attempts = valueOps.get(email + ":attempts");
+        return attempts != null && Integer.parseInt(attempts) >= 3;
+    }
+
+    public void incrementFailedAttempts(String email) {
+        ValueOperations<String, String> valueOps = redisTemplate.opsForValue();
+        String key = email + ":attempts";
+        String attempts = valueOps.get(key);
+
+        if (attempts == null) {
+            valueOps.set(key, "1", 600, TimeUnit.SECONDS); // 10-minute block duration
+        } else {
+            valueOps.increment(key);
+        }
+    }
+
+    public void resetAttempts(String email) {
+        redisTemplate.delete(email + ":attempts");
+    }
+
+
+
+
+
 }
