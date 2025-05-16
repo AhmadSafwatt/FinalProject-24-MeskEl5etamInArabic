@@ -1,10 +1,9 @@
 package com.example.chatservice.services;
 
-import com.example.chatservice.enums.MessageType;
-import com.example.chatservice.enums.ReportType;
 import com.example.chatservice.dtos.CreateMessageDTO;
 import com.example.chatservice.dtos.UpdateMessageDTO;
 import com.example.chatservice.enums.MessageStatus;
+import com.example.chatservice.enums.ReportType;
 import com.example.chatservice.factories.MessageFactory;
 import com.example.chatservice.models.Message;
 import com.example.chatservice.repositories.MessageRepository;
@@ -15,7 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import java.time.LocalDateTime;
+
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -51,10 +50,10 @@ public class MessageService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No message with id " + id + " found"));
     }
 
-    public Message saveMessage(CreateMessageDTO createMessageDTO) {
+    public Message saveMessage(UUID userId, CreateMessageDTO createMessageDTO) {
 
         Message message = MessageFactory.createMessage(
-                createMessageDTO.getSenderId(),
+                userId,
                 createMessageDTO.getReceiverId(),
                 createMessageDTO.getContent(),
                 createMessageDTO.getType()

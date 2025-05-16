@@ -19,6 +19,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -46,7 +48,8 @@ public class MessageController {
     /**
      * Get all messages.
      *
-     * @return List of messages
+     * @return messages: field contains a list of messages,
+     *         pagingState: field contains the next page state for pagination
      */
 
     @GetMapping
@@ -108,8 +111,15 @@ public class MessageController {
      */
     @PostMapping
     public ResponseEntity<Message> createMessage(@Valid @RequestBody CreateMessageDTO createMessageDTO) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userId = authentication.getPrincipal().toString();
+
         log.info("Creating message at /messages endpoint");
-        SendMessageCommand sendMessageCommand = new SendMessageCommand(createMessageDTO, messageService);
+        SendMessageCommand sendMessageCommand = new SendMessageCommand(
+                UUID.fromString(userId),
+                createMessageDTO,
+                messageService
+        );
         Message createdMessage = sendMessageCommand.execute();
         log.info("Created message at /messages endpoint {}", createdMessage);
         return ResponseEntity.created(URI.create("/messages/" + createdMessage.getId())).body(createdMessage);
