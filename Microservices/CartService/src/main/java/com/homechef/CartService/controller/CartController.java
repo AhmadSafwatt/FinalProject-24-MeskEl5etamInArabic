@@ -29,8 +29,11 @@ public class CartController {
         // "id", "username", "email", "address", "phoneNumber", "role"
     }
 
-    @PutMapping("/{customerId}/addProduct")
-    public Cart addProduct(@PathVariable String customerId, @RequestBody Map<String, Object> payload) {
+    @PutMapping("/addProduct")
+    public Cart addProduct(  @RequestHeader("Authorization") String authHeader  , @RequestBody Map<String, Object> payload) {
+        String jwt = authHeader.replace("Bearer " , "");
+        String customerId = jwtUtil.getUserClaims(jwt).get("id").toString();
+
         String productID = (String) payload.get("productID");
         int quantity = (int) payload.get("quantity");
         String notes = (String) payload.get("notes");
@@ -39,36 +42,48 @@ public class CartController {
     }
 
 
-    @PutMapping("/{customerId}/{productId}/addNotesToCartItem")
-    public Cart addNotesToCartItem(@PathVariable String customerId , @PathVariable String productId , @RequestBody Map<String, String> body){
+    @PutMapping("/{productId}/addNotesToCartItem")
+    public Cart addNotesToCartItem( @RequestHeader("Authorization") String authHeader , @PathVariable String productId , @RequestBody Map<String, String> body){
+        String jwt = authHeader.replace("Bearer " , "");
+        String customerId = jwtUtil.getUserClaims(jwt).get("id").toString();
         return cartService.addNotesToCartItem(customerId, productId, body.get("notes"));
     }
 
-    @PutMapping("/{customerId}/{productId}/removeProduct")
-    public Cart removeProduct(@PathVariable String customerId , @PathVariable String productId ){
+    @PutMapping("/{productId}/removeProduct")
+    public Cart removeProduct(@RequestHeader("Authorization") String authHeader , @PathVariable String productId ){
+        String jwt = authHeader.replace("Bearer " , "");
+        String customerId = jwtUtil.getUserClaims(jwt).get("id").toString();
         return cartService.removeProduct(customerId , productId);
     }
 
-    @PutMapping("/{customerId}/updatePromo")
-    public Cart updateCartPromo(@PathVariable String customerId, @RequestBody Map<String, Boolean> payload){
+    @PutMapping("/updatePromo")
+    public Cart updateCartPromo(@RequestHeader("Authorization") String authHeader, @RequestBody Map<String, Boolean> payload){
+        String jwt = authHeader.replace("Bearer " , "");
+        String customerId = jwtUtil.getUserClaims(jwt).get("id").toString();
         return cartService.updatePromo(customerId , payload.get("promo"));
     }
 
-    @PutMapping("/{customerId}/updateNotes")
-    public Cart updateCartNotes(@PathVariable String customerId, @RequestBody HashMap<String, String> payload) {
+    @PutMapping("/updateNotes")
+    public Cart updateCartNotes( @RequestHeader("Authorization") String authHeader, @RequestBody HashMap<String, String> payload) {
+        String jwt = authHeader.replace("Bearer " , "");
+        String customerId = jwtUtil.getUserClaims(jwt).get("id").toString();
         String notes = payload.get("notes");
         return cartService.updateNotes(customerId, notes);
     }
 
 
-    @GetMapping("/customerId/{customerId}")
-    public Cart getCartByCustomerId(@PathVariable String customerId) {
+    @GetMapping("/getCart")
+    public Cart getCartByCustomerId(@RequestHeader("Authorization") String authHeader) {
+        String jwt = authHeader.replace("Bearer ", "");
+        String customerId = jwtUtil.getUserClaims(jwt).get("id").toString();
         return cartService.getCartByCustomerId(customerId);
     }
 
-    @GetMapping("/{cartId}")
-    public Cart getCartById(@PathVariable String cartId) {
-        return cartService.getCartById(cartId);
+    @GetMapping("/{cartId}/cartId")
+    public Cart getCartById(@PathVariable String cartId , @RequestHeader("Authorization") String authHeader) {
+        String jwt = authHeader.replace("Bearer ", "");
+        String customerId = jwtUtil.getUserClaims(jwt).get("id").toString();
+        return cartService.getCartById(cartId, customerId);
     }
 
     @DeleteMapping
