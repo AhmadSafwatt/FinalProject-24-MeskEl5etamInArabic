@@ -192,9 +192,9 @@ public class MessageController {
      */
     @DeleteMapping
     public ResponseEntity<String> clearMessages() {
-        log.info("Deleting all messages at /messages/clear endpoint");
+        log.info("Deleting all messages at /messages endpoint");
         messageService.deleteAllMessages();
-        log.info("Deleted all messages at /messages/clear endpoint");
+        log.info("Deleted all messages at /messages endpoint");
         return ResponseEntity.noContent().build();
     }
 
