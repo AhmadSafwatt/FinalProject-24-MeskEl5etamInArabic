@@ -1,10 +1,12 @@
 package com.homechef.ProductService.controller;
 
 
+import com.homechef.ProductService.config.JwtUtil;
 import com.homechef.ProductService.model.Product;
 import com.homechef.ProductService.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import com.homechef.ProductService.config.JwtUtil.*;
 
 import java.util.List;
 import java.util.Map;
@@ -16,7 +18,7 @@ import java.util.UUID;
 public class ProductController {
 
     ProductService productService;
-
+    private JwtUtil jwtUtil = JwtUtil.getInstance();
 
     @Autowired
     public ProductController(ProductService productService) {
@@ -24,11 +26,13 @@ public class ProductController {
     }
 
     @PostMapping
-    public Product createProduct(@RequestBody Map<String, Object> request) {
+    public Product createProduct(@RequestBody Map<String, Object> request, @RequestHeader("Authorization") String authHeader) {
         String type = (String) request.get("type");
         String name = (String) request.get("name");
         Double price = ((Number) request.get("price")).doubleValue();
-        UUID sellerId = UUID.fromString((String) request.get("sellerId"));
+        //UUID sellerId = UUID.fromString((String) request.get("sellerId"));
+        String jwt = authHeader.replace("Bearer ", "");
+        UUID sellerId = UUID.fromString(jwtUtil.getUserClaims(jwt).get("id").toString());
         int amountSold = ((Number) request.get("amountSold")).intValue();
         String description = request.get("description") != null ? (String) request.get("description") : "";
         Double discount = request.get("discount") != null ? ((Number) request.get("discount")).doubleValue() : 0.0;
@@ -48,6 +52,7 @@ public class ProductController {
     public List<Product> getMostSoldProducts() {
         return productService.getMostSoldProducts();
     }
+
     @DeleteMapping("/{id}")
     public void deleteProductById(@PathVariable String id) {
         productService.deleteProductById(id);
@@ -58,29 +63,18 @@ public class ProductController {
         return  productService.updateProduct(id,request);
     }
 
-
     @PutMapping("/discount/{id}")
     public Double applyDiscount(@PathVariable String id, @RequestParam Double discount){
         return  productService.applyDiscount(id,discount);
     }
 
-
     @PutMapping("/incrementAmountSold/{id}")
     public Product incrementAmountSold(@PathVariable String id, @RequestParam int amount) {
-
         return productService.incrementAmountSold(id, amount);
-
     }
-
-
 
     @PutMapping("/{id}/decrement")
     public Product decrementAmountSold(@PathVariable String id, @RequestParam int amount) {
        return productService.decrementAmountSold(id, amount);
     }
-
-
-
-
-
 }
