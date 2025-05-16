@@ -83,6 +83,9 @@ public class ProductService {
         List<Product> products = new ArrayList<>();
         for (String id : ids){
             UUID productUUID = UUID.fromString(id);
+            if (!productRepository.existsById(productUUID)) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
+            }
             Product product = productRepository.findById(productUUID).orElse(null);
             products.add(product);
         }
