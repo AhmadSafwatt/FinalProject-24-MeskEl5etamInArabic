@@ -146,16 +146,17 @@ public class CartService {
         return c;
     }
 
-    public String deleteCartById(String cartId) {
-        UUID cartUUID = UUID.fromString(cartId);
-        if (!cartRepository.existsById(cartUUID))
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Cart not found for cart ID: %s", cartId));
+    public String deleteCartByCustomerID(String customerId) {
+        UUID customerUUID = UUID.fromString(customerId);
+        Cart cart = cartRepository.findByCustomerId(customerUUID);
+        if (cart == null)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Cart not found for User: %s", customerId));
 
-        cartRepository.deleteById(cartUUID);
+        cartRepository.delete(cart);
         return "Cart Deleted Successfully";
     }
 
-    public String checkoutCartById(String cartId) { // facade design pattern
-        return checkoutFacade.execute(cartId);
+    public String checkoutCartByCustomerId(String customerId) { // facade design pattern
+        return checkoutFacade.execute(customerId);
     }
 }

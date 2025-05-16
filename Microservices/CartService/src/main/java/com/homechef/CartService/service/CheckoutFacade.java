@@ -23,8 +23,8 @@ public class CheckoutFacade {
         this.productClient = productClient;
     }
 
-    public String execute(String cartId) { // facade design pattern
-        Cart cart = findCart(cartId);
+    public String execute(String customerId) { // facade design pattern
+        Cart cart = findCart(customerId);
 
         double totalCost = calculateTotalCost(cart);
 
@@ -35,11 +35,11 @@ public class CheckoutFacade {
         return "Checkout Successful";
     }
 
-    private Cart findCart(String cartId) {
-        UUID cartUUID = UUID.fromString(cartId);
-        Cart c = cartRepository.findById(cartUUID).orElse(null);
+    private Cart findCart(String customerId) {
+        UUID customerUUID = UUID.fromString(customerId);
+        Cart c = cartRepository.findByCustomerId(customerUUID);
         if (c == null)
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Cart not found for cart ID: %s", cartId));
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Cart not found for User ID: %s", customerUUID));
 
         return c;
     }

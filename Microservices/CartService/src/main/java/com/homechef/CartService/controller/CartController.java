@@ -71,13 +71,15 @@ public class CartController {
         return cartService.getCartById(cartId);
     }
 
-    @DeleteMapping("/{cartId}")
-    public ResponseEntity<String> deleteCart(@PathVariable String cartId) {
-        return ResponseEntity.ok(cartService.deleteCartById(cartId));
+    @DeleteMapping
+    public ResponseEntity<String> deleteCart(@RequestHeader("Authorization") String authHeader) {
+        String jwt = authHeader.replace("Bearer ", "");
+        return ResponseEntity.ok(cartService.deleteCartByCustomerID(jwtUtil.getUserClaims(jwt).get("id").toString()));
     }
 
-    @PostMapping("/{cartId}/checkout")
-    public ResponseEntity<String> checkout(@PathVariable String cartId) {
-        return ResponseEntity.ok(cartService.checkoutCartById(cartId));
+    @PostMapping("/checkout")
+    public ResponseEntity<String> checkout(@RequestHeader("Authorization") String authHeader) {
+        String jwt = authHeader.replace("Bearer ", "");
+        return ResponseEntity.ok(cartService.checkoutCartByCustomerId(jwtUtil.getUserClaims(jwt).get("id").toString()));
     }
 }
