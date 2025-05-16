@@ -8,21 +8,33 @@ import com.example.chatservice.enums.MessageStatus;
 import com.example.chatservice.factories.MessageFactory;
 import com.example.chatservice.models.Message;
 import com.example.chatservice.repositories.MessageRepository;
+import org.springframework.data.cassandra.core.CassandraTemplate;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+
 
 @Service
 public class MessageService {
 
     private final MessageRepository messageRepository;
+    private final CassandraTemplate cassandraTemplate;
 
-    public MessageService(MessageRepository messageRepository) {
+    public MessageService(MessageRepository messageRepository, CassandraTemplate cassandraTemplate) {
         this.messageRepository = messageRepository;
+        this.cassandraTemplate = cassandraTemplate;
+    }
+
+    public Slice<Message> getMessages(Pageable pageable) {
+        return messageRepository.findAll(pageable);
     }
 
     public List<Message> getMessages() {
@@ -54,6 +66,20 @@ public class MessageService {
 
         return messageRepository.save(message);
 
+    }
+
+    @Async
+    public CompletableFuture<Void> saveAllMessagesAsync(List<Message> messages) {
+        saveAllMessages(messages);
+        return CompletableFuture.completedFuture(null);
+    }
+
+    private void saveAllMessages(List<Message> messages) {
+        if (messages == null || messages.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message list cannot be null or empty");
+        }
+
+        messageRepository.saveAll(messages);
     }
 
     public void deleteMessage(UUID id) {
@@ -115,7 +141,7 @@ public class MessageService {
         if (messageCount == 0) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No messages to delete");
         }
-        messageRepository.deleteAll();
+        cassandraTemplate.truncate(Message.class);
     }
 
     public List<Message> searchMessagesByContent(String searchString) {

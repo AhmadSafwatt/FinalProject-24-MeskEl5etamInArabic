@@ -1,5 +1,7 @@
 package com.example.chatservice.models;
 
+import com.example.chatservice.enums.MessageStatus;
+import com.example.chatservice.enums.MessageType;
 import com.example.chatservice.enums.ReportType;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -16,9 +18,6 @@ import org.springframework.data.cassandra.core.mapping.Table;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
-
-import com.example.chatservice.enums.MessageStatus;
-import com.example.chatservice.enums.MessageType;
 
 /**
  * Represents a message in the chat service.
@@ -47,6 +46,20 @@ public class Message {
         this.type = type;
         this.timestamp = LocalDateTime.now();
         this.status = MessageStatus.SENT;
+    }
+
+
+    // This constructor is for testing purposes
+    public Message(MessageType type, LocalDateTime timestamp, MessageStatus status, String content, boolean isReported, ReportType reportType) {
+        this.id = UUID.randomUUID();
+        this.senderId = UUID.randomUUID();
+        this.receiverId = UUID.randomUUID();
+        this.type = type;
+        this.timestamp = timestamp;
+        this.status = status;
+        this.content = content;
+        this.isReported = isReported;
+        this.reportType = reportType;
     }
 
     @PrimaryKey
