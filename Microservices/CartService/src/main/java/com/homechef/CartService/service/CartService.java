@@ -8,6 +8,9 @@ import com.homechef.CartService.model.ProductDTO;
 import com.homechef.CartService.repository.CartRepository;
 import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -24,15 +27,16 @@ public class CartService {
     @Autowired
     private CheckoutFacade checkoutFacade;
 
+    @Autowired
+    private CacheManager cacheManager;
+
     public CartService(ProductClient productClient) {
         this.productClient = productClient;
     }
 
-
+    @CachePut(value = "cartCache", key = "#result.id")
     public Cart createCart(String customerId) {
-
         UUID customerIDD = UUID.fromString(customerId);
-
         if(!(cartRepository.findByCustomerId(customerIDD) == null))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Customer already has a cart");
         Cart cart1=new Cart.Builder()
@@ -45,6 +49,7 @@ public class CartService {
         return cartRepository.save(cart1);
     }
 
+    @CachePut(value = "cartCache", key = "#result.id")
     public Cart addProduct(String customerId , String productID , int quantity , String notes){
         UUID customerIDD = UUID.fromString(customerId);
         UUID productIDD = UUID.fromString(productID);
@@ -70,6 +75,7 @@ public class CartService {
         return cartRepository.save(cart);
     }
 
+    @CachePut(value = "cartCache", key = "#result.id")
     public Cart addNotesToCartItem(String customerId, String productID, String notes){
         UUID customerIDD = UUID.fromString(customerId);
         UUID productIDD = UUID.fromString(productID);
@@ -83,6 +89,7 @@ public class CartService {
         return cartRepository.save(cart);
     }
 
+    @CachePut(value = "cartCache", key = "#result.id")
     public Cart removeProduct(String customerId , String productId){
         UUID customerIDD = UUID.fromString(customerId);
         UUID productIDD = UUID.fromString(productId);
@@ -97,6 +104,7 @@ public class CartService {
         return cartRepository.save(cart);
     }
 
+    @CachePut(value = "cartCache", key = "#result.id")
     public Cart updatePromo(String customerId , boolean promo) {
         UUID customerIDD = UUID.fromString(customerId);
         Cart cart = cartRepository.findByCustomerId(customerIDD);
@@ -106,6 +114,7 @@ public class CartService {
         return cartRepository.save(cart);
     }
 
+    @CachePut(value = "cartCache", key = "#result.id")
     public Cart updateNotes(String customerId, String notes) {
         UUID customerIDD = UUID.fromString(customerId);
         Cart cart = cartRepository.findByCustomerId(customerIDD);
@@ -126,6 +135,7 @@ public class CartService {
         return cart;
     }
 
+    @Cacheable(value = "cartCache", key = "#cartId")
     public Cart getCartById(String cartId , String customerId) {
         UUID cartUUID = UUID.fromString(cartId);
         Cart c = cartRepository.findById(cartUUID).orElse(null);
@@ -143,7 +153,9 @@ public class CartService {
         for (CartItem item : c.getCartItems()){
             ids.add(item.getProductId().toString());
         }
-        List<ProductDTO> products = productClient.getProductsById(ids);
+        List<ProductDTO> products = new ArrayList<>();
+        if (!ids.isEmpty())
+            products = productClient.getProductsById(ids);
         // Update cart items with product details
         for (int i = 0; i < c.getCartItems().size(); i++) {
             c.getCartItems().get(i).setProduct(products.get(i));
@@ -156,6 +168,8 @@ public class CartService {
         Cart cart = cartRepository.findByCustomerId(customerUUID);
         if (cart == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Cart not found for User: %s", customerId));
+
+        cacheManager.getCache("cartCache").evict(cart.getId());
 
         cartRepository.delete(cart);
         return "Cart Deleted Successfully";

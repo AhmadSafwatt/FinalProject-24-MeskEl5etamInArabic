@@ -103,6 +103,11 @@
 
 		<!-- ================================ END AUTH DEPENDENCIES ====================================-->
 
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-redis-reactive</artifactId>
+		</dependency>
+
 	</dependencies>
 	<dependencyManagement>
 		<dependencies>
