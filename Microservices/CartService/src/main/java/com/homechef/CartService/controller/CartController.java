@@ -60,7 +60,7 @@ public class CartController {
     }
 
 
-    @GetMapping("/byCustomerId")
+    @GetMapping("/getCart")
     public Cart getCartByCustomerId(@RequestHeader("Authorization") String authHeader) {
         String jwt = authHeader.replace("Bearer ", "");
         String customerId = jwtUtil.getUserClaims(jwt).get("id").toString();
