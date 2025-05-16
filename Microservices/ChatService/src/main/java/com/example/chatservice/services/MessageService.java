@@ -7,6 +7,7 @@ import com.example.chatservice.enums.ReportType;
 import com.example.chatservice.factories.MessageFactory;
 import com.example.chatservice.models.Message;
 import com.example.chatservice.repositories.MessageRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.cassandra.core.CassandraTemplate;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -27,6 +28,7 @@ public class MessageService {
     private final MessageRepository messageRepository;
     private final CassandraTemplate cassandraTemplate;
 
+    @Autowired
     public MessageService(MessageRepository messageRepository, CassandraTemplate cassandraTemplate) {
         this.messageRepository = messageRepository;
         this.cassandraTemplate = cassandraTemplate;
