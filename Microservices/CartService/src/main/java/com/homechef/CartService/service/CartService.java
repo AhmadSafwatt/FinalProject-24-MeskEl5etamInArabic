@@ -46,6 +46,7 @@ public class CartService {
                 .notes("")
                 .promo(false)
                 .build();
+        cacheManager.getCache("user_cart_map").put(customerId, cart1.getId().toString());
         return cartRepository.save(cart1);
     }
 
@@ -125,14 +126,12 @@ public class CartService {
     }
 
     public Cart getCartByCustomerId(String customerId) {
-        UUID customerUUID = UUID.fromString(customerId);
-        Cart cart = cartRepository.findByCustomerId(customerUUID);
-        if (cart == null) {
+        String cartId = cacheManager.getCache("user_cart_map").get(customerId, String.class);
+        if (cartId == null) {
             String errorMessage = "Cart not found for customer ID: " + customerId;
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, errorMessage);
         }
-        cart = getCartById(cart.getId().toString(), customerId);
-        return cart;
+        return getCartById(cartId, customerId);
     }
 
     @Cacheable(value = "cartCache", key = "#cartId")
@@ -170,6 +169,7 @@ public class CartService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Cart not found for User: %s", customerId));
 
         cacheManager.getCache("cartCache").evict(cart.getId());
+        cacheManager.getCache("user_cart_map").evict(customerId);
 
         cartRepository.delete(cart);
         return "Cart Deleted Successfully";

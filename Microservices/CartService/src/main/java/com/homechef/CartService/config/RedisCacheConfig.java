@@ -33,6 +33,11 @@ public class RedisCacheConfig {
                         RedisSerializationContext.SerializationPair.fromSerializer(
                                 new Jackson2JsonRedisSerializer<>(Cart.class))));
 
+        cacheConfigurations.put("user_cart_map",
+                defaultConfig.serializeValuesWith(
+                        RedisSerializationContext.SerializationPair.fromSerializer(
+                                new Jackson2JsonRedisSerializer<>(String.class))));
+
         return RedisCacheManager.builder(redisConnectionFactory)
                 .cacheDefaults(defaultConfig)
                 .withInitialCacheConfigurations(cacheConfigurations)
