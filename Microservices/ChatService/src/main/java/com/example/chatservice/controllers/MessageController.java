@@ -4,6 +4,7 @@ import com.example.chatservice.commands.DeleteMessageCommand;
 import com.example.chatservice.commands.SendMessageCommand;
 import com.example.chatservice.commands.UpdateMessageCommand;
 import com.example.chatservice.dtos.CreateMessageDTO;
+import com.example.chatservice.dtos.MessagePage;
 import com.example.chatservice.dtos.UpdateMessageDTO;
 import com.example.chatservice.models.Message;
 import com.example.chatservice.seeders.MessageSeeder;
@@ -11,11 +12,18 @@ import com.example.chatservice.services.MessageService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.cassandra.core.query.CassandraPageRequest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.List;
+import java.net.URLEncoder;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.UUID;
 
 @Slf4j
@@ -37,12 +45,42 @@ public class MessageController {
      *
      * @return List of messages
      */
+
     @GetMapping
-    public ResponseEntity<List<Message>> getMessages() {
+    public ResponseEntity<MessagePage> getMessages(
+            @RequestParam(defaultValue = "50") int size,
+            @RequestParam(required = false) String pagingState
+    ) {
         log.info("Getting all messages from /messages endpoint");
-        List<Message> messages = messageService.getMessages();
-        log.info("Retrieved {} messages from /messages endpoint", messages.size());
-        return ResponseEntity.ok(messages);
+
+        Pageable pageable = PageRequest.of(0, size);
+
+        if (pagingState != null && !pagingState.isEmpty()) {
+            try {
+                ByteBuffer decoded = ByteBuffer.wrap(Base64.getDecoder().decode(pagingState));
+                pageable = CassandraPageRequest.of(pageable, decoded);
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.badRequest().body(null);
+            }
+        }
+
+        Slice<Message> slice = messageService.getMessages(pageable);
+
+        String nextPageState = null;
+        if (slice.hasNext() && slice.getPageable() instanceof CassandraPageRequest cassandraPageRequest) {
+            ByteBuffer stateBuffer = cassandraPageRequest.getPagingState();
+            if (stateBuffer != null) {
+                byte[] bytes = new byte[stateBuffer.remaining()];
+                stateBuffer.duplicate().get(bytes);
+                nextPageState = URLEncoder.encode(Base64.getEncoder().encodeToString(bytes), StandardCharsets.UTF_8);
+            }
+        }
+
+        MessagePage response = new MessagePage(slice.getContent(), nextPageState);
+
+        log.info("Retrieved {} messages", slice.getNumberOfElements());
+
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -135,21 +173,23 @@ public class MessageController {
     /**
      * Seeds the database with a specified number of messages.
      *
-     * @param numberOfMessages The number of messages to seed
+     * @param count The number of messages to seed
      */
 
-    @GetMapping("/seed/{numberOfMessages}")
-    public ResponseEntity<String> seedMessages(@PathVariable int numberOfMessages) {
-        log.info("Seeding messages at /messages/seed endpoint");
-        messageSeeder.seedMessages(numberOfMessages);
+    @GetMapping("/seed")
+    public ResponseEntity<String> seedMessages(@RequestParam(defaultValue = "50") int count) {
+        log.info("Seeding messages at /messages/seed endpoint with count={}", count);
+        long startTime = System.currentTimeMillis();
+        messageSeeder.seedMessages(count);
         log.info("Seeded messages at /messages/seed endpoint");
-        return ResponseEntity.ok("Seeded " + numberOfMessages + " messages successfully");
+        long endTime = System.currentTimeMillis();
+        return ResponseEntity.ok("Seeded " + count + " messages in " + (endTime - startTime) + " ms");
     }
 
     /**
      * Clear all messages.
      */
-    @DeleteMapping("/")
+    @DeleteMapping
     public ResponseEntity<String> clearMessages() {
         log.info("Deleting all messages at /messages/clear endpoint");
         messageService.deleteAllMessages();
