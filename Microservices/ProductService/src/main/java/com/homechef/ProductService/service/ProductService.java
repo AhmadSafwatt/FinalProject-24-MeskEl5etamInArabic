@@ -1,6 +1,7 @@
 package com.homechef.ProductService.service;
 
 
+import com.homechef.ProductService.DTO.ProductMessage;
 import com.homechef.ProductService.model.*;
 import com.homechef.ProductService.rabbitmq.RabbitMQConfig;
 import com.homechef.ProductService.repository.ProductRepository;
@@ -226,10 +227,11 @@ public class ProductService {
 
     }
 
-    @RabbitListener(queues = RabbitMQConfig.PRODUCT_QUEUE)
-    public Product incrementAmountSold(String id, int incrementBy) {
+    @RabbitListener(queues = RabbitMQConfig.INCREMENT_QUEUE)
+    public Product incrementAmountSold(ProductMessage message) {
 
-        UUID productUUID = UUID.fromString(id);
+
+        UUID productUUID = message.getProductId();
 
 
         if(!productRepository.existsById(productUUID))
@@ -237,22 +239,22 @@ public class ProductService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
         }
 
-        if(incrementBy < 0 ) {
+        if(message.getAmount() < 0 ) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Increment value must be non-negative");
         }
 
-        Query query = new Query(Criteria.where("_id").is(id));
-        Update update = new Update().inc("amountSold", incrementBy);
+        Query query = new Query(Criteria.where("_id").is(message.getProductId().toString()));
+        Update update = new Update().inc("amountSold", message.getAmount());
         mongoTemplate.updateFirst(query, update, Product.class);
         return mongoTemplate.findOne(query, Product.class);
 
     }
+    @RabbitListener(queues = RabbitMQConfig.DECREMENT_QUEUE)
+    public Product decrementAmountSold(ProductMessage message) {
 
-    public Product decrementAmountSold(String id, int decrementBy) {
 
 
-
-        UUID productUUID = UUID.fromString(id);
+        UUID productUUID = message.getProductId();
 
 
         if(!productRepository.existsById(productUUID))
@@ -260,16 +262,16 @@ public class ProductService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
         }
         int productAmountSold = productRepository.findById(productUUID).get().getAmountSold();
-        if( productAmountSold< decrementBy) {
+        if( productAmountSold< message.getAmount()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"decrement value must be less than amount sold");
         }
 
-        if(decrementBy < 0) {
+        if(message.getAmount() < 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"decrement value must be non-negative");
         }
 
-        Query query = new Query(Criteria.where("_id").is(id));
-        Update update = new Update().inc("amountSold", -decrementBy);
+        Query query = new Query(Criteria.where("_id").is(message.getProductId().toString()));
+        Update update = new Update().inc("amountSold",-1*message.getAmount());
         mongoTemplate.updateFirst(query, update, Product.class);
         return mongoTemplate.findOne(query, Product.class);
     }
