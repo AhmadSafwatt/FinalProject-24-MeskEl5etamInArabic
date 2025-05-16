@@ -38,20 +38,23 @@ import static org.junit.jupiter.api.Assertions.*;
 @EnableAutoConfiguration
 class ChatServiceApplicationTests {
 
-    @Autowired
-    private MockMvc mockMvc;
+    private final MockMvc mockMvc;
 
-    @Autowired
     private MessageService messageService;
 
-    @Autowired
-    private MessageRepository messageRepository;
+    private final MessageRepository messageRepository;
 
-    @Autowired
-    private CassandraTemplate cassandraTemplate;
+    private final CassandraTemplate cassandraTemplate;
 
     private ObjectMapper objectMapper;
     private UUID receiverId;
+
+    @Autowired
+    public ChatServiceApplicationTests(MockMvc mockMvc, MessageRepository messageRepository, CassandraTemplate cassandraTemplate) {
+        this.mockMvc = mockMvc;
+        this.messageRepository = messageRepository;
+        this.cassandraTemplate = cassandraTemplate;
+    }
 
 
     @BeforeEach
