@@ -153,10 +153,11 @@ public class CartService {
             String errorMessage = "Cart not found for customer ID: " + customerId;
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, errorMessage);
         }
+        cart = getCartById(cart.getId().toString(), customerId);
         return cart;
     }
 
-    public Cart getCartById(String cartId) {
+    public Cart getCartById(String cartId , String customerId) {
         UUID cartUUID = UUID.fromString(cartId);
         Cart c = cartRepository.findById(cartUUID).orElse(null);
 
@@ -164,6 +165,10 @@ public class CartService {
             String errorMessage = "Cart not found for cart ID: " + cartId;
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, errorMessage);
         }
+        if (!customerId.equals(c.getCustomerId().toString())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authorized to access this cart");
+        }   
+             
         List<String> ids = new ArrayList<>();
         // Fetch product details from Product Service
         for (CartItem item : c.getCartItems()){
