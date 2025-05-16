@@ -47,7 +47,6 @@ public class AuthController {
     }
 
 
-
     @PutMapping("/reset-password")
     public String resetPassword(@RequestParam String email) {
         return authService.emailResetPassword(email);

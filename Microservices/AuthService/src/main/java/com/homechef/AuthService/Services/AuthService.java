@@ -344,6 +344,34 @@ public class AuthService {
         redisTemplate.delete(email + ":attempts");
     }
 
+    public String deleteAccount(UUID id) {
+        User user = userRepository.findById(id).orElse(null);
+        if (user == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "User not found"
+            );
+        }
+        userRepository.delete(user);
+        return "User deleted";
+    }
+
+
+    public Map<String, String> getUsersEmails(List<UUID> ids) {
+        List<User> users = userRepository.findAllById(ids);
+        if (users.isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "No users found"
+            );
+        }
+        return users.stream()
+                .collect(Collectors.toMap(
+                        user -> user.getId().toString(),  // Convert UUID (or any ID) to String
+                        User::getEmail
+                ));
+    }
+
 
 
 
