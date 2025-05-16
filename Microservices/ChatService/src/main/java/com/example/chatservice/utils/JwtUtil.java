@@ -41,11 +41,11 @@ public class JwtUtil {
     }
 
     public static String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject);
+        return extractClaim(token, claims -> claims.get("username", String.class));
     }
 
     public static String extractUserId(String token) {
-        return extractClaim(token, claims -> claims.get("userId", String.class));
+        return extractClaim(token, claims -> claims.get("id", String.class));
     }
 
     public static <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {

@@ -1,15 +1,15 @@
 ### Get the base URL
 GET {{baseUrl}}
 
-### !!! Make sure to replace token in http-client.env.json with a valid token !!! ###
-## A valid token will be generated and printed in the console every time the application starts. ###
+// !!! Make sure to replace token in http-client.env.json with a valid token !!!
+// A valid token will be generated and printed in the console every time the application starts.
 
 ### Seed the database with the specified number of messages. Takes a query parameter `count` to specify the number of messages to seed. If no count is provided, it defaults to 50.
 GET {{baseUrl}}/messages/seed?count=7
 Authorization: Bearer {{token}}
 
 ### Get All Messages
-GET {{baseUrl}}/messages?size=1&pagingState=Y2Fzc2FuZHJhLXJhbmdlLXBhc3MtMTIzNDU2
+GET {{baseUrl}}/messages
 Authorization: Bearer {{token}}
 
 
@@ -24,7 +24,6 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "senderId": "c843b0e1-77b4-4a5d-b601-b17879071f1c",
   "receiverId": "cca07896-caf9-42b4-9db4-57ea899cab7a",
   "content": "Hello, how are you?",
   "type": "TEXT"
