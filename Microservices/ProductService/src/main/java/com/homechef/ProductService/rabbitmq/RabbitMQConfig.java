@@ -55,7 +55,7 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public Jackson2JsonMessageConverter orderMessageConverter() {
+    public Jackson2JsonMessageConverter productMessageConverter() {
         ObjectMapper mapper = new ObjectMapper()
                 .registerModule(new JavaTimeModule())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -67,10 +67,10 @@ public class RabbitMQConfig {
     @Bean
     public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(
             ConnectionFactory connectionFactory,
-            Jackson2JsonMessageConverter orderMessageConverter) {
+            Jackson2JsonMessageConverter productMessageConverter) {
         SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
         factory.setConnectionFactory(connectionFactory);
-        factory.setMessageConverter(orderMessageConverter);
+        factory.setMessageConverter(productMessageConverter);
         return factory;
     }
 
