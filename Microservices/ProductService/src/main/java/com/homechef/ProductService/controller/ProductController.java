@@ -54,8 +54,10 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteProductById(@PathVariable String id) {
-        productService.deleteProductById(id);
+    public void deleteProductById(@PathVariable String id , @RequestHeader("Authorization") String authHeader) {
+        String jwt = authHeader.replace("Bearer ", "");
+        UUID sellerId = UUID.fromString(jwtUtil.getUserClaims(jwt).get("id").toString());
+        productService.deleteProductById(id, sellerId);
     }
 
     @PutMapping("/{id}")
