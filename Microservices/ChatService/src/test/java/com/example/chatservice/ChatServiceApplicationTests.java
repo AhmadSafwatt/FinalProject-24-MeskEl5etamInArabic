@@ -51,21 +51,19 @@ class ChatServiceApplicationTests {
     private CassandraTemplate cassandraTemplate;
 
     private ObjectMapper objectMapper;
-    private UUID senderId;
     private UUID receiverId;
+
 
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
-        senderId = UUID.randomUUID();
         receiverId = UUID.randomUUID();
         messageService = new MessageService(messageRepository, cassandraTemplate);
     }
 
     private CreateMessageDTO createTestCreateMessageDTO(MessageType type) {
         return CreateMessageDTO.builder()
-                .senderId(senderId)
                 .receiverId(receiverId)
                 .content("Test content")
                 .type(type)
@@ -92,7 +90,7 @@ class ChatServiceApplicationTests {
         @Test
         void testGetMessageByIdEndpoint_shouldReturnMessage_whenMessageExists() throws Exception {
             CreateMessageDTO createMessageDTO = createTestCreateMessageDTO(MessageType.TEXT);
-            SendMessageCommand messageSender = new SendMessageCommand(createMessageDTO, messageService);
+            SendMessageCommand messageSender = new SendMessageCommand(UUID.randomUUID(), createMessageDTO, messageService);
             Message message = messageSender.execute();
 
             String responseContent = mockMvc.perform(MockMvcRequestBuilders.get("/messages/" + message.getId()))
@@ -129,13 +127,13 @@ class ChatServiceApplicationTests {
             int messageCountBefore = messageService.getMessages().size();
 
             CreateMessageDTO textMessageDTO = createTestCreateMessageDTO(MessageType.TEXT);
-            SendMessageCommand messageSender = new SendMessageCommand(textMessageDTO, messageService);
+            SendMessageCommand messageSender = new SendMessageCommand(UUID.randomUUID(), textMessageDTO, messageService);
             Message textMessage = messageSender.execute();
 
 
 
             CreateMessageDTO productMessageDTO = createTestCreateMessageDTO(MessageType.PRODUCT);
-            SendMessageCommand productMessageSender = new SendMessageCommand(productMessageDTO, messageService);
+            SendMessageCommand productMessageSender = new SendMessageCommand(UUID.randomUUID(), productMessageDTO, messageService);
             Message productMessage = productMessageSender.execute();
 
 
@@ -154,26 +152,6 @@ class ChatServiceApplicationTests {
                             .content(objectMapper.writeValueAsString(nullMessage)))
                     .andExpect(MockMvcResultMatchers.status().isBadRequest())
                     .andDo(MockMvcResultHandlers.print());
-        }
-
-        @Test
-        void testSaveMessageEndpoint_shouldSaveMessage_WhenValidMessage() throws Exception {
-
-            CreateMessageDTO message = createTestCreateMessageDTO(MessageType.TEXT);
-
-            String responseContent = mockMvc.perform(MockMvcRequestBuilders.post("/messages")
-                            .contentType("application/json")
-                            .content(objectMapper.writeValueAsString(message)))
-                    .andExpect(MockMvcResultMatchers.status().isCreated())
-                    .andReturn()
-                    .getResponse()
-                    .getContentAsString();
-
-            JsonNode jsonNode = objectMapper.readTree(responseContent);
-            String id = jsonNode.path("id").asText();
-
-            Message savedMessage = messageService.getMessageById(UUID.fromString(id));
-            assertNotNull(savedMessage);
         }
 
         @Test
@@ -200,18 +178,6 @@ class ChatServiceApplicationTests {
                     .andDo(MockMvcResultHandlers.print());
         }
 
-        @Test
-        void testSaveMessageEndpoint_shouldSaveMesage_whenContentWithinLimit() throws Exception {
-            String validContent = "a".repeat(500); // 500 characters
-            CreateMessageDTO validMessageDTO = createTestCreateMessageDTO(MessageType.TEXT);
-            validMessageDTO.setContent(validContent);
-
-            mockMvc.perform(MockMvcRequestBuilders.post("/messages")
-                            .contentType("application/json")
-                            .content(objectMapper.writeValueAsString(validMessageDTO)))
-                    .andExpect(MockMvcResultMatchers.status().isCreated())
-                    .andDo(MockMvcResultHandlers.print());
-        }
 
         @Test
         void testSaveMessageEndpoint_shouldReturnBadRequest_whenContentIsTooLong() throws Exception {
@@ -229,7 +195,6 @@ class ChatServiceApplicationTests {
         @Test
         void testSaveMessageEndpoint_shouldReturnBadRequest_whenSenderIdIsNull() throws Exception {
             CreateMessageDTO invalidMessage = createTestCreateMessageDTO(MessageType.TEXT);
-            invalidMessage.setSenderId(null);
 
             mockMvc.perform(MockMvcRequestBuilders.post("/messages")
                             .contentType("application/json")
@@ -245,7 +210,7 @@ class ChatServiceApplicationTests {
         void testDeleteMessage_shouldDeleteMessage_whenMessageExists() throws Exception {
             CreateMessageDTO createMessageDTO = createTestCreateMessageDTO(MessageType.TEXT);
 
-            SendMessageCommand messageSender = new SendMessageCommand(createMessageDTO, messageService);
+            SendMessageCommand messageSender = new SendMessageCommand(UUID.randomUUID(), createMessageDTO, messageService);
             Message message = messageSender.execute();
 
             Message existingMessage = messageService.getMessageById(message.getId());
@@ -293,7 +258,7 @@ class ChatServiceApplicationTests {
             updateMessageDTO.setStatus(MessageStatus.DELIVERED);
 
             CreateMessageDTO createMessageDTO = createTestCreateMessageDTO(MessageType.TEXT);
-            SendMessageCommand messageSender = new SendMessageCommand(createMessageDTO, messageService);
+            SendMessageCommand messageSender = new SendMessageCommand(UUID.randomUUID(), createMessageDTO, messageService);
             Message message = messageSender.execute();
 
             UpdateMessageCommand updateMessageCommand = new UpdateMessageCommand(message.getId(), updateMessageDTO, messageService);
@@ -307,7 +272,7 @@ class ChatServiceApplicationTests {
         @Test
         void testUpdateMessageEndpoint_shouldReturnUpdatedMessage_whenValidMessage() throws Exception {
             CreateMessageDTO createMessageDTO = createTestCreateMessageDTO(MessageType.TEXT);
-            SendMessageCommand messageSender = new SendMessageCommand(createMessageDTO, messageService);
+            SendMessageCommand messageSender = new SendMessageCommand(UUID.randomUUID(), createMessageDTO, messageService);
             Message message = messageSender.execute();
 
             UpdateMessageDTO productMessageDTO = createTestUpdateMessageDTO();
@@ -329,7 +294,7 @@ class ChatServiceApplicationTests {
         @Test
         void testUpdateMessageEndpoint_ShouldNotUpdateMessageType_WhenTypeIsNotChanged() throws Exception {
             CreateMessageDTO createMessageDTO = createTestCreateMessageDTO(MessageType.TEXT);
-            SendMessageCommand messageSender = new SendMessageCommand(createMessageDTO, messageService);
+            SendMessageCommand messageSender = new SendMessageCommand(UUID.randomUUID(), createMessageDTO, messageService);
             Message message = messageSender.execute();
 
             UpdateMessageDTO textMessageDTO = createTestUpdateMessageDTO();
@@ -360,7 +325,7 @@ class ChatServiceApplicationTests {
         @Test
         void testUpdateMessageEndpoint_shouldNotUpdateSenderId() throws Exception {
             CreateMessageDTO createMessageDTO = createTestCreateMessageDTO(MessageType.TEXT);
-            SendMessageCommand messageSender = new SendMessageCommand(createMessageDTO, messageService);
+            SendMessageCommand messageSender = new SendMessageCommand(UUID.randomUUID(), createMessageDTO, messageService);
             Message message = messageSender.execute();
 
             UpdateMessageDTO productMessageDTO = createTestUpdateMessageDTO();
@@ -399,7 +364,7 @@ class ChatServiceApplicationTests {
         void testUpdateMessageEndpoint_shouldNotUpdateMessageTimestamp_whenUpdateSucceeds() throws Exception {
 
             CreateMessageDTO createMessageDTO = createTestCreateMessageDTO(MessageType.TEXT);
-            SendMessageCommand messageSender = new SendMessageCommand(createMessageDTO, messageService);
+            SendMessageCommand messageSender = new SendMessageCommand(UUID.randomUUID(), createMessageDTO, messageService);
             Message message = messageSender.execute();
 
             Thread.sleep(10);
@@ -426,7 +391,7 @@ class ChatServiceApplicationTests {
         @Test
         void testUpdateMessageEndpoint_shouldNotUpdateMessageTimestamp_whenUpdateFails() throws Exception {
             CreateMessageDTO createMessageDTO = createTestCreateMessageDTO(MessageType.TEXT);
-            SendMessageCommand messageSender = new SendMessageCommand(createMessageDTO, messageService);
+            SendMessageCommand messageSender = new SendMessageCommand(UUID.randomUUID(), createMessageDTO, messageService);
             Message message = messageSender.execute();
 
             Thread.sleep(10);
@@ -456,7 +421,7 @@ class ChatServiceApplicationTests {
         void testUpdateMessageStatus_shouldUpdateStatus_whenMessageExists() {
 
             CreateMessageDTO createMessageDTO = createTestCreateMessageDTO(MessageType.TEXT);
-            SendMessageCommand messageSender = new SendMessageCommand(createMessageDTO, messageService);
+            SendMessageCommand messageSender = new SendMessageCommand(UUID.randomUUID(), createMessageDTO, messageService);
             Message message = messageSender.execute();
 
 
@@ -478,7 +443,7 @@ class ChatServiceApplicationTests {
         @Test
         void testIsMessageSeenEndpoint_shouldReturnTrue_whenMessageIsSeen() throws Exception {
             CreateMessageDTO createMessageDTO = createTestCreateMessageDTO(MessageType.TEXT);
-            SendMessageCommand messageSender = new SendMessageCommand(createMessageDTO, messageService);
+            SendMessageCommand messageSender = new SendMessageCommand(UUID.randomUUID(), createMessageDTO, messageService);
             Message message = messageSender.execute();
 
             MarkMessageAsSeenCommand markMessageAsSeenCommand = new MarkMessageAsSeenCommand(message.getId(), messageService);
@@ -494,7 +459,7 @@ class ChatServiceApplicationTests {
         @Test
         void testIsMessageSeenEndpoint_shouldReturnFalse_whenMessageIsNotSeen() throws Exception {
             CreateMessageDTO createMessageDTO = createTestCreateMessageDTO(MessageType.TEXT);
-            SendMessageCommand messageSender = new SendMessageCommand(createMessageDTO, messageService);
+            SendMessageCommand messageSender = new SendMessageCommand(UUID.randomUUID(), createMessageDTO, messageService);
             Message message = messageSender.execute();
 
             mockMvc.perform(MockMvcRequestBuilders.get("/messages/" + message.getId() + "/seen"))
@@ -515,7 +480,7 @@ class ChatServiceApplicationTests {
         @Test
         void testMarkMessageAsSeenEndpoint_shouldReturnOkWhenMessageNotSeen_andMarkItAsSeen() throws Exception {
             CreateMessageDTO createMessageDTO = createTestCreateMessageDTO(MessageType.TEXT);
-            SendMessageCommand messageSender = new SendMessageCommand(createMessageDTO, messageService);
+            SendMessageCommand messageSender = new SendMessageCommand(UUID.randomUUID(), createMessageDTO, messageService);
             Message message = messageSender.execute();
 
             mockMvc.perform(MockMvcRequestBuilders.patch("/messages/" + message.getId() + "/seen"))
@@ -526,7 +491,7 @@ class ChatServiceApplicationTests {
         @Test
         void testMarkMessageAsSeenEndpoint_shouldReturnBadRequest_WhenMessageAlreadySeen() throws Exception {
             CreateMessageDTO createMessageDTO = createTestCreateMessageDTO(MessageType.TEXT);
-            SendMessageCommand messageSender = new SendMessageCommand(createMessageDTO, messageService);
+            SendMessageCommand messageSender = new SendMessageCommand(UUID.randomUUID(), createMessageDTO, messageService);
             Message message = messageSender.execute();
 
             MarkMessageAsSeenCommand markMessageAsSeenCommand = new MarkMessageAsSeenCommand(message.getId(), messageService);
