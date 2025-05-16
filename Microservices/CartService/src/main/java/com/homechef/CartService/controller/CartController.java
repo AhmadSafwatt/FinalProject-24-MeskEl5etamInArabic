@@ -68,8 +68,10 @@ public class CartController {
     }
 
     @GetMapping("/{cartId}/cartId")
-    public Cart getCartById(@PathVariable String cartId) {
-        return cartService.getCartById(cartId);
+    public Cart getCartById(@PathVariable String cartId , @RequestHeader("Authorization") String authHeader) {
+        String jwt = authHeader.replace("Bearer ", "");
+        String customerId = jwtUtil.getUserClaims(jwt).get("id").toString();
+        return cartService.getCartById(cartId, customerId);
     }
 
     @DeleteMapping("/{cartId}")
