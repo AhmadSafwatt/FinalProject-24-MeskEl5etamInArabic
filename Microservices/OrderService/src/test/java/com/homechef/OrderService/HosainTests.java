@@ -57,11 +57,9 @@ class HosainTests {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    private String generateTestToken(String userId, String role) {
+    private String generateTestToken(String userId) {
         Map<String, Object> claimsMap = new HashMap<>();
         claimsMap.put("id", userId);
-        claimsMap.put("role", role);
-
         long nowMillis = System.currentTimeMillis();
         Date now = new Date(nowMillis);
         Date exp = new Date(nowMillis + 1000 * 60 * 60); // Token valid for 1 hour
@@ -111,7 +109,7 @@ class HosainTests {
     @Test
     void testGetOrderById_Authenticated_UserIsBuyer_ReturnsOk() {
         String userId = testOrder.getBuyerId().toString();
-        HttpEntity<String> entity = generateHttpsEntity(userId, "user");
+        HttpEntity<String> entity = generateHttpsEntity(userId);
         String url = baseUrl + testOrder.getId();
         ResponseEntity<Order> response = restTemplate.exchange(url, HttpMethod.GET, entity, Order.class);
 
@@ -125,7 +123,7 @@ class HosainTests {
     @Test
     void testGetOrderById_Authenticated_UserIsnotBuyer_ReturnsForbidden() {
         String differentUserId = UUID.randomUUID().toString();
-        HttpEntity<String> entity = generateHttpsEntity(differentUserId, "user");
+        HttpEntity<String> entity = generateHttpsEntity(differentUserId);
         String url = baseUrl + testOrder.getId();
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
         assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
@@ -149,8 +147,7 @@ class HosainTests {
         String url = baseUrl + nonExistentOrderId + "/newState";
         HttpEntity<String> requestEntity = generateHttpsEntityWithBody(
                 OrderStatus.PREPARING.name(),
-                UUID.randomUUID().toString(),
-                "user");
+                UUID.randomUUID().toString());
 
         ResponseEntity<String> responseEntity = restTemplate.exchange(
                 url, HttpMethod.PUT, requestEntity, String.class);
@@ -163,8 +160,7 @@ class HosainTests {
         String url = baseUrl + testOrder.getId() + "/newState";
         HttpEntity<String> requestEntity = generateHttpsEntityWithBody(
                 "INVALID_STATE",
-                testOrder.getBuyerId().toString(),
-                "user");
+                testOrder.getBuyerId().toString());
 
         ResponseEntity<String> responseEntity = restTemplate.exchange(
                 url, HttpMethod.PUT, requestEntity, String.class);
@@ -180,8 +176,7 @@ class HosainTests {
         String userId = validBuyer ? testOrder.getBuyerId().toString() : UUID.randomUUID().toString();
         HttpEntity<String> requestEntity = generateHttpsEntityWithBody(
                 targetStatus.name(),
-                userId,
-                "user");
+                userId);
         ResponseEntity<String> responseEntity = restTemplate.exchange(
                 url,
                 HttpMethod.PUT,
@@ -458,8 +453,7 @@ class HosainTests {
         String url = baseUrl + nonExistentOrderId + "/items/" + fixedProductId + "/editNote";
         HttpEntity<String> requestEntity = generateHttpsEntityWithBody(
                 "New Note",
-                fixedSellerId.toString(),
-                "user");
+                fixedSellerId.toString());
         ResponseEntity<String> responseEntity = restTemplate.exchange(
                 url,
                 HttpMethod.PUT,
@@ -477,8 +471,7 @@ class HosainTests {
         String url = baseUrl + testOrder.getId() + "/items/" + randomItemId + "/editNote";
         HttpEntity<String> requestEntity = generateHttpsEntityWithBody(
                 "New Note",
-                fixedSellerId.toString(),
-                "user");
+                fixedSellerId.toString());
         ResponseEntity<String> responseEntity = restTemplate.exchange(
                 url,
                 HttpMethod.PUT,
@@ -496,8 +489,7 @@ class HosainTests {
         String url = baseUrl + testOrder.getId() + "/items/" + fixedProductId + "/editNote";
         HttpEntity<String> requestEntity = generateHttpsEntityWithBody(
                 "New Note",
-                UUID.randomUUID().toString(),
-                "user");
+                UUID.randomUUID().toString());
         ResponseEntity<String> responseEntity = restTemplate.exchange(
                 url,
                 HttpMethod.PUT,
@@ -532,8 +524,7 @@ class HosainTests {
         String url = baseUrl + orderForTestSetup.getId() + "/items/" + fixedProductId + "/editNote";
         HttpEntity<String> requestEntity = generateHttpsEntityWithBody(
                 newNote,
-                fixedSellerId.toString(),
-                "user");
+                fixedSellerId.toString());
         ResponseEntity<String> responseEntity = restTemplate.exchange(
                 url,
                 HttpMethod.PUT,
@@ -591,15 +582,15 @@ class HosainTests {
         assertItemNoteUpdateAttempt(OrderStatus.CANCELLED, "Note updated in CANCELLED state", false);
     }
 
-    private HttpEntity<String> generateHttpsEntity(String userId, String role) {
-        String token = generateTestToken(userId, "user");
+    private HttpEntity<String> generateHttpsEntity(String userId) {
+        String token = generateTestToken(userId);
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + token);
         return new HttpEntity<>(headers);
     }
 
-    private <T> HttpEntity<T> generateHttpsEntityWithBody(T body, String userId, String role) {
-        String token = generateTestToken(userId, role);
+    private <T> HttpEntity<T> generateHttpsEntityWithBody(T body, String userId) {
+        String token = generateTestToken(userId);
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + token);
         return new HttpEntity<>(body, headers);
