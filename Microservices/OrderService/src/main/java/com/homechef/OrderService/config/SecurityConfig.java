@@ -1,4 +1,4 @@
-package com.homechef.CartService.config;
+package com.homechef.OrderService.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,8 +10,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) ; // ⚡ Disable CSRF for stateless JWT
-                 // Enable JWT if needed
+                .csrf(csrf -> csrf.disable()); // ⚡ Disable CSRF for stateless JWT
+        // Enable JWT if needed
 
         return http.build();
     }
