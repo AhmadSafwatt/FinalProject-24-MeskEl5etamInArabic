@@ -198,7 +198,7 @@ public class AuthService {
         //TODONE: send email verification link, the link should be the url of verifyEmail controller with value of id`
 
         // Construct the verification link URL
-        String verifyEmailUrl = "http://localhost:8081/auth/verify-email?userid=" + id;
+        String verifyEmailUrl = "http://localhost:8081/auth/verify-email?userId=" + id;
 
         // Compose the email using SimpleMailMessage
         SimpleMailMessage message = new SimpleMailMessage();
