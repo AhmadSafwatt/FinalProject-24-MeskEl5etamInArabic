@@ -7,10 +7,13 @@ import com.example.chatservice.models.Message;
 import com.example.chatservice.services.MessageService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
@@ -20,7 +23,8 @@ import java.util.concurrent.ThreadLocalRandom;
 @Component
 public class MessageSeeder {
 
-    private final static int BATCH_SIZE = 50;
+    @Value("${seeder.batch-size}")
+    private int BATCH_SIZE;
 
     private final MessageService messageService;
 
@@ -32,10 +36,10 @@ public class MessageSeeder {
     private LocalDateTime getRandomTimestamp() {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime start = now.minusDays(30);
-        long startEpoch = start.toEpochSecond(java.time.ZoneOffset.UTC);
-        long endEpoch = now.toEpochSecond(java.time.ZoneOffset.UTC);
+        long startEpoch = start.toEpochSecond(ZoneOffset.UTC);
+        long endEpoch = now.toEpochSecond(ZoneOffset.UTC);
         long randomEpoch = ThreadLocalRandom.current().nextLong(startEpoch, endEpoch);
-        return LocalDateTime.ofEpochSecond(randomEpoch, 0, java.time.ZoneOffset.UTC).truncatedTo(ChronoUnit.SECONDS);
+        return LocalDateTime.ofEpochSecond(randomEpoch, 0, ZoneOffset.UTC).truncatedTo(ChronoUnit.SECONDS);
     }
 
     private Message createRandomMessage() {
@@ -94,8 +98,8 @@ public class MessageSeeder {
 
 
     public void seedMessages(int numberOfMessages) {
-        List<Message> batch = new java.util.ArrayList<>(BATCH_SIZE);
-        List<java.util.concurrent.CompletableFuture<Void>> futures = new java.util.ArrayList<>();
+        List<Message> batch = new ArrayList<>(BATCH_SIZE);
+        List<CompletableFuture<Void>> futures = new ArrayList<>();
         int[] seeded = {0};
 
         for (int i = 0; i < numberOfMessages; i++) {
@@ -104,14 +108,14 @@ public class MessageSeeder {
             if (batch.size() == BATCH_SIZE || i == numberOfMessages - 1) {
                 int batchSize = batch.size();
                 futures.add(
-                        messageService.saveAllMessagesAsync(new java.util.ArrayList<>(batch))
+                        messageService.saveAllMessagesAsync(new ArrayList<>(batch))
                                 .thenRun(() -> log.debug("Seeded {} / {} messages", seeded[0] += batchSize, numberOfMessages))
                 );
                 batch.clear();
             }
         }
 
-        CompletableFuture.allOf(futures.toArray(new java.util.concurrent.CompletableFuture[0])).join();
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
         int total = messageService.getMessages().size();
         log.info("Seeded {} messages. Total messages in the database: {}", numberOfMessages, total);
     }
