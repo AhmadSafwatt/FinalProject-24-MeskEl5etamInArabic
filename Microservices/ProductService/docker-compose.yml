@@ -40,6 +40,13 @@ services:
       ME_CONFIG_BASICAUTH: false
     depends_on:
       - mongo
-
+  rabbitmq:
+    image: rabbitmq:4.0-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
 volumes:
   product_volume:
