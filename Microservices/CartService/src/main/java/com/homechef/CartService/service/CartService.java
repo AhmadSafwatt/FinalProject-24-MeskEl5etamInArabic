@@ -21,6 +21,9 @@ public class CartService {
     @Autowired
     private final ProductClient productClient;
 
+    @Autowired
+    private CheckoutFacade checkoutFacade;
+
     public CartService(ProductClient productClient) {
         this.productClient = productClient;
     }
@@ -153,62 +156,6 @@ public class CartService {
     }
 
     public String checkoutCartById(String cartId) { // facade design pattern
-        Cart cart = findCart(cartId);
-
-        double totalCost = calculateTotalCost(cart);
-
-        sendCartToOrderService(prepareCartCostMap(cart, totalCost));
-
-        clearCart(cart);
-
-        return "Checkout Successful";
+        return checkoutFacade.execute(cartId);
     }
-
-    private Cart findCart(String cartId) {
-        UUID cartUUID = UUID.fromString(cartId);
-        Cart c = cartRepository.findById(cartUUID).orElse(null);
-        if (c == null)
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Cart not found for cart ID: %s", cartId));
-
-        return c;
-    }
-
-    private double calculateTotalCost(Cart cart) {
-        List<CartItem> cartItems = cart.getCartItems();
-        if (cartItems == null || cartItems.isEmpty())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cart is empty");
-
-        double totalCost = 0;
-        List<String> ids = new ArrayList<>();
-        for (CartItem item : cartItems) {
-            ids.add(item.getProductId().toString());
-        }
-        List<ProductDTO> products = productClient.getProductsById(ids);
-        for (int i = 0; i < cartItems.size(); i++) {
-            if (products.get(i) == null)
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("No product exists with ID: %s", products.get(i).getId()));
-
-            totalCost += (products.get(i).getPrice() * (1 - products.get(i).getDiscount())) * cartItems.get(i).getQuantity();
-        }
-        if (cart.isPromo())
-            totalCost = totalCost - 0.05*totalCost;
-        return totalCost;
-    }
-
-    private Map<Cart, Double> prepareCartCostMap(Cart cart, double totalCost) {
-        Map<Cart, Double> cartCostMap = new HashMap<>();
-        cartCostMap.put(cart, totalCost);
-        return cartCostMap;
-    }
-
-    private void clearCart(Cart cart) {
-        cart.setCartItems(new ArrayList<>());
-        cartRepository.save(cart);
-    }
-
-    private void sendCartToOrderService(Map<Cart, Double> cartCostMap) {
-        //orderService.sendCartCheckout(cartCostMap); // Async via RabbitMQ
-        System.out.println("SENT TO ORDER SERVICE");
-    }
-
 }
