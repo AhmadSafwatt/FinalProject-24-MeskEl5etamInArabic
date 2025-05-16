@@ -124,4 +124,15 @@ public class Cart {
             return this;
         }
     }
+
+    @Override
+    public String toString() {
+        return "Cart{" +
+                "id=" + id +
+                ", customerId=" + customerId +
+                ", cartItems=" + cartItems +
+                ", notes='" + notes + '\'' +
+                ", promo=" + promo +
+                '}';
+    }
 }

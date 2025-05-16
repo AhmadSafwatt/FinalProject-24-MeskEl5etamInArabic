@@ -8,6 +8,9 @@ import com.homechef.CartService.model.ProductDTO;
 import com.homechef.CartService.repository.CartRepository;
 import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -21,15 +24,19 @@ public class CartService {
     @Autowired
     private final ProductClient productClient;
 
+    @Autowired
+    private CheckoutFacade checkoutFacade;
+
+    @Autowired
+    private CacheManager cacheManager;
+
     public CartService(ProductClient productClient) {
         this.productClient = productClient;
     }
 
-
+    @CachePut(value = "cartCache", key = "#result.id")
     public Cart createCart(String customerId) {
-
         UUID customerIDD = UUID.fromString(customerId);
-
         if(!(cartRepository.findByCustomerId(customerIDD) == null))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Customer already has a cart");
         Cart cart1=new Cart.Builder()
@@ -42,23 +49,7 @@ public class CartService {
         return cartRepository.save(cart1);
     }
 
-//    public Cart updateCart(String cartID, Cart cart) {
-//        UUID cartid = UUID.fromString(cartID);
-//        cart.setId(cartid);
-//        return cartRepository.save(cart);
-//    }
-
-//    public Cart addProduct(String customerId , String productID , int quantity , String notes){
-//        UUID customerIDD = UUID.fromString(customerId);
-//        UUID productIDD = UUID.fromString(productID);
-//        Cart cart = cartRepository.findByCustomerId(customerIDD);
-//        CartItem cartItem = new CartItem(productIDD , quantity , LocalDateTime.now() , notes , UUID.randomUUID());
-//        List <CartItem> oldCartItems = cart.getCartItems();
-//        oldCartItems.add(cartItem);
-//        cart.setCartItems(oldCartItems);
-//        return cartRepository.save(cart);
-//    }
-
+    @CachePut(value = "cartCache", key = "#result.id")
     public Cart addProduct(String customerId , String productID , int quantity , String notes){
         UUID customerIDD = UUID.fromString(customerId);
         UUID productIDD = UUID.fromString(productID);
@@ -84,7 +75,7 @@ public class CartService {
         return cartRepository.save(cart);
     }
 
-
+    @CachePut(value = "cartCache", key = "#result.id")
     public Cart addNotesToCartItem(String customerId, String productID, String notes){
         UUID customerIDD = UUID.fromString(customerId);
         UUID productIDD = UUID.fromString(productID);
@@ -98,7 +89,7 @@ public class CartService {
         return cartRepository.save(cart);
     }
 
-
+    @CachePut(value = "cartCache", key = "#result.id")
     public Cart removeProduct(String customerId , String productId){
         UUID customerIDD = UUID.fromString(customerId);
         UUID productIDD = UUID.fromString(productId);
@@ -113,6 +104,7 @@ public class CartService {
         return cartRepository.save(cart);
     }
 
+    @CachePut(value = "cartCache", key = "#result.id")
     public Cart updatePromo(String customerId , boolean promo) {
         UUID customerIDD = UUID.fromString(customerId);
         Cart cart = cartRepository.findByCustomerId(customerIDD);
@@ -122,15 +114,7 @@ public class CartService {
         return cartRepository.save(cart);
     }
 
-
-//    public Cart updatePromo(String cartID , boolean promo) {
-//        Cart customerCart = getCartById(cartID);
-//        Cart newCart = new Cart.Builder().from(customerCart).promo(promo).build();
-//        return cartRepository.save(newCart);
-//    }
-
-
-
+    @CachePut(value = "cartCache", key = "#result.id")
     public Cart updateNotes(String customerId, String notes) {
         UUID customerIDD = UUID.fromString(customerId);
         Cart cart = cartRepository.findByCustomerId(customerIDD);
@@ -139,12 +123,6 @@ public class CartService {
         cart.setNotes(notes);
         return cartRepository.save(cart);
     }
-
-//    public Cart updateNotes(String cartID, String notes) {
-//        Cart customerCart = getCartById(cartID);
-//        Cart newCart = new Cart.Builder().from(customerCart).notes(notes).build();
-//        return cartRepository.save(newCart);
-//    }
 
     public Cart getCartByCustomerId(String customerId) {
         UUID customerUUID = UUID.fromString(customerId);
@@ -157,6 +135,7 @@ public class CartService {
         return cart;
     }
 
+    @Cacheable(value = "cartCache", key = "#cartId")
     public Cart getCartById(String cartId , String customerId) {
         UUID cartUUID = UUID.fromString(cartId);
         Cart c = cartRepository.findById(cartUUID).orElse(null);
@@ -174,7 +153,9 @@ public class CartService {
         for (CartItem item : c.getCartItems()){
             ids.add(item.getProductId().toString());
         }
-        List<ProductDTO> products = productClient.getProductsById(ids);
+        List<ProductDTO> products = new ArrayList<>();
+        if (!ids.isEmpty())
+            products = productClient.getProductsById(ids);
         // Update cart items with product details
         for (int i = 0; i < c.getCartItems().size(); i++) {
             c.getCartItems().get(i).setProduct(products.get(i));
@@ -182,65 +163,19 @@ public class CartService {
         return c;
     }
 
+    public String deleteCartByCustomerID(String customerId) {
+        UUID customerUUID = UUID.fromString(customerId);
+        Cart cart = cartRepository.findByCustomerId(customerUUID);
+        if (cart == null)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Cart not found for User: %s", customerId));
 
-    public String deleteCartById(String cartId) {
-        UUID cartUUID = UUID.fromString(cartId);
-        if (!cartRepository.existsById(cartUUID))
-            return "Cart Not Found";
-        cartRepository.deleteById(cartUUID);
+        cacheManager.getCache("cartCache").evict(cart.getId());
+
+        cartRepository.delete(cart);
         return "Cart Deleted Successfully";
     }
 
-    public String checkoutCartById(String cartId) { // facade design pattern
-        Cart cart = findCart(cartId);
-        if (cart == null) return "Cart Not Found";
-
-        double totalCost = calculateTotalCost(cart);
-        Map<Cart, Double> cartCostMap = prepareCartCostMap(cart, totalCost);
-
-        sendCartToOrderService(cartCostMap);
-        clearCart(cart);
-
-        return "Checkout Successful";
+    public String checkoutCartByCustomerId(String customerId) { // facade design pattern
+        return checkoutFacade.execute(customerId);
     }
-
-    private Cart findCart(String cartId) {
-        UUID cartUUID = UUID.fromString(cartId);
-        return cartRepository.findById(cartUUID).orElse(null);
-    }
-
-    private double calculateTotalCost(Cart cart) {
-        List<CartItem> cartItems = cart.getCartItems();
-        double totalCost = 0;
-        List<String> ids = new ArrayList<>();
-        for (CartItem item : cartItems) {
-            ids.add(item.getProductId().toString());
-        }
-        List<ProductDTO> products = productClient.getProductsById(ids);
-        for (int i = 0; i < cartItems.size(); i++) {
-            totalCost += (products.get(i).getPrice() * (1 - products.get(i).getDiscount())) * cartItems.get(i).getQuantity();
-        }
-        if (cart.isPromo())
-            totalCost = totalCost - 0.05*totalCost;
-        System.out.println(totalCost);
-        return totalCost;
-    }
-
-    private Map<Cart, Double> prepareCartCostMap(Cart cart, double totalCost) {
-        Map<Cart, Double> cartCostMap = new HashMap<>();
-        cartCostMap.put(cart, totalCost);
-        return cartCostMap;
-    }
-
-    private void clearCart(Cart cart) {
-        cart.setCartItems(new ArrayList<>());
-        cartRepository.save(cart);
-    }
-
-    private void sendCartToOrderService(Map<Cart, Double> cartCostMap) {
-        //orderService.sendCartCheckout(cartCostMap); // Async via RabbitMQ
-        System.out.println("SENT TO ORDER SERVICE");
-    }
-
-
 }
