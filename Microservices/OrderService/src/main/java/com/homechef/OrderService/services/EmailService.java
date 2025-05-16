@@ -29,7 +29,12 @@ public class EmailService {
                             + body);
         } catch (MailException e) {
             System.out
-                    .println("Error sending email, does the mail : " + toEmail + " really exist? \n" + e.getMessage());
+                    .println("Error sending email, the reason is most likely one of the following 2 reasons : " + '\n' +
+                            "1 - you do not have the (application-secrets.yml) file, please contact (Mohammed Tamaa) team \n "
+                            +
+                            "2 - the email :" + toEmail + " does not exist. \n" +
+                            "error : " + e.getMessage());
+
         }
 
     }
