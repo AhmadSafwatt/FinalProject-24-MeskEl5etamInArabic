@@ -9,7 +9,10 @@ spring:
     port: ${CASSANDRA_PORT:9042}
     schema-action: create_if_not_exists
 
-  logging:
+seeder:
+  batch-size: 50
+
+logging:
     level:
       root: INFO
       com.datastax.driver.core: WARN
@@ -18,3 +21,10 @@ spring:
 
 server:
   port: 8083
+
+
+jwt:
+  secret: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  expiration: 85400000
+
+

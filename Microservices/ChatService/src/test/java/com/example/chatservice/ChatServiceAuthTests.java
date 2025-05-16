@@ -13,6 +13,7 @@ import lombok.Getter;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,29 +30,39 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class ChatServiceAuthTests {
 
     @Autowired
     private MessageRepository messageRepository;
 
-    @Autowired
     private MessageService messageService;
 
-    @Autowired
-    private CassandraTemplate cassandraTemplate;
+    private final CassandraTemplate cassandraTemplate;
 
-    @Autowired
-    private MockMvc mockMvc;
+    private final MockMvc mockMvc;
 
     private ObjectMapper objectMapper;
 
+    private final JwtUtil jwtUtil;
+
+    private final TokenUtil tokenUtil;
+
     @Getter
-    private static String testToken;
+    private String testToken;
+
+    @Autowired
+    public ChatServiceAuthTests(MockMvc mockMvc, JwtUtil jwtUtil, TokenUtil tokenUtil, CassandraTemplate cassandraTemplate) {
+        this.mockMvc = mockMvc;
+        this.jwtUtil = jwtUtil;
+        this.tokenUtil = tokenUtil;
+        this.cassandraTemplate = cassandraTemplate;
+    }
 
     @BeforeAll
-    static void initToken() {
+    void initToken() {
         UUID testSenderId = UUID.randomUUID();
-        testToken = TokenUtil.generateTestToken(testSenderId);
+        testToken = tokenUtil.generateTestToken(testSenderId);
     }
 
     @BeforeEach
@@ -97,7 +108,7 @@ public class ChatServiceAuthTests {
         JsonNode jsonNode = objectMapper.readTree(responseContent);
 
         String id = jsonNode.path("id").asText();
-        String userId = JwtUtil.extractUserId(testToken);
+        String userId = jwtUtil.extractUserId(testToken);
 
         Message savedMessage = messageService.getMessageById(UUID.fromString(id));
         assertNotNull(savedMessage);
