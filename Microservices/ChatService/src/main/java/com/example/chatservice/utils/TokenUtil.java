@@ -1,12 +1,23 @@
 package com.example.chatservice.utils;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+@Component
 public class TokenUtil {
 
-    public static String generateTestToken(UUID userId) {
+    private final JwtUtil jwtUtil;
+
+    @Autowired
+    public TokenUtil(JwtUtil jwtUtil) {
+        this.jwtUtil = jwtUtil;
+    }
+
+    public String generateTestToken(UUID userId) {
 
         Map<String, Object> claims = new HashMap<>();
 
@@ -17,6 +28,6 @@ public class TokenUtil {
         claims.put("phoneNumber", "123-456-7890");
 
 
-        return JwtUtil.generateToken(String.valueOf(userId), claims);
+        return jwtUtil.generateToken(userId.toString(), claims);
     }
 }
