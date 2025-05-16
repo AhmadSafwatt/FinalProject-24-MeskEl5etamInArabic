@@ -15,4 +15,5 @@ public class ImageMessage extends Message {
     public ImageMessage() {
         super(MessageType.IMAGE);
     }
+
 }

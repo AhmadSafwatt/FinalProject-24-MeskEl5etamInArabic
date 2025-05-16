@@ -1,5 +1,7 @@
 package com.example.chatservice.services;
 
+import com.example.chatservice.enums.MessageType;
+import com.example.chatservice.enums.ReportType;
 import com.example.chatservice.dtos.CreateMessageDTO;
 import com.example.chatservice.dtos.UpdateMessageDTO;
 import com.example.chatservice.enums.MessageStatus;
@@ -13,10 +15,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+
 
 @Service
 public class MessageService {
@@ -139,4 +143,22 @@ public class MessageService {
         }
         cassandraTemplate.truncate(Message.class);
     }
+
+    public List<Message> searchMessagesByContent(String searchString) {
+        List<Message> allMessages = messageRepository.findAll();
+
+        return allMessages.stream()
+                .filter(message -> message.getContent() != null && message.getContent().toLowerCase().contains(searchString.toLowerCase()))
+                .collect(Collectors.toList());
+    }
+
+    public Message reportMessage(UUID messageId, ReportType reportType) {
+        Message message = getMessageById(messageId);
+
+        message.setReported(true);
+        message.setReportType(reportType);
+
+        return messageRepository.save(message);
+    }
+
 }

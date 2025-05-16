@@ -1,9 +1,10 @@
 package com.homechef.OrderService.states;
 
-import com.homechef.OrderService.models.Order;
-import com.homechef.OrderService.models.OrderStatus;
-
 import java.util.UUID;
+
+import com.homechef.OrderService.models.Order;
+import com.homechef.OrderService.models.OrderItem;
+import com.homechef.OrderService.models.OrderStatus;
 
 public class PreparingState implements OrderState {
     @Override
@@ -17,7 +18,7 @@ public class PreparingState implements OrderState {
 
     @Override
     public void updateItemNote(Order order, UUID productId, String note) {
-        for (var item : order.getItems()) {
+        for (OrderItem item : order.getItems()) {
             if (item.getProductId().equals(productId)) {
                 item.setNotes(note);
                 return;

@@ -20,7 +20,8 @@ public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    // @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JsonProperty
     private UUID id;
 
     private UUID buyerId;
@@ -41,14 +42,12 @@ public class Order {
     @OneToMany(mappedBy = "order", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<OrderItem> items;
 
-
     @JsonCreator
     public Order(
-        @JsonProperty("buyerId") UUID buyerId,
-        @JsonProperty("items") List<OrderItem> items,
-        @JsonProperty("totalPrice") Double totalPrice,
-        @JsonProperty("orderNote") String orderNote
-    ) {
+            @JsonProperty("buyerId") UUID buyerId,
+            @JsonProperty("items") List<OrderItem> items,
+            @JsonProperty("totalPrice") Double totalPrice,
+            @JsonProperty("orderNote") String orderNote) {
         this.buyerId = buyerId;
         this.status = OrderStatus.CREATED;
         this.state = new CreatedState();
@@ -60,8 +59,15 @@ public class Order {
     }
 
     // setter override
-    public void setStatus(OrderStatus status) {this.status = status; initState();}
-    public void setState(OrderState state) {this.state = state; setStatus(state.getOrderStatus());}
+    public void setStatus(OrderStatus status) {
+        this.status = status;
+        initState();
+    }
+
+    public void setState(OrderState state) {
+        this.state = state;
+        setStatus(state.getOrderStatus());
+    }
 
     @PostLoad
     public void initState() {
@@ -71,10 +77,28 @@ public class Order {
     public void setOrderState(OrderState state) {
         this.state.setOrderState(this, state);
     }
+
     public void cancelOrder() {
         this.state.cancelOrder(this);
     }
+
     public void updateItemNote(UUID productId, String note) {
         this.state.updateItemNote(this, productId, note);
+    }
+
+    // setter override
+    public void setItems(List<OrderItem> items) {
+        this.items = items;
+        for (OrderItem item : items) {
+            item.setOrder(this);
+        }
+    }
+
+    public void addItem(OrderItem item) {
+        if (items == null) {
+            items = new java.util.ArrayList<>();
+        }
+        items.add(item);
+        item.setOrder(this);
     }
 }

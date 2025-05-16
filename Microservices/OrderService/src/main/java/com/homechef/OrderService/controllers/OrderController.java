@@ -12,8 +12,6 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/orders")
@@ -70,6 +68,8 @@ public class OrderController {
     }
 
     // update state (you can also set new state = CANCELLED to cancel the order)
+    // and extra procedures for cancellation will be handled by the order
+    // service automatically
     @PutMapping("/{orderId}/newState")
     public void updateOrderState(@PathVariable UUID orderId, @RequestBody String newState) {
 
@@ -92,7 +92,7 @@ public class OrderController {
         // -------------------------------------------
         try {
             orderService.updateOrderStatus(orderId, OrderStatus.getState(newStatus));
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalStateException e) {
             // will be thrown by the "setOrderState" method / "cancelOrder" method
             // in the Order class if the operation is not allowed
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,

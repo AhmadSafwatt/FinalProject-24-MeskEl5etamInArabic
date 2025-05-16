@@ -92,6 +92,7 @@ public class MessageSeeder {
         );
     }
 
+
     public void seedMessages(int numberOfMessages) {
         List<Message> batch = new java.util.ArrayList<>(BATCH_SIZE);
         List<java.util.concurrent.CompletableFuture<Void>> futures = new java.util.ArrayList<>();
