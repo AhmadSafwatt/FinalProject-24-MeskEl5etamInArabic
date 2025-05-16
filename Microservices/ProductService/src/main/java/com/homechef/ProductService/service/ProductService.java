@@ -106,9 +106,18 @@ public class ProductService {
     public void deleteProductById(String id,UUID sellerId) {
         UUID productUUID = UUID.fromString(id);
 
+
         if(!productRepository.existsById(productUUID)){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
         }
+
+        UUID productSellerID = productRepository.findById(productUUID).get().getSellerId();
+
+        if(!productSellerID.equals(sellerId)){
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authorized to access this cart");
+        }
+
+
 
         productRepository.deleteById(productUUID);
     }
