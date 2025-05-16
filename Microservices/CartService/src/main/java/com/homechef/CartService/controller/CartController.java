@@ -67,7 +67,7 @@ public class CartController {
         return cartService.getCartByCustomerId(customerId);
     }
 
-    @GetMapping("/{cartId}")
+    @GetMapping("/{cartId}/cartId")
     public Cart getCartById(@PathVariable String cartId) {
         return cartService.getCartById(cartId);
     }

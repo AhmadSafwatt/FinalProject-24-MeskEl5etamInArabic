@@ -153,6 +153,7 @@ public class CartService {
             String errorMessage = "Cart not found for customer ID: " + customerId;
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, errorMessage);
         }
+        cart = getCartById(cart.getId().toString());
         return cart;
     }
 
