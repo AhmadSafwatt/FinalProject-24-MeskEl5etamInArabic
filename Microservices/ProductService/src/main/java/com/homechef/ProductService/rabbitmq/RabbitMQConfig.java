@@ -15,6 +15,7 @@ public class RabbitMQConfig {
     public static final String PRODUCT_QUEUE = "product-queue";
     public static final String PRODUCT_EXCHANGE = "product-exchange";
     public static final String PRODUCT_ROUTING_KEY = "product-routing-key";
+   // public static final String PRODUCT_ROUTING_KEY = "product-routing-key";
 
 
     @Bean

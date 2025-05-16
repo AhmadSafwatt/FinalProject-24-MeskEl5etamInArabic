@@ -2,6 +2,7 @@ package com.homechef.ProductService.service;
 
 
 import com.homechef.ProductService.model.*;
+import com.homechef.ProductService.rabbitmq.RabbitMQConfig;
 import com.homechef.ProductService.repository.ProductRepository;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -10,6 +11,7 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpStatus;
@@ -224,7 +226,7 @@ public class ProductService {
 
     }
 
-
+    @RabbitListener(queues = RabbitMQConfig.PRODUCT_QUEUE)
     public Product incrementAmountSold(String id, int incrementBy) {
 
         UUID productUUID = UUID.fromString(id);
