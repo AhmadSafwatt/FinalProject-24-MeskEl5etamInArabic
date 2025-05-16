@@ -1,12 +1,13 @@
 package com.example.chatservice.controllers;
-import com.example.chatservice.commands.ReportMessageCommand;
-import com.example.chatservice.commands.UpdateMessageCommand;
-import com.example.chatservice.enums.ReportType;
+
 import com.example.chatservice.commands.DeleteMessageCommand;
+import com.example.chatservice.commands.ReportMessageCommand;
 import com.example.chatservice.commands.SendMessageCommand;
+import com.example.chatservice.commands.UpdateMessageCommand;
 import com.example.chatservice.dtos.CreateMessageDTO;
 import com.example.chatservice.dtos.MessagePage;
 import com.example.chatservice.dtos.UpdateMessageDTO;
+import com.example.chatservice.enums.ReportType;
 import com.example.chatservice.models.Message;
 import com.example.chatservice.seeders.MessageSeeder;
 import com.example.chatservice.services.MessageService;
@@ -25,6 +26,7 @@ import java.net.URLEncoder;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -102,7 +104,7 @@ public class MessageController {
      * Create a new message.
      *
      * @param createMessageDTO CreateMessageDTO object
-     * @return Created message object
+     * @return The created message object
      */
     @PostMapping
     public ResponseEntity<Message> createMessage(@Valid @RequestBody CreateMessageDTO createMessageDTO) {
@@ -132,7 +134,7 @@ public class MessageController {
      *
      * @param id      Message ID
      * @param updateMessageDTO UpdateMessageDTO object
-     * @return Updated message object
+     * @return The updated message object
      */
     @PatchMapping("/{id}")
     public ResponseEntity<Message> updateMessage(@PathVariable UUID id, @Valid @RequestBody UpdateMessageDTO updateMessageDTO) {
