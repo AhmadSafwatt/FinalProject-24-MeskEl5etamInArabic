@@ -31,7 +31,7 @@ public class CartService {
         UUID customerIDD = UUID.fromString(customerId);
 
         if(!(cartRepository.findByCustomerId(customerIDD) == null))
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Customer already exists");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Customer already has a cart");
         Cart cart1=new Cart.Builder()
                 .id(UUID.randomUUID())
                 .customerId( customerIDD )
