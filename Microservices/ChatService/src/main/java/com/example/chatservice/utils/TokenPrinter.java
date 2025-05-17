@@ -1,5 +1,7 @@
 package com.example.chatservice.utils;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -28,8 +30,8 @@ public class TokenPrinter implements CommandLineRunner {
 
         String usernameFromToken = jwUtil.extractUsername(token);
         System.out.println("username extracted from token: " + usernameFromToken);
-        boolean isValid = jwUtil.validateToken(token);
-        if (isValid) {
+        Jws<Claims> validateToken = jwUtil.validateToken(token);
+        if (validateToken != null) {
             System.out.println("Token is valid.");
         } else {
             System.out.println("Token is invalid.");

@@ -28,6 +28,6 @@ public class TokenUtil {
         claims.put("phoneNumber", "123-456-7890");
 
 
-        return jwtUtil.generateToken(username, claims);
+        return jwtUtil.createToken(claims, username);
     }
 }
