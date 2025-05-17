@@ -45,7 +45,9 @@ public class OrderService {
         return orderRepository.findAll();
     }
 
-    public Order createOrder(Order order) {
+    public Order createOrder(Order order) { return createOrder(order, order.getBuyerId()); }
+    public Order createOrder(Order order, UUID buyerId) { // added buyerId parameter for controller authorization
+        order.setBuyerId(buyerId);
         Order createdOrder = orderRepository.save(order);
         sendOrderCreationNotifications(createdOrder);
         return createdOrder;
