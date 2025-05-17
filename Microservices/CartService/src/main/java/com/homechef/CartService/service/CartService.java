@@ -128,8 +128,14 @@ public class CartService {
     public Cart getCartByCustomerId(String customerId) {
         String cartId = cacheManager.getCache("user_cart_map").get(customerId, String.class);
         if (cartId == null) {
-            String errorMessage = "Cart not found for customer ID: " + customerId;
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, errorMessage);
+            // If the cart ID is not in the cache, fetch it from the database
+            Cart cart = cartRepository.findByCustomerId(UUID.fromString(customerId));
+            if (cart == null) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cart not found for customer ID: " + customerId);
+            }
+            cartId = cart.getId().toString();
+            // Store the cart ID in the cache for future use
+            cacheManager.getCache("user_cart_map").put(customerId, cartId);
         }
         return getCartById(cartId, customerId);
     }
