@@ -1,7 +1,6 @@
 package com.example.chatservice.controllers;
 
 import com.example.chatservice.commands.ReportMessageCommand;
-import com.example.chatservice.commands.UpdateMessageCommand;
 import com.example.chatservice.dtos.CreateMessageDTO;
 import com.example.chatservice.dtos.MessagePage;
 import com.example.chatservice.dtos.UpdateMessageDTO;
@@ -9,8 +8,6 @@ import com.example.chatservice.enums.ReportType;
 import com.example.chatservice.models.Message;
 import com.example.chatservice.seeders.MessageSeeder;
 import com.example.chatservice.services.MessageService;
-import com.example.chatservice.services.UserMessageService;
-import com.example.chatservice.utils.JwtUtil;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,15 +35,11 @@ public class MessageController {
 
     private final MessageService messageService;
     private final MessageSeeder messageSeeder;
-    private final UserMessageService userMessageService;
-    private final JwtUtil jwtUtil;
 
     @Autowired
-    public MessageController(MessageService messageService, MessageSeeder messageSeeder, UserMessageService userMessageService, JwtUtil jwtUtil) {
+    public MessageController(MessageService messageService, MessageSeeder messageSeeder) {
         this.messageService = messageService;
         this.messageSeeder = messageSeeder;
-        this.userMessageService = userMessageService;
-        this.jwtUtil = jwtUtil;
     }
 
     /**
@@ -120,7 +113,10 @@ public class MessageController {
         String userId = (String) authentication.getDetails();
 
         log.info("Creating message at /messages endpoint");
-        Message createdMessage = messageService.createMessage(UUID.fromString(userId), createMessageDTO);
+        Message createdMessage = messageService.createMessageEntrypoint(
+                UUID.fromString(userId),
+                createMessageDTO
+        );
         log.info("Created message at /messages endpoint {}", createdMessage);
         return ResponseEntity.created(URI.create("/messages/" + createdMessage.getId())).body(createdMessage);
     }
@@ -132,13 +128,9 @@ public class MessageController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteMessage(@PathVariable UUID id) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String userId = (String) authentication.getDetails();
-
-
         log.info("Deleting message with ID {} at /messages/{} endpoint", id, id);
 
-        messageService.deleteMessageReceiver(UUID.fromString(userId), id);
+        messageService.deleteMessageByIdEntrypoint(id);
 
         log.info("Deleted message with ID {} at /messages/{} endpoint", id, id);
         return ResponseEntity.noContent().build();
@@ -154,8 +146,8 @@ public class MessageController {
     @PatchMapping("/{id}")
     public ResponseEntity<Message> updateMessage(@PathVariable UUID id, @Valid @RequestBody UpdateMessageDTO updateMessageDTO) {
         log.info("Updating message with ID {} at /messages/{} endpoint {}", id, id, updateMessageDTO);
-        UpdateMessageCommand updateMessageCommand = new UpdateMessageCommand(id, updateMessageDTO, messageService, userMessageService);
-        Message updatedMessage = updateMessageCommand.execute();
+
+        Message updatedMessage = messageService.updateMessageEntrypoint(id, updateMessageDTO);
         log.info("Updated message with ID {} at /messages/{} endpoint {}", id, id, updatedMessage);
         return ResponseEntity.ok(updatedMessage);
     }
@@ -211,7 +203,6 @@ public class MessageController {
     public ResponseEntity<String> clearMessages() {
         log.info("Deleting all messages at /messages endpoint");
         messageService.deleteAllMessages();
-        userMessageService.deleteAllUserMessages();
         log.info("Deleted all messages at /messages endpoint");
         return ResponseEntity.noContent().build();
     }
