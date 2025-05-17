@@ -79,12 +79,12 @@ public class CartController {
         return cartService.getCartByCustomerId(customerId);
     }
 
-    @GetMapping("/{cartId}/cartId")
-    public Cart getCartById(@PathVariable String cartId , @RequestHeader("Authorization") String authHeader) {
-        String jwt = authHeader.replace("Bearer ", "");
-        String customerId = jwtUtil.getUserClaims(jwt).get("id").toString();
-        return cartService.getCartById(cartId, customerId);
-    }
+    // @GetMapping("/{cartId}/cartId")
+    // public Cart getCartById(@PathVariable String cartId , @RequestHeader("Authorization") String authHeader) {
+    //     String jwt = authHeader.replace("Bearer ", "");
+    //     String customerId = jwtUtil.getUserClaims(jwt).get("id").toString();
+    //     return cartService.getCartById(cartId, customerId);
+    // }
 
     @DeleteMapping
     public ResponseEntity<String> deleteCart(@RequestHeader("Authorization") String authHeader) {
