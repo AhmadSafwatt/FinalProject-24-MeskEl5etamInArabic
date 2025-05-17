@@ -61,8 +61,8 @@ public class AuthService {
     }
 
     public String login(User user) {
-        Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
         try{
+            Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
             if (authenticate.isAuthenticated()) {
                 // check if verified
                 User foundUser = userRepository.findByUsername(user.getUsername()).get();
