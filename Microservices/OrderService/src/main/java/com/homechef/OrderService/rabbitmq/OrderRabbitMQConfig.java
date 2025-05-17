@@ -16,6 +16,9 @@ public class OrderRabbitMQConfig {
     public static final String CART_ORDER_EXCHANGE = "CART_ORDER_XCHANGE";
     public static final String CART_ROUTING = "cart_routing_key";
 
+    public static final String REORDERING_QUEUE = "reordering-queue";
+    public static final String REORDERING_ROUTING = "reordering-routing-key";
+
     public static final String DECREMENT_QUEUE = "product-decrement-queue";
     public static final String PRODUCT_EXCHANGE = "product-exchange";
 
@@ -25,6 +28,8 @@ public class OrderRabbitMQConfig {
     public Queue cartQueue() {
         return new Queue(CART_QUEUE);
     }
+
+    @Bean Queue reorderingQueue() { return new Queue(REORDERING_QUEUE); }
 
     @Bean
     public Queue decrementQueue() { return  new Queue(DECREMENT_QUEUE); }
@@ -42,6 +47,11 @@ public class OrderRabbitMQConfig {
     @Bean
     public Binding cartBinding(Queue cartQueue, TopicExchange cartExchange) {
         return BindingBuilder.bind(cartQueue).to(cartExchange).with(CART_ROUTING);
+    }
+
+    @Bean
+    public Binding reorderingBinding(Queue reorderingQueue, TopicExchange cartExchange) {
+        return BindingBuilder.bind(reorderingQueue).to(cartExchange).with(REORDERING_ROUTING);
     }
 
     @Bean
