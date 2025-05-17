@@ -54,27 +54,33 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteProductById(@PathVariable String id) {
-        productService.deleteProductById(id);
+    public void deleteProductById(@PathVariable String id , @RequestHeader("Authorization") String authHeader) {
+        String jwt = authHeader.replace("Bearer ", "");
+        UUID sellerId = UUID.fromString(jwtUtil.getUserClaims(jwt).get("id").toString());
+        productService.deleteProductById(id, sellerId);
     }
 
     @PutMapping("/{id}")
-    public Optional<Product> updateProduct(@PathVariable String id, @RequestBody Map<String, Object> request){
-        return  productService.updateProduct(id,request);
+    public Optional<Product> updateProduct(@PathVariable String id, @RequestBody Map<String, Object> request,@RequestHeader("Authorization") String authHeader){
+        String jwt = authHeader.replace("Bearer ", "");
+        UUID sellerId = UUID.fromString(jwtUtil.getUserClaims(jwt).get("id").toString());
+        return  productService.updateProduct(id,request,sellerId);
     }
 
     @PutMapping("/discount/{id}")
-    public Double applyDiscount(@PathVariable String id, @RequestParam Double discount){
-        return  productService.applyDiscount(id,discount);
+    public Double applyDiscount(@PathVariable String id, @RequestParam Double discount,@RequestHeader("Authorization") String authHeader){
+        String jwt = authHeader.replace("Bearer ", "");
+        UUID sellerId = UUID.fromString(jwtUtil.getUserClaims(jwt).get("id").toString());
+        return  productService.applyDiscount(id,discount,sellerId);
     }
-
-    @PutMapping("/incrementAmountSold/{id}")
-    public Product incrementAmountSold(@PathVariable String id, @RequestParam int amount) {
-        return productService.incrementAmountSold(id, amount);
-    }
-
-    @PutMapping("/{id}/decrement")
-    public Product decrementAmountSold(@PathVariable String id, @RequestParam int amount) {
-       return productService.decrementAmountSold(id, amount);
-    }
+//
+//    @PutMapping("/incrementAmountSold/{id}")
+//    public Product incrementAmountSold(@PathVariable String id, @RequestParam int amount) {
+//        return productService.incrementAmountSold(id, amount);
+//    }
+//
+//    @PutMapping("/{id}/decrement")
+//    public Product decrementAmountSold(@PathVariable String id, @RequestParam int amount) {
+//       return productService.decrementAmountSold(id, amount);
+//    }
 }

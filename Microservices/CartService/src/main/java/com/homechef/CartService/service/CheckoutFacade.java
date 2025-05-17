@@ -4,6 +4,7 @@ import com.homechef.CartService.client.ProductClient;
 import com.homechef.CartService.model.Cart;
 import com.homechef.CartService.model.CartItem;
 import com.homechef.CartService.model.ProductDTO;
+import com.homechef.CartService.rabbitmq.ProductRabbitMQProducer;
 import com.homechef.CartService.repository.CartRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,14 +20,21 @@ public class CheckoutFacade {
     private CartRepository cartRepository;
     @Autowired
     private final ProductClient productClient;
-    public CheckoutFacade(ProductClient productClient) {
+    @Autowired
+    private final ProductRabbitMQProducer productRabbitMQProducer;
+    public CheckoutFacade(ProductClient productClient, ProductRabbitMQProducer productRabbitMQProducer) {
+        this.productRabbitMQProducer = productRabbitMQProducer;
         this.productClient = productClient;
     }
+
+
 
     public String execute(String customerId) { // facade design pattern
         Cart cart = findCart(customerId);
 
         double totalCost = calculateTotalCost(cart);
+
+        sendProductsToProductsService(cart);
 
         sendCartToOrderService(prepareCartCostMap(cart, totalCost));
 
@@ -64,6 +72,14 @@ public class CheckoutFacade {
         if (cart.isPromo())
             totalCost = totalCost - 0.05*totalCost;
         return totalCost;
+    }
+
+    private void sendProductsToProductsService(Cart cart) {
+        List<CartItem> cartItems = cart.getCartItems();
+
+        for (CartItem cartItem : cartItems) {
+            productRabbitMQProducer.send(cartItem.getProductId(), cartItem.getQuantity());
+        }
     }
 
     private Map<Cart, Double> prepareCartCostMap(Cart cart, double totalCost) {
