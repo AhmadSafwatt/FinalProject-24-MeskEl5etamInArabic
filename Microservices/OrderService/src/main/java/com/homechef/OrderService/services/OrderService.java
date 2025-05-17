@@ -97,7 +97,7 @@ public class OrderService {
             order.cancelOrder();
             orderRepository.save(order);
             // TODO: uncomment this line when the api is ready
-            // decreaseProductSales(order);
+             decreaseProductSales(order);
             sendOrderCancellationNotification(order);
         } else {
             order.setOrderState(newState);
@@ -126,7 +126,7 @@ public class OrderService {
 
     // ------------------------------------------ helpers
 
-    // TODO: should be Async ?
+    // TODO: should be Async ? DONE
     private void decreaseProductSales(Order order) {
         for (OrderItem item : order.getItems()) {
             UUID productId = item.getProductId();
