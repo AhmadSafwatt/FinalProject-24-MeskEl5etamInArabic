@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -35,23 +34,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String authHeader = request.getHeader("Authorization");
         String jwt = null;
         String id = null;
+        String username = null;
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             jwt = authHeader.substring(7);
             try {
                 id = jwtUtil.extractUserId(jwt);
+                username = jwtUtil.extractUsername(jwt);
             } catch (Exception e) {
-                logger.warn("Failed to extract id from JWT: {}", e.getMessage());
+                logger.warn("Failed to extract claims from JWT: {}", e.getMessage());
             }
         }
 
-        if (id != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             if (jwtUtil.validateToken(jwt)) {
                 UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(id, null, Collections.emptyList());
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                        new UsernamePasswordAuthenticationToken(username, null, Collections.emptyList());
+
+                authToken.setDetails(id);
                 SecurityContextHolder.getContext().setAuthentication(authToken);
-                logger.debug("JWT authentication set for id: {}", id);
+                logger.debug("JWT authentication set for username: {}, id: {}", username, id);
             } else {
                 logger.warn("Invalid JWT token");
             }

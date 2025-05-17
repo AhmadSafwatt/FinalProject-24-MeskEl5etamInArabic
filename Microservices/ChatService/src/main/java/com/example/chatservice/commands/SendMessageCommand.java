@@ -20,6 +20,6 @@ public class SendMessageCommand implements Command<Message> {
 
     @Override
     public Message execute() {
-        return messageService.saveMessage(userId, createMessageDTO);
+        return messageService.createMessage(userId, createMessageDTO);
     }
 }

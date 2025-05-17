@@ -1,9 +1,6 @@
 package com.example.chatservice.controllers;
 
-import com.example.chatservice.commands.DeleteMessageCommand;
 import com.example.chatservice.commands.ReportMessageCommand;
-import com.example.chatservice.commands.SendMessageCommand;
-import com.example.chatservice.commands.UpdateMessageCommand;
 import com.example.chatservice.dtos.CreateMessageDTO;
 import com.example.chatservice.dtos.MessagePage;
 import com.example.chatservice.dtos.UpdateMessageDTO;
@@ -111,16 +108,15 @@ public class MessageController {
      */
     @PostMapping
     public ResponseEntity<Message> createMessage(@Valid @RequestBody CreateMessageDTO createMessageDTO) {
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String userId = authentication.getPrincipal().toString();
+        String userId = (String) authentication.getDetails();
 
         log.info("Creating message at /messages endpoint");
-        SendMessageCommand sendMessageCommand = new SendMessageCommand(
+        Message createdMessage = messageService.createMessageEntrypoint(
                 UUID.fromString(userId),
-                createMessageDTO,
-                messageService
+                createMessageDTO
         );
-        Message createdMessage = sendMessageCommand.execute();
         log.info("Created message at /messages endpoint {}", createdMessage);
         return ResponseEntity.created(URI.create("/messages/" + createdMessage.getId())).body(createdMessage);
     }
@@ -133,8 +129,9 @@ public class MessageController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteMessage(@PathVariable UUID id) {
         log.info("Deleting message with ID {} at /messages/{} endpoint", id, id);
-        DeleteMessageCommand deleteMessageCommand = new DeleteMessageCommand(id, messageService);
-        deleteMessageCommand.execute();
+
+        messageService.deleteMessageByIdEntrypoint(id);
+
         log.info("Deleted message with ID {} at /messages/{} endpoint", id, id);
         return ResponseEntity.noContent().build();
     }
@@ -149,8 +146,8 @@ public class MessageController {
     @PatchMapping("/{id}")
     public ResponseEntity<Message> updateMessage(@PathVariable UUID id, @Valid @RequestBody UpdateMessageDTO updateMessageDTO) {
         log.info("Updating message with ID {} at /messages/{} endpoint {}", id, id, updateMessageDTO);
-        UpdateMessageCommand updateMessageCommand = new UpdateMessageCommand(id, updateMessageDTO, messageService);
-        Message updatedMessage = updateMessageCommand.execute();
+
+        Message updatedMessage = messageService.updateMessageEntrypoint(id, updateMessageDTO);
         log.info("Updated message with ID {} at /messages/{} endpoint {}", id, id, updatedMessage);
         return ResponseEntity.ok(updatedMessage);
     }
