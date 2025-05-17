@@ -17,7 +17,7 @@ services:
       context: ./AuthService
       dockerfile: Dockerfile
     environment:
-      spring.datasource.url: jdbc:postgresql://host.docker.internal:5432/auth_db
+      spring.datasource.url: jdbc:postgresql://postgres_db:5432/auth_db
       spring.datasource.username: postgres
       spring.datasource.password: 1234
       spring.data.redis.host: redis_cache

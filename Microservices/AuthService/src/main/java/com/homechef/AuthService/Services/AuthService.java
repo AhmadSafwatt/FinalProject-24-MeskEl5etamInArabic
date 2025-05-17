@@ -62,23 +62,31 @@ public class AuthService {
 
     public String login(User user) {
         Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
-        if (authenticate.isAuthenticated()) {
-            // check if verified
-            User foundUser = userRepository.findByUsername(user.getUsername()).get();
-            if (foundUser.getRole().equals("unverified_user") || foundUser.getRole().equals("unverified_seller")) {
+        try{
+            if (authenticate.isAuthenticated()) {
+                // check if verified
+                User foundUser = userRepository.findByUsername(user.getUsername()).get();
+                if (foundUser.getRole().equals("unverified_user") || foundUser.getRole().equals("unverified_seller")) {
+                    throw new ResponseStatusException(
+                            HttpStatus.UNAUTHORIZED,
+                            "User not verified using email"
+                    );
+                }
+
+                return generateUserToken(user);
+            } else {
                 throw new ResponseStatusException(
                         HttpStatus.UNAUTHORIZED,
-                        "User not verified using email"
+                        "Invalid username or password"
                 );
             }
-
-            return generateUserToken(user);
-        } else {
+        } catch (Exception e) {
             throw new ResponseStatusException(
                     HttpStatus.UNAUTHORIZED,
                     "Invalid username or password"
             );
         }
+
     }
 
     public String generateUserToken(User user) {
@@ -371,9 +379,5 @@ public class AuthService {
                         User::getEmail
                 ));
     }
-
-
-
-
 
 }
