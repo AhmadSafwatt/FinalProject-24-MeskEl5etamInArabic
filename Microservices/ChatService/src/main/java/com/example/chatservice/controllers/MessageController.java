@@ -223,8 +223,11 @@ public class MessageController {
      * @param reportType Report type
      */
     @PatchMapping("/report/{id}")
-    public Message reportMessage(@RequestHeader("Authorization") String authHeader, @PathVariable("id") UUID messageId, @RequestParam ReportType reportType) {
-        String userId = authHeader.replace("Bearer ", "");
+    public Message reportMessage(@PathVariable("id") UUID messageId, @RequestParam ReportType reportType) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userId = authentication.getPrincipal().toString();
+
+        log.info("User {} is reporting message {} with type {}", userId, messageId, reportType);
 
         ReportMessageCommand reportCommand = new ReportMessageCommand(messageId, reportType, messageService);
         reportCommand.execute();
