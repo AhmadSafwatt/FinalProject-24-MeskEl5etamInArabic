@@ -24,6 +24,8 @@ buildNumber.properties
 *.iml
 *.ipr
 
+.jetclient/
+
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/

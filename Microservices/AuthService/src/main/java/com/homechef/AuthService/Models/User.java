@@ -1,4 +1,4 @@
-package Models;
+package com.homechef.AuthService.Models;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.GenericGenerator;
@@ -30,6 +30,10 @@ public class User {
         this.username = username;
         this.password = password;
         this.email = email;
+    }
+
+    public UUID getId() {
+        return id;
     }
 
     public String getUsername() {
@@ -82,5 +86,13 @@ public class User {
 
     public void setRoleSeller() {
         this.role = "seller";
+    }
+
+    public void setRoleUnverifiedUser() {
+        this.role = "unverified_user";
+    }
+
+    public void setRoleUnverifiedSeller() {
+        this.role = "unverified_seller";
     }
 }

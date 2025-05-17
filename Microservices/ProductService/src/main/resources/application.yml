@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: ProductService
+  data:
+    mongodb:
+      uri: mongodb://root:example@localhost:27018/elthon2yelamr7?authSource=admin
+      database: elthon2yelamr7
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+server:
+  port: 8085
+

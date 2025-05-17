@@ -2,7 +2,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/auth_db
     username: postgres
-    password: password
+    password: 1234
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
@@ -13,11 +13,42 @@ spring:
       hibernate:
         format_sql: true
         use_sql_comments: true
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: homechef477@gmail.com
+    password: solc ergg gpxc cllt
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+  otp:
+    expiration: 300000 # Expiration time in milliseconds (e.g., 5 minutes)
+    token-length: 6     # Number of digits in the OTP
+    algorithm: HmacSHA256 # Algorithm for generating OTP (e.g., HmacSHA256)
+    max-attempts: 3
+    block-duration: 600000
+  data:
+    redis:
+      host: localhost
+      password: redis-password
+      port: 6379
+      timeout: 60000
+      database: 0
+
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG
+        web: DEBUG # Optional, but can be helpful for request mapping issues
 
 
 server:
   port: 8081
 
 jwt:
-  secret: your-256-bit-secret-key-here
+  secret: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
   expiration: 86400000 # 24 hours in milliseconds
