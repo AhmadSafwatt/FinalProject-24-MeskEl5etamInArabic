@@ -17,17 +17,17 @@ public class TokenUtil {
         this.jwtUtil = jwtUtil;
     }
 
-    public String generateTestToken(UUID userId) {
+    public String generateTestToken(String username) {
 
         Map<String, Object> claims = new HashMap<>();
 
-        claims.put("id", userId.toString());
-        claims.put("username", "testuser");
+        claims.put("id", UUID.randomUUID().toString());
+        claims.put("username", username);
         claims.put("email", "testuser@gmail.com");
         claims.put("address", "123 Test St, Test City, TC 12345");
         claims.put("phoneNumber", "123-456-7890");
 
 
-        return jwtUtil.generateToken(userId.toString(), claims);
+        return jwtUtil.generateToken(username, claims);
     }
 }

@@ -1,8 +1,13 @@
 package com.example.chatservice.services;
 
+import com.example.chatservice.clients.ProductClient;
+import com.example.chatservice.commands.DeleteMessageCommand;
+import com.example.chatservice.commands.SendMessageCommand;
+import com.example.chatservice.commands.UpdateMessageCommand;
 import com.example.chatservice.dtos.CreateMessageDTO;
 import com.example.chatservice.dtos.UpdateMessageDTO;
 import com.example.chatservice.enums.MessageStatus;
+import com.example.chatservice.enums.MessageType;
 import com.example.chatservice.enums.ReportType;
 import com.example.chatservice.factories.MessageFactory;
 import com.example.chatservice.models.Message;
@@ -28,8 +33,11 @@ public class MessageService {
     private final MessageRepository messageRepository;
     private final CassandraTemplate cassandraTemplate;
 
+    private final ProductClient productClient;
+
     @Autowired
-    public MessageService(MessageRepository messageRepository, CassandraTemplate cassandraTemplate) {
+    public MessageService(MessageRepository messageRepository, CassandraTemplate cassandraTemplate, ProductClient productClient) {
+        this.productClient = productClient;
         this.messageRepository = messageRepository;
         this.cassandraTemplate = cassandraTemplate;
     }
@@ -52,7 +60,25 @@ public class MessageService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No message with id " + id + " found"));
     }
 
-    public Message saveMessage(UUID userId, CreateMessageDTO createMessageDTO) {
+    public Message createMessageEntrypoint(UUID userId, CreateMessageDTO createMessageDTO) {
+        SendMessageCommand sendMessageCommand = new SendMessageCommand(
+                userId,
+                createMessageDTO,
+                this
+        );
+
+        if (createMessageDTO.getType() == MessageType.PRODUCT) {
+            String productId = createMessageDTO.getContent().trim();
+
+            String productContent = productClient.getProductById(productId);
+
+            createMessageDTO.setContent(productContent);
+        }
+
+        return sendMessageCommand.execute();
+    }
+
+    public Message createMessage(UUID userId, CreateMessageDTO createMessageDTO) {
 
         Message message = MessageFactory.createMessage(
                 userId,
@@ -66,7 +92,6 @@ public class MessageService {
         }
 
         return messageRepository.save(message);
-
     }
 
     @Async
@@ -83,9 +108,19 @@ public class MessageService {
         messageRepository.saveAll(messages);
     }
 
-    public void deleteMessage(UUID id) {
+    public void deleteMessageByIdEntrypoint(UUID id) {
         getMessageById(id);
+        DeleteMessageCommand deleteMessageCommand = new DeleteMessageCommand(id, this);
+        deleteMessageCommand.execute();
+    }
+
+    public void deleteMessageById(UUID id) {
         messageRepository.deleteById(id);
+    }
+
+    public Message updateMessageEntrypoint(UUID id, UpdateMessageDTO partialMessage) {
+        UpdateMessageCommand updateMessageCommand = new UpdateMessageCommand(id, partialMessage, this);
+        return updateMessageCommand.execute();
     }
 
     public Message updateMessage(UUID id, UpdateMessageDTO partialMessage) {

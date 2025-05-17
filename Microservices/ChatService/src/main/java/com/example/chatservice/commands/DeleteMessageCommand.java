@@ -16,7 +16,7 @@ public class DeleteMessageCommand implements Command<Void> {
 
     @Override
     public Void execute() {
-        messageService.deleteMessage(messageId);
+        messageService.deleteMessageById(messageId);
         return null;
     }
 }
