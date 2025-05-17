@@ -5,8 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
-import java.util.UUID;
-
 @Slf4j
 @Component
 public class TokenPrinter implements CommandLineRunner {
@@ -23,13 +21,13 @@ public class TokenPrinter implements CommandLineRunner {
     @Override
     public void run(String... args) {
 
-        UUID userId = UUID.randomUUID();
+        String username = "testUser";
 
-        String token = tokenUtil.generateTestToken(userId);
-        System.out.println("Generated JWT at startup for " + userId + ":\n" + token);
+        String token = tokenUtil.generateTestToken(username);
+        System.out.println("Generated JWT at startup for " + username + ":\n" + token);
 
-        String userIdFromToken = jwUtil.extractUserId(token);
-        System.out.println("id extracted from token: " + userIdFromToken);
+        String usernameFromToken = jwUtil.extractUsername(token);
+        System.out.println("username extracted from token: " + usernameFromToken);
         boolean isValid = jwUtil.validateToken(token);
         if (isValid) {
             System.out.println("Token is valid.");
