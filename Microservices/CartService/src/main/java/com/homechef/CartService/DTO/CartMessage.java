@@ -7,6 +7,12 @@ public class CartMessage {
     Cart cart;
     Double totalPrice;
 
+    public CartMessage() {}
+    public CartMessage(Cart cart,Double totalPrice) {
+        this.cart = cart;
+        this.totalPrice = totalPrice;
+    }
+
     public Cart getCart() {
         return cart;
     }
