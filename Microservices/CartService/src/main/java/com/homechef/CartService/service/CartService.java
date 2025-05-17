@@ -136,8 +136,10 @@ public class CartService {
             cartId = cart.getId().toString();
             // Store the cart ID in the cache for future use
             cacheManager.getCache("user_cart_map").put(customerId, cartId);
+            cacheManager.getCache("cartCache").put(cartId, cart);
         }
-        return getCartById(cartId, customerId);
+        Cart c = cacheManager.getCache("cartCache").get(cartId, Cart.class);
+        return getFullProduct(c);
     }
 
     @Cacheable(value = "cartCache", key = "#cartId")
@@ -149,23 +151,27 @@ public class CartService {
             String errorMessage = "Cart not found for cart ID: " + cartId;
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, errorMessage);
         }
-        if (!customerId.equals(c.getCustomerId().toString())) {
+        if (!customerId.equals(c.getCustomerId().toString())) 
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authorized to access this cart");
-        }   
-             
+        
+        if (cacheManager.getCache("user_cart_map").get(customerId) == null) 
+            cacheManager.getCache("user_cart_map").put(customerId, cartId);
+                
+        return getFullProduct(c);
+    }
+
+    private Cart getFullProduct (Cart cart){
         List<String> ids = new ArrayList<>();
-        // Fetch product details from Product Service
-        for (CartItem item : c.getCartItems()){
+        for (CartItem item : cart.getCartItems()){
             ids.add(item.getProductId().toString());
         }
         List<ProductDTO> products = new ArrayList<>();
         if (!ids.isEmpty())
             products = productClient.getProductsById(ids);
-        // Update cart items with product details
-        for (int i = 0; i < c.getCartItems().size(); i++) {
-            c.getCartItems().get(i).setProduct(products.get(i));
+        for (int i = 0; i < cart.getCartItems().size(); i++) {
+            cart.getCartItems().get(i).setProduct(products.get(i));
         }
-        return c;
+        return cart;
     }
 
     public String deleteCartByCustomerID(String customerId) {
