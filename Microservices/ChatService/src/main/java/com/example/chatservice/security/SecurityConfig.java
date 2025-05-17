@@ -6,17 +6,21 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 public class SecurityConfig {
 
-    @Autowired
-    private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Autowired
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
+    public SecurityConfig(JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint, JwtAuthenticationFilter jwtAuthenticationFilter) {
+        this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -30,7 +34,7 @@ public class SecurityConfig {
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                 )
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter, BearerTokenAuthenticationFilter.class);
         return http.build();
     }
 }

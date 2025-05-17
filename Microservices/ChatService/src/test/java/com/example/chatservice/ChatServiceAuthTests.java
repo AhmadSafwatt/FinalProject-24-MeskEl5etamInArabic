@@ -1,5 +1,6 @@
 package com.example.chatservice;
 
+import com.example.chatservice.clients.ProductClient;
 import com.example.chatservice.dtos.CreateMessageDTO;
 import com.example.chatservice.enums.MessageType;
 import com.example.chatservice.models.Message;
@@ -38,6 +39,8 @@ public class ChatServiceAuthTests {
 
     private MessageService messageService;
 
+    private final ProductClient productClient;
+
     private final CassandraTemplate cassandraTemplate;
 
     private final MockMvc mockMvc;
@@ -52,24 +55,26 @@ public class ChatServiceAuthTests {
     private String testToken;
 
     @Autowired
-    public ChatServiceAuthTests(MockMvc mockMvc, JwtUtil jwtUtil, TokenUtil tokenUtil, CassandraTemplate cassandraTemplate) {
+    public ChatServiceAuthTests(MockMvc mockMvc, JwtUtil jwtUtil, TokenUtil tokenUtil,
+                                CassandraTemplate cassandraTemplate, ProductClient productClient) {
         this.mockMvc = mockMvc;
         this.jwtUtil = jwtUtil;
         this.tokenUtil = tokenUtil;
         this.cassandraTemplate = cassandraTemplate;
+        this.productClient = productClient;
     }
 
     @BeforeAll
     void initToken() {
-        UUID testSenderId = UUID.randomUUID();
-        testToken = tokenUtil.generateTestToken(testSenderId);
+        String testUser = "testFileTestUser";
+        testToken = tokenUtil.generateTestToken(testUser);
     }
 
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
-        messageService = new MessageService(messageRepository, cassandraTemplate);
+        messageService = new MessageService(messageRepository, cassandraTemplate, productClient);
     }
 
     private CreateMessageDTO createTestCreateMessageDTO(MessageType type) {
