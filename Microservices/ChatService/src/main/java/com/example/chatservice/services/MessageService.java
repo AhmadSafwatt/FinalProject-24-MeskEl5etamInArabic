@@ -5,6 +5,7 @@ import com.example.chatservice.commands.DeleteMessageCommand;
 import com.example.chatservice.commands.SendMessageCommand;
 import com.example.chatservice.commands.UpdateMessageCommand;
 import com.example.chatservice.dtos.CreateMessageDTO;
+import com.example.chatservice.dtos.ProductDTO;
 import com.example.chatservice.dtos.UpdateMessageDTO;
 import com.example.chatservice.enums.MessageStatus;
 import com.example.chatservice.enums.MessageType;
@@ -12,6 +13,8 @@ import com.example.chatservice.enums.ReportType;
 import com.example.chatservice.factories.MessageFactory;
 import com.example.chatservice.models.Message;
 import com.example.chatservice.repositories.MessageRepository;
+import com.example.chatservice.utils.ProductUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.cassandra.core.CassandraTemplate;
 import org.springframework.data.domain.Pageable;
@@ -72,7 +75,15 @@ public class MessageService {
 
             String productContent = productClient.getProductById(productId);
 
-            createMessageDTO.setContent(productContent);
+            ObjectMapper objectMapper = new ObjectMapper();
+
+            try {
+                ProductDTO productDTO = objectMapper.readValue(productContent, ProductDTO.class);
+                String prettyProduct = ProductUtils.prettyPrintProduct(productDTO);
+                createMessageDTO.setContent(prettyProduct);
+            } catch (Exception e) {
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error parsing product data", e);
+            }
         }
 
         return sendMessageCommand.execute();
