@@ -142,8 +142,20 @@ public class CartService {
         return getFullProduct(c);
     }
 
-    @Cacheable(value = "cartCache", key = "#cartId")
+    // @Cacheable(value = "cartCache", key = "#cartId")
     public Cart getCartById(String cartId , String customerId) {
+
+        if(cacheManager.getCache("cartCache").get(cartId) != null){
+            Cart cc = cacheManager.getCache("cartCache").get(cartId, Cart.class);
+            if (cc.getCustomerId().toString().equals(customerId)) {
+                return getFullProduct(cc);
+            } else {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authorized to access this cart");
+            }
+        }
+            
+
+
         UUID cartUUID = UUID.fromString(cartId);
         Cart c = cartRepository.findById(cartUUID).orElse(null);
 
