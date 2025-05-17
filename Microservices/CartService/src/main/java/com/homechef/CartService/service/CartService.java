@@ -5,8 +5,11 @@ import com.homechef.CartService.model.CartItem;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import com.homechef.CartService.model.ProductDTO;
+import com.homechef.CartService.rabbitmq.CartRabbitMQConfig;
 import com.homechef.CartService.repository.CartRepository;
 import java.util.*;
+
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachePut;
@@ -172,4 +175,34 @@ public class CartService {
     public String checkoutCartByCustomerId(String customerId) { // facade design pattern
         return checkoutFacade.execute(customerId);
     }
+
+
+    // TODO: check if the logic is correct and respects the current design
+    @RabbitListener(queues = CartRabbitMQConfig.REORDERING_QUEUE)
+    public void receiveReOrderingCartMessage(Cart cart) {
+        System.out.println("Received cart message: " + cart);
+        Cart c = cartRepository.findByCustomerId(cart.getCustomerId());
+        if (c == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cart not found for customer ID: " + cart.getCustomerId());
+        }
+        List<CartItem> existingCartItems = cart.getCartItems();
+
+        for (CartItem item : existingCartItems) {
+            boolean found = false; // to not use duplicate items
+            for (CartItem existingItem : c.getCartItems()) {
+                if (item.getProductId().equals(existingItem.getProductId())) {
+                    existingItem.setQuantity(existingItem.getQuantity() + item.getQuantity());
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                c.getCartItems().add(item);
+            }
+        }
+
+        cartRepository.save(c);
+
+    }
+
 }
