@@ -142,39 +142,6 @@ public class CartService {
         return getFullProduct(c);
     }
 
-    // @Cacheable(value = "cartCache", key = "#cartId")     I can explain why .....
-    // public Cart getCartById(String cartId , String customerId) {
-    //     System.out.println("cartId: " + cartId);
-    //     System.out.println("customerId: " + customerId);
-
-    //     // If found in cache, check that it belongs to this user
-    //     if(cacheManager.getCache("cartCache").get(cartId) != null){
-    //         System.out.println("Found in cache");
-    //         Cart cc = cacheManager.getCache("cartCache").get(cartId, Cart.class);
-    //         if (cc.getCustomerId().toString().equals(customerId)) {
-    //             System.out.println("Found in cache and belongs to this user");
-    //             return getFullProduct(cc);
-    //         } else {
-    //             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authorized to access this cart");
-    //         }
-    //     }
-    //     // If not found in cache, check the database and add it to the cache    
-    //     UUID cartUUID = UUID.fromString(cartId);
-    //     Cart c = cartRepository.findById(cartUUID).orElse(null);
-
-    //     if (c == null) {
-    //         String errorMessage = "Cart not found for cart ID: " + cartId;
-    //         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, errorMessage);
-    //     }
-    //     if (!customerId.equals(c.getCustomerId().toString())) 
-    //         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authorized to access this cart");
-        
-    //     cacheManager.getCache("cartCache").put(cartId, c);
-    //     cacheManager.getCache("user_cart_map").put(customerId, cartId);
-                
-    //     return getFullProduct(c);
-    // }
-
     private Cart getFullProduct (Cart cart){
         List<String> ids = new ArrayList<>();
         for (CartItem item : cart.getCartItems()){
