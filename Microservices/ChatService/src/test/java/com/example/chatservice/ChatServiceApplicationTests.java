@@ -1,5 +1,4 @@
 package com.example.chatservice;
-
 import com.example.chatservice.clients.ProductClient;
 import com.example.chatservice.commands.MarkMessageAsSeenCommand;
 import com.example.chatservice.commands.SendMessageCommand;
