@@ -7,6 +7,7 @@ import com.homechef.OrderService.services.OrderService;
 import com.homechef.OrderService.services.OrdersSeeder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -128,6 +129,13 @@ public class OrderController {
             @RequestBody String note) {
         validateUserIsItemSeller(authHeader, orderId, productId);
         orderService.updateItemNote(orderId, productId, note);
+    }
+
+    @PostMapping("/{orderId}/reorder")
+    public ResponseEntity<String> reorder(@RequestHeader("Authorization") String authHeader, @PathVariable String orderId) {
+        validateeUserIsOrderBuyer(authHeader, UUID.fromString(orderId));
+        orderService.reOrderAndSendItemsToCart(UUID.fromString(orderId));
+        return ResponseEntity.ok("Order with id " + orderId + " has been reordered successfully");
     }
 
     private void validateeUserIsOrderBuyer(String authHeader, UUID orderId) {

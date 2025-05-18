@@ -1,4 +1,5 @@
 package com.homechef.CartService.service;
+import com.homechef.CartService.DTO.CartMessage;
 import com.homechef.CartService.client.ProductClient;
 import com.homechef.CartService.model.Cart;
 import com.homechef.CartService.model.CartItem;
@@ -179,7 +180,8 @@ public class CartService {
 
     // TODO: check if the logic is correct and respects the current design
     @RabbitListener(queues = CartRabbitMQConfig.REORDERING_QUEUE)
-    public void receiveReOrderingCartMessage(Cart cart) {
+    public void receiveReOrderingCartMessage(CartMessage cartMsg) {
+        Cart cart = cartMsg.getCart();
         System.out.println("Received cart message: " + cart);
         Cart c = cartRepository.findByCustomerId(cart.getCustomerId());
         if (c == null) {

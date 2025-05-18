@@ -208,7 +208,7 @@ public class OrderService {
         createOrder(cart.toOrder(price));
     }
 
-    public void ReOrderAndSendItemsToCart(UUID orderId) {
+    public void reOrderAndSendItemsToCart(UUID orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Order with id " + orderId + " not found"));
