@@ -3,8 +3,10 @@ package com.homechef.ProductService.controller;
 
 import com.homechef.ProductService.config.JwtUtil;
 import com.homechef.ProductService.model.Product;
+import com.homechef.ProductService.seed.DatabaseSeeder;
 import com.homechef.ProductService.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.homechef.ProductService.config.JwtUtil.*;
 
@@ -16,6 +18,20 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/products")
 public class ProductController {
+    @Autowired
+    private  DatabaseSeeder databaseSeeder;
+
+    public ProductController(DatabaseSeeder databaseSeeder) {
+        this.databaseSeeder = databaseSeeder;
+    }
+
+
+    @GetMapping("/seed")
+    public ResponseEntity<String> seedDatabase() {
+        databaseSeeder.seed();
+        return ResponseEntity.ok("Database seeded successfully");
+    }
+
 
     ProductService productService;
     private JwtUtil jwtUtil = JwtUtil.getInstance();

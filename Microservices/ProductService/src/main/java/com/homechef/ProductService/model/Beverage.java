@@ -81,6 +81,10 @@ public class Beverage extends Product {
             this.isHot = isHot;
             return this;
         }
+        public Builder setId(UUID id) {
+            this.id = id;
+            return this;
+        }
         public Beverage build() {
             return new Beverage(this);
         }
