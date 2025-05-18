@@ -88,11 +88,17 @@ public class CartService {
         UUID productIDD = UUID.fromString(productID);
 
         Cart cart = cartRepository.findByCustomerId(customerIDD);
+        if(cart == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cart does not exist");
+        boolean found = false;
         for(int i = 0 ; i< cart.getCartItems().size() ; i++){
             if((cart.getCartItems().get(i).getProductId().equals(productIDD))){
                 cart.getCartItems().get(i).setNotes( cart.getCartItems().get(i).getNotes() + ", " + notes);
+                found = true;
             }
         }
+        if(!found)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found in cart");
         return cartRepository.save(cart);
     }
 
@@ -101,12 +107,18 @@ public class CartService {
         UUID customerIDD = UUID.fromString(customerId);
         UUID productIDD = UUID.fromString(productId);
         Cart cart = cartRepository.findByCustomerId(customerIDD);
+        if(cart == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cart does not exist");
         List<CartItem> newCartItems = new ArrayList<>();
+        // boolean found = false;
         for(int i = 0 ; i< cart.getCartItems().size() ; i++){
             if(!(cart.getCartItems().get(i).getProductId().equals(productIDD))){
                 newCartItems.add(cart.getCartItems().get(i));
+                // found = true;
             }
         }
+        if(newCartItems.size() == cart.getCartItems().size())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found in cart");
         cart.setCartItems(newCartItems);
         return cartRepository.save(cart);
     }
