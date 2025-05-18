@@ -79,8 +79,8 @@ public class ProductController {
 //        return productService.incrementAmountSold(id, amount);
 //    }
 //
-//    @PutMapping("/{id}/decrement")
-//    public Product decrementAmountSold(@PathVariable String id, @RequestParam int amount) {
-//       return productService.decrementAmountSold(id, amount);
-//    }
+    @PutMapping("/{id}/decrement")
+    public void decrementAmountSold(@PathVariable String id, @RequestParam int amount) {
+       productService.decrementAmountSold(id, amount);
+    }
 }

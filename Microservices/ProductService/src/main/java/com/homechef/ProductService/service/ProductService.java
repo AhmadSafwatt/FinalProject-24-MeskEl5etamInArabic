@@ -243,24 +243,25 @@ public class ProductService {
         Update update = new Update().inc("amountSold", message.getAmount());
         mongoTemplate.updateFirst(query, update, Product.class);
     }
-    @RabbitListener(queues = RabbitMQConfig.DECREMENT_QUEUE)
-    public void decrementAmountSold(ProductMessage message) {
-        UUID productUUID = message.getProductId();
+    //@RabbitListener(queues = RabbitMQConfig.DECREMENT_QUEUE)
+    public void decrementAmountSold(String id, int amount) {
+        //UUID productUUID = message.getProductId();
+        UUID productUUID = UUID.fromString(id);
         if(!productRepository.existsById(productUUID))
         {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
         }
         int productAmountSold = productRepository.findById(productUUID).get().getAmountSold();
-        if( productAmountSold< message.getAmount()) {
+        if( productAmountSold< amount) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"decrement value must be less than amount sold");
         }
 
-        if(message.getAmount() < 0) {
+        if(amount < 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"decrement value must be non-negative");
         }
 
-        Query query = new Query(Criteria.where("_id").is(message.getProductId().toString()));
-        Update update = new Update().inc("amountSold",-1*message.getAmount());
+        Query query = new Query(Criteria.where("_id").is(id));
+        Update update = new Update().inc("amountSold",-1*amount);
         mongoTemplate.updateFirst(query, update, Product.class);
     }
 }

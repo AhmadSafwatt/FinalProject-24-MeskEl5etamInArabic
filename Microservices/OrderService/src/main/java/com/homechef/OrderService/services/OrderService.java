@@ -28,17 +28,18 @@ import java.util.UUID;
 public class OrderService {
     private final OrderRepository orderRepository;
     private final EmailService emailService;
-//    private final ProductServiceClient productServiceClient;
+    private final ProductServiceClient productServiceClient;
     private final RabbitMQProducer rabbitMQProducer;
     private final AuthServiceClient authServiceClient;
 
     @Autowired
     public OrderService(OrderRepository orderRepository, EmailService emailService,
-            RabbitMQProducer rabbitMQProducer, AuthServiceClient authServiceClient) {
+            RabbitMQProducer rabbitMQProducer, AuthServiceClient authServiceClient, ProductServiceClient productServiceClient) {
         this.orderRepository = orderRepository;
         this.emailService = emailService;
         this.rabbitMQProducer = rabbitMQProducer;
         this.authServiceClient = authServiceClient;
+        this.productServiceClient = productServiceClient;
     }
 
     public List<Order> getAllOrders() {
@@ -133,9 +134,10 @@ public class OrderService {
         for (OrderItem item : order.getItems()) {
             UUID productId = item.getProductId();
             int quantity = item.getQuantity();
-//            productServiceClient.modifyProductSales(productId, -quantity); // Previous SYNC communication
+            productServiceClient.decrementAmountSold(productId.toString(), quantity); //SYNC communication
             // new ASYNC communication
-            rabbitMQProducer.sendProductDecrement(productId, quantity);
+            //rabbitMQProducer.sendProductDecrement(productId, quantity);
+            // Swapped back to sync, but both are working if changes are made
         }
     }
 
