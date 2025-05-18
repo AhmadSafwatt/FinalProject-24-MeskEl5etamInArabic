@@ -1,9 +1,12 @@
 package com.homechef.CartService.service;
 
+import com.homechef.CartService.DTO.CartMessage;
 import com.homechef.CartService.client.ProductClient;
 import com.homechef.CartService.model.Cart;
 import com.homechef.CartService.model.CartItem;
 import com.homechef.CartService.model.ProductDTO;
+import com.homechef.CartService.rabbitmq.CartRabbitMQConfig;
+import com.homechef.CartService.rabbitmq.CartRabbitMQProducer;
 import com.homechef.CartService.rabbitmq.ProductRabbitMQProducer;
 import com.homechef.CartService.repository.CartRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,9 +25,13 @@ public class CheckoutFacade {
     private final ProductClient productClient;
     @Autowired
     private final ProductRabbitMQProducer productRabbitMQProducer;
-    public CheckoutFacade(ProductClient productClient, ProductRabbitMQProducer productRabbitMQProducer) {
+    @Autowired
+    private final CartRabbitMQProducer cartRabbitMQProducer;
+    public CheckoutFacade(ProductClient productClient, ProductRabbitMQProducer productRabbitMQProducer,
+                          CartRabbitMQProducer cartRabbitMQProducer) {
         this.productRabbitMQProducer = productRabbitMQProducer;
         this.productClient = productClient;
+        this.cartRabbitMQProducer = cartRabbitMQProducer;
     }
 
 
@@ -36,7 +43,7 @@ public class CheckoutFacade {
 
         sendProductsToProductsService(cart);
 
-        sendCartToOrderService(prepareCartCostMap(cart, totalCost));
+        sendCartToOrderService(cart, totalCost);
 
         clearCart(cart);
 
@@ -82,19 +89,13 @@ public class CheckoutFacade {
         }
     }
 
-    private Map<Cart, Double> prepareCartCostMap(Cart cart, double totalCost) {
-        Map<Cart, Double> cartCostMap = new HashMap<>();
-        cartCostMap.put(cart, totalCost);
-        return cartCostMap;
-    }
-
     private void clearCart(Cart cart) {
         cart.setCartItems(new ArrayList<>());
         cartRepository.save(cart);
     }
 
-    private void sendCartToOrderService(Map<Cart, Double> cartCostMap) {
-        //orderService.sendCartCheckout(cartCostMap); // Async via RabbitMQ
+    private void sendCartToOrderService(Cart cart, double totalCost) {
+        cartRabbitMQProducer.sendCart(cart, totalCost);
         System.out.println("SENT TO ORDER SERVICE");
     }
 }

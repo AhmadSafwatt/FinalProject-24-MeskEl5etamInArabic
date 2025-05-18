@@ -12,8 +12,12 @@ spring:
     type: redis
   rabbitmq:
     host: localhost
-    port: 5672
+    port: 5676
     username: guest
     password: guest
 server:
   port: 8082
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: on_param

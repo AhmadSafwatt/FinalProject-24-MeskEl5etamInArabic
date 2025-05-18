@@ -1,8 +1,10 @@
 package com.homechef.CartService.controller;
 
+import com.homechef.CartService.DTO.CartMessage;
 import com.homechef.CartService.config.JwtUtil;
 import com.homechef.CartService.model.Cart;
 import com.homechef.CartService.model.CartItem;
+import com.homechef.CartService.seed.DatabaseSeeder;
 import com.homechef.CartService.service.CartService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,8 +21,16 @@ public class CartController {
 
     @Autowired
     private CartService cartService;
+    @Autowired
+    private DatabaseSeeder databaseSeeder;
 
     private JwtUtil jwtUtil = JwtUtil.getInstance();
+
+    @GetMapping("/seed")
+    public ResponseEntity<String> seedDatabase() {
+        databaseSeeder.seed();
+        return ResponseEntity.ok("Database seeded successfully");
+    }
 
     @PostMapping("/createCart")
     public Cart createCart(@RequestHeader("Authorization") String authHeader){
@@ -79,8 +89,6 @@ public class CartController {
         return cartService.getCartByCustomerId(customerId);
     }
 
-   
-
     @DeleteMapping
     public ResponseEntity<String> deleteCart(@RequestHeader("Authorization") String authHeader) {
         String jwt = authHeader.replace("Bearer ", "");
@@ -91,5 +99,10 @@ public class CartController {
     public ResponseEntity<String> checkout(@RequestHeader("Authorization") String authHeader) {
         String jwt = authHeader.replace("Bearer ", "");
         return ResponseEntity.ok(cartService.checkoutCartByCustomerId(jwtUtil.getUserClaims(jwt).get("id").toString()));
+    }
+
+    @PostMapping("/reorder")
+    public void reorder(@RequestBody CartMessage cartMessage) {
+        cartService.receiveReOrderingCartMessage(cartMessage);
     }
 }
