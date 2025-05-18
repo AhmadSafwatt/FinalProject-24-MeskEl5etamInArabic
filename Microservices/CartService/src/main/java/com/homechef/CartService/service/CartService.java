@@ -88,11 +88,17 @@ public class CartService {
         UUID productIDD = UUID.fromString(productID);
 
         Cart cart = cartRepository.findByCustomerId(customerIDD);
+        if(cart == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cart does not exist");
+        boolean found = false;
         for(int i = 0 ; i< cart.getCartItems().size() ; i++){
             if((cart.getCartItems().get(i).getProductId().equals(productIDD))){
                 cart.getCartItems().get(i).setNotes( cart.getCartItems().get(i).getNotes() + ", " + notes);
+                found = true;
             }
         }
+        if(!found)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found in cart");
         return cartRepository.save(cart);
     }
 
