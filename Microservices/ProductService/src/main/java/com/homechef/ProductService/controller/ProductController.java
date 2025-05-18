@@ -73,14 +73,14 @@ public class ProductController {
         UUID sellerId = UUID.fromString(jwtUtil.getUserClaims(jwt).get("id").toString());
         return  productService.applyDiscount(id,discount,sellerId);
     }
-
-    @PutMapping("/incrementAmountSold/{id}")
-    public Product incrementAmountSold(@PathVariable String id, @RequestParam int amount) {
-        return productService.incrementAmountSold(id, amount);
-    }
-
+//
+//    @PutMapping("/incrementAmountSold/{id}")
+//    public Product incrementAmountSold(@PathVariable String id, @RequestParam int amount) {
+//        return productService.incrementAmountSold(id, amount);
+//    }
+//
     @PutMapping("/{id}/decrement")
-    public Product decrementAmountSold(@PathVariable String id, @RequestParam int amount) {
-       return productService.decrementAmountSold(id, amount);
+    public void decrementAmountSold(@PathVariable String id, @RequestParam int amount) {
+       productService.decrementAmountSold(id, amount);
     }
 }

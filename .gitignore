@@ -24,6 +24,8 @@ buildNumber.properties
 *.iml
 *.ipr
 
+.jetclient/
+
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
@@ -36,3 +38,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# secrets
+Microservices/OrderService/src/main/resources/application-secrets.yml

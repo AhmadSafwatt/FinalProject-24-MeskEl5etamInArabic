@@ -5,12 +5,16 @@ services:
     ports:
       - "9042:9042"
     environment:
+      CASSANDRA_DC: "datacenter1"
       CASSANDRA_CLUSTER_NAME: "ChatCluster"
       CASSANDRA_NUM_TOKENS: "256"
       CASSANDRA_KEYSPACE: "chat_keyspace"
+    healthcheck:
+      test: ["CMD", "cqlsh", "-e", "describe keyspaces"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
 
-#    volumes:
-#      - ./init.cql:/docker-entrypoint-initdb.d/init.cql
 
   chatservice:
     container_name: chatservice
@@ -20,8 +24,7 @@ services:
     ports:
       - "8083:8083"
     environment:
-      CASSANDRA_HOST: cassandra
-      CASSANDRA_PORT: 9042
-      CASSANDRA_KEYSPACE: chat_keyspace
+      - CASSANDRA_HOST=cassandra
     depends_on:
-      - cassandra
+      cassandra:
+        condition: service_healthy
