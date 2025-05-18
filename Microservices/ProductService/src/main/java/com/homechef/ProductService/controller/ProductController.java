@@ -3,8 +3,10 @@ package com.homechef.ProductService.controller;
 
 import com.homechef.ProductService.config.JwtUtil;
 import com.homechef.ProductService.model.Product;
+import com.homechef.ProductService.seed.DatabaseSeeder;
 import com.homechef.ProductService.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.homechef.ProductService.config.JwtUtil.*;
 
@@ -16,6 +18,20 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/products")
 public class ProductController {
+    @Autowired
+    private  DatabaseSeeder databaseSeeder;
+
+    public ProductController(DatabaseSeeder databaseSeeder) {
+        this.databaseSeeder = databaseSeeder;
+    }
+
+
+    @GetMapping("/seed")
+    public ResponseEntity<String> seedDatabase() {
+        databaseSeeder.seed();
+        return ResponseEntity.ok("Database seeded successfully");
+    }
+
 
     ProductService productService;
     private JwtUtil jwtUtil = JwtUtil.getInstance();
@@ -54,27 +70,33 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteProductById(@PathVariable String id) {
-        productService.deleteProductById(id);
+    public void deleteProductById(@PathVariable String id , @RequestHeader("Authorization") String authHeader) {
+        String jwt = authHeader.replace("Bearer ", "");
+        UUID sellerId = UUID.fromString(jwtUtil.getUserClaims(jwt).get("id").toString());
+        productService.deleteProductById(id, sellerId);
     }
 
     @PutMapping("/{id}")
-    public Optional<Product> updateProduct(@PathVariable String id, @RequestBody Map<String, Object> request){
-        return  productService.updateProduct(id,request);
+    public Optional<Product> updateProduct(@PathVariable String id, @RequestBody Map<String, Object> request,@RequestHeader("Authorization") String authHeader){
+        String jwt = authHeader.replace("Bearer ", "");
+        UUID sellerId = UUID.fromString(jwtUtil.getUserClaims(jwt).get("id").toString());
+        return  productService.updateProduct(id,request,sellerId);
     }
 
     @PutMapping("/discount/{id}")
-    public Double applyDiscount(@PathVariable String id, @RequestParam Double discount){
-        return  productService.applyDiscount(id,discount);
+    public Double applyDiscount(@PathVariable String id, @RequestParam Double discount,@RequestHeader("Authorization") String authHeader){
+        String jwt = authHeader.replace("Bearer ", "");
+        UUID sellerId = UUID.fromString(jwtUtil.getUserClaims(jwt).get("id").toString());
+        return  productService.applyDiscount(id,discount,sellerId);
     }
-
-    @PutMapping("/incrementAmountSold/{id}")
-    public Product incrementAmountSold(@PathVariable String id, @RequestParam int amount) {
-        return productService.incrementAmountSold(id, amount);
-    }
-
+//
+//    @PutMapping("/incrementAmountSold/{id}")
+//    public Product incrementAmountSold(@PathVariable String id, @RequestParam int amount) {
+//        return productService.incrementAmountSold(id, amount);
+//    }
+//
     @PutMapping("/{id}/decrement")
-    public Product decrementAmountSold(@PathVariable String id, @RequestParam int amount) {
-       return productService.decrementAmountSold(id, amount);
+    public void decrementAmountSold(@PathVariable String id, @RequestParam int amount) {
+       productService.decrementAmountSold(id, amount);
     }
 }

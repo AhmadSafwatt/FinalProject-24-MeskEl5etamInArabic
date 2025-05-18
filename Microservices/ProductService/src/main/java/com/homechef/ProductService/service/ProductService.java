@@ -1,7 +1,9 @@
 package com.homechef.ProductService.service;
 
 
+import com.homechef.ProductService.DTO.ProductMessage;
 import com.homechef.ProductService.model.*;
+import com.homechef.ProductService.rabbitmq.RabbitMQConfig;
 import com.homechef.ProductService.repository.ProductRepository;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -10,6 +12,7 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpStatus;
@@ -83,6 +86,9 @@ public class ProductService {
         List<Product> products = new ArrayList<>();
         for (String id : ids){
             UUID productUUID = UUID.fromString(id);
+            if (!productRepository.existsById(productUUID)) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
+            }
             Product product = productRepository.findById(productUUID).orElse(null);
             products.add(product);
         }
@@ -103,12 +109,21 @@ public class ProductService {
     }
 
 
-    public void deleteProductById(String id) {
+    public void deleteProductById(String id,UUID sellerId) {
         UUID productUUID = UUID.fromString(id);
+
 
         if(!productRepository.existsById(productUUID)){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
         }
+
+        UUID productSellerID = productRepository.findById(productUUID).get().getSellerId();
+
+        if(!productSellerID.equals(sellerId)){
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authorized to access this cart");
+        }
+
+
 
         productRepository.deleteById(productUUID);
     }
@@ -116,7 +131,7 @@ public class ProductService {
 
 
 
-    public Optional<Product> updateProduct(String id, Map<String, Object> updates) {
+    public Optional<Product> updateProduct(String id, Map<String, Object> updates,UUID sellerId) {
         MongoDatabase mongoDatabase = this.mongoClient.getDatabase("elthon2yelamr7");
         MongoCollection<Document> products = mongoDatabase.getCollection("products");
 
@@ -128,6 +143,10 @@ public class ProductService {
         }
 
         Product product = productOptional.get();
+
+        if(!product.getSellerId().equals(sellerId)){
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"user not authorised to update this product");
+        }
 
         if (updates.containsKey("name")) {
             products.updateOne(Filters.eq("_id", id),
@@ -183,7 +202,7 @@ public class ProductService {
         return productRepository.findById(productUUID);
     }
 
-    public Double applyDiscount(String id,Double discount){
+    public Double applyDiscount(String id,Double discount,UUID sellerId){
 
         if (discount == null || discount < 0.0 || discount > 1.0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Discount must be between 0 and 1");
@@ -195,59 +214,54 @@ public class ProductService {
         Optional<Product> productOptional = productRepository.findById(productUUID);
 
         if (productOptional.isEmpty()) {
+
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
         }
 
         Product product = productOptional.get();
+        if(!product.getSellerId().equals(sellerId)){
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"user not authorised to apply discount for this product");
+        }
+
         return  product.getPrice() * (1-discount);
 
     }
 
-
-    public Product incrementAmountSold(String id, int incrementBy) {
-
-        UUID productUUID = UUID.fromString(id);
-
-
+    @RabbitListener(queues = RabbitMQConfig.INCREMENT_QUEUE)
+    public void incrementAmountSold(ProductMessage message) {
+        UUID productUUID = message.getProductId();
         if(!productRepository.existsById(productUUID))
         {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
         }
 
-        if(incrementBy < 0 ) {
+        if(message.getAmount() < 0 ) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Increment value must be non-negative");
         }
 
-        Query query = new Query(Criteria.where("_id").is(id));
-        Update update = new Update().inc("amountSold", incrementBy);
+        Query query = new Query(Criteria.where("_id").is(message.getProductId().toString()));
+        Update update = new Update().inc("amountSold", message.getAmount());
         mongoTemplate.updateFirst(query, update, Product.class);
-        return mongoTemplate.findOne(query, Product.class);
-
     }
-
-    public Product decrementAmountSold(String id, int decrementBy) {
-
-
-
+    //@RabbitListener(queues = RabbitMQConfig.DECREMENT_QUEUE)
+    public void decrementAmountSold(String id, int amount) {
+        //UUID productUUID = message.getProductId();
         UUID productUUID = UUID.fromString(id);
-
-
         if(!productRepository.existsById(productUUID))
         {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
         }
         int productAmountSold = productRepository.findById(productUUID).get().getAmountSold();
-        if( productAmountSold< decrementBy) {
+        if( productAmountSold< amount) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"decrement value must be less than amount sold");
         }
 
-        if(decrementBy < 0) {
+        if(amount < 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"decrement value must be non-negative");
         }
 
         Query query = new Query(Criteria.where("_id").is(id));
-        Update update = new Update().inc("amountSold", -decrementBy);
+        Update update = new Update().inc("amountSold",-1*amount);
         mongoTemplate.updateFirst(query, update, Product.class);
-        return mongoTemplate.findOne(query, Product.class);
     }
 }

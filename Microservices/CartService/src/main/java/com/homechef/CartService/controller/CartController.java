@@ -1,10 +1,13 @@
 package com.homechef.CartService.controller;
 
+import com.homechef.CartService.DTO.CartMessage;
 import com.homechef.CartService.config.JwtUtil;
 import com.homechef.CartService.model.Cart;
 import com.homechef.CartService.model.CartItem;
+import com.homechef.CartService.seed.DatabaseSeeder;
 import com.homechef.CartService.service.CartService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.homechef.CartService.config.JwtUtil.*;
 
@@ -18,8 +21,16 @@ public class CartController {
 
     @Autowired
     private CartService cartService;
+    @Autowired
+    private DatabaseSeeder databaseSeeder;
 
     private JwtUtil jwtUtil = JwtUtil.getInstance();
+
+    @GetMapping("/seed")
+    public ResponseEntity<String> seedDatabase() {
+        databaseSeeder.seed();
+        return ResponseEntity.ok("Database seeded successfully");
+    }
 
     @PostMapping("/createCart")
     public Cart createCart(@RequestHeader("Authorization") String authHeader){
@@ -71,23 +82,27 @@ public class CartController {
     }
 
 
-    @GetMapping("/customerId/{customerId}")
-    public Cart getCartByCustomerId(@PathVariable String customerId) {
+    @GetMapping("/getCart")
+    public Cart getCartByCustomerId(@RequestHeader("Authorization") String authHeader) {
+        String jwt = authHeader.replace("Bearer ", "");
+        String customerId = jwtUtil.getUserClaims(jwt).get("id").toString();
         return cartService.getCartByCustomerId(customerId);
     }
 
-    @GetMapping("/{cartId}")
-    public Cart getCartById(@PathVariable String cartId) {
-        return cartService.getCartById(cartId);
+    @DeleteMapping
+    public ResponseEntity<String> deleteCart(@RequestHeader("Authorization") String authHeader) {
+        String jwt = authHeader.replace("Bearer ", "");
+        return ResponseEntity.ok(cartService.deleteCartByCustomerID(jwtUtil.getUserClaims(jwt).get("id").toString()));
     }
 
-    @DeleteMapping("/{cartId}")
-    public String deleteCart(@PathVariable String cartId) {
-        return cartService.deleteCartById(cartId);
+    @PostMapping("/checkout")
+    public ResponseEntity<String> checkout(@RequestHeader("Authorization") String authHeader) {
+        String jwt = authHeader.replace("Bearer ", "");
+        return ResponseEntity.ok(cartService.checkoutCartByCustomerId(jwtUtil.getUserClaims(jwt).get("id").toString()));
     }
 
-    @PostMapping("/{cartId}/checkout")
-    public String checkout(@PathVariable String cartId) {
-        return cartService.checkoutCartById(cartId);
+    @PostMapping("/reorder")
+    public void reorder(@RequestBody CartMessage cartMessage) {
+        cartService.receiveReOrderingCartMessage(cartMessage);
     }
 }

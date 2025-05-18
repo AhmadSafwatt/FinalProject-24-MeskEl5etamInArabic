@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Unknown Logs ###
+hs_err_pid748.log
+hs_err_pid20272.log
+*.log

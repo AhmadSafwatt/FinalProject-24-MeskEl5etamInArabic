@@ -82,6 +82,10 @@ public class Food extends Product {
             this.cuisineType = cuisineType;
             return this;
         }
+        public Builder setId(UUID id) {
+            this.id = id;
+            return this;
+        }
 
 
         public Food build() {
