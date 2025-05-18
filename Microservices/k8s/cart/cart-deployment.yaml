@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cart-service
+  namespace: homechef
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cart-service
+  template:
+    metadata:
+      labels:
+        app: cart-service
+    spec:
+      containers:
+        - name: cart-service
+          image: homecheff/cart-service
+          ports:
+            - containerPort: 8082
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: k8s
+            - name: SPRING_DATA_MONGODB_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: mongo-cart-secret
+                  key: URI
+            - name: SPRING_DATA_MONGODB_DATABASE
+              valueFrom:
+                  secretKeyRef:
+                    name: mongo-cart-secret
+                    key: MONGO_DB_NAME
+
+            - name: REDIS_HOST
+              value: "redis-cart"  # Kubernetes Service name for Redis
+            - name: REDIS_PORT
+              value: "6379"
+
+            - name: SPRING_RABBITMQ_HOST
+              value: rabbitmq-service
+            - name: SPRING_RABBITMQ_PORT
+              value: "5672"
+            - name: SPRING_RABBITMQ_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-secret
+                  key: RABBITMQ_DEFAULT_USER
+            - name: SPRING_RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-secret
+                  key: RABBITMQ_DEFAULT_PASS
+#            - name: REDIS_PASSWORD
+#              valueFrom:
+#                secretKeyRef:
+#                  name: redis-cart-secret  # Store password in a Secret
+#                  key: redis.password
+            - name: products-service.url
+              value: http://product-service:8080/products

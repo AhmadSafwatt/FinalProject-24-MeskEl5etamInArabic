@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongo-product
+  namespace: homechef
+spec:
+  serviceName: "mongo-cart"  # Must match headless service
+  replicas: 1  # Can scale to more for replica set
+  selector:
+    matchLabels:
+      app: mongo-product
+  template:
+    metadata:
+      labels:
+        app: mongo-product
+    spec:
+      containers:
+        - name: mongo
+          image: mongo
+          ports:
+            - containerPort: 27017
+#              uri: mongodb://bahy:alansary@localhost:27017/elsolasyelmare7?authSource=admin
+#              database: elsolasyelmare7
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-product-secret
+                  key: MONGO_INITDB_ROOT_USERNAME
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-product-secret
+                  key: MONGO_INITDB_ROOT_PASSWORD
+
+          volumeMounts:
+            - name: mongo-persistent-volume
+              mountPath: /data/db
+  volumeClaimTemplates:
+    - metadata:
+        name: mongo-persistent-volume
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi

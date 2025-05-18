@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+  namespace: homechef
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+          app: api-gateway
+    template:
+        metadata:
+          labels:
+            app: api-gateway
+        spec:
+          containers:
+            - name: api-gateway-container
+              image: homecheff/api-gateway # Replace with our actual image name
+              ports:
+                - containerPort: 8080
+
+
+              env:
+                - name: SPRING_PROFILES_ACTIVE
+                  value: k8s
+                # Authentication Service
+                - name: SPRING_CLOUD_GATEWAY_ROUTES_0_ID
+                  value: "authentication-service"
+                - name: SPRING_CLOUD_GATEWAY_ROUTES_0_URI
+                  value: "http://auth-service:8080"
+                - name: SPRING_CLOUD_GATEWAY_ROUTES_0_PREDICATES_0
+                  value: "Path=/auth/**"
+
+
+                # Cart Service
+                - name: SPRING_CLOUD_GATEWAY_ROUTES_1_ID
+                  value: "cart-service"
+                - name: SPRING_CLOUD_GATEWAY_ROUTES_1_URI
+                  value: "http://cart-service:8080"
+                - name: SPRING_CLOUD_GATEWAY_ROUTES_1_PREDICATES_0
+                  value: "Path=/carts/**"
+
+
+                # Order Service
+                - name: SPRING_CLOUD_GATEWAY_ROUTES_2_ID
+                  value: "order-service"
+                - name: SPRING_CLOUD_GATEWAY_ROUTES_2_URI
+                  value: "http://order-service:8080"
+                - name: SPRING_CLOUD_GATEWAY_ROUTES_2_PREDICATES_0
+                  value: "Path=/orders/**"
+
+
+                # Chat Service
+                - name: SPRING_CLOUD_GATEWAY_ROUTES_3_ID
+                  value: "chat-service"
+                - name: SPRING_CLOUD_GATEWAY_ROUTES_3_URI
+                  value: "http://chat-service:8080"
+                - name: SPRING_CLOUD_GATEWAY_ROUTES_3_PREDICATES_0
+                  value: "Path=/messages/**"
+
+
+                # Product Service
+                - name: SPRING_CLOUD_GATEWAY_ROUTES_4_ID
+                  value: "product-service"
+                - name: SPRING_CLOUD_GATEWAY_ROUTES_4_URI
+                  value: "http://product-service:8080"
+                - name: SPRING_CLOUD_GATEWAY_ROUTES_4_PREDICATES_0
+                  value: "Path=/products/**"
+
+                - name: JWT_SECRET
+                  valueFrom:
+                    secretKeyRef:
+                      name: api-gateway-secret
+                      key: jwt.secret
+                - name: JWT_EXPIRATION
+                  valueFrom:
+                    secretKeyRef:
+                      name: api-gateway-secret
+                      key: jwt.expiration

@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chat-service
+  namespace: homechef
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: chat-service
+  template:
+    metadata:
+      labels:
+        app: chat-service
+    spec:
+      containers:
+        - name: chat-service
+          image: homecheff/chat-service
+          ports:
+            - containerPort: 8083
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: k8s
+                # Cassandra Configuration
+            - name: SPRING_CASSANDRA_LOCAL_DATACENTER
+              value: "datacenter1"  # Replace with your actual datacenter name
+            - name: SPRING_CASSANDRA_KEYSPACE_NAME
+              value: "chat_keyspace"  # Replace with your actual keyspace name
+            - name: SPRING_CASSANDRA_CONTACT_POINTS
+              value: "cassandra-service"  # Kubernetes service name
+            - name: SPRING_CASSANDRA_PORT
+              value: "9042"
+
+
+
+
+#            - name: REDIS_PASSWORD
+#              valueFrom:
+#                secretKeyRef:
+#                  name: redis-cart-secret  # Store password in a Secret
+#                  key: redis.password
+            - name: products-service.url
+              value: http://product-service:8080

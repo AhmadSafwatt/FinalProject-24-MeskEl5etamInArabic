@@ -1,0 +1,48 @@
+# cassandra-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cassandra
+  namespace: homechef
+spec:
+  replicas: 1  # For production, use StatefulSet with multiple replicas
+  selector:
+    matchLabels:
+      app: cassandra
+  template:
+    metadata:
+      labels:
+        app: cassandra
+    spec:
+      containers:
+        - name: cassandra
+          image: cassandra:4.0
+          ports:
+            - containerPort: 9042
+          env:
+            - name: CASSANDRA_DC
+              value: "datacenter1"
+            - name: CASSANDRA_CLUSTER_NAME
+              value: "ChatCluster"
+            - name: CASSANDRA_NUM_TOKENS
+              value: "256"
+            - name: CASSANDRA_KEYSPACE
+              valueFrom:
+                secretKeyRef:
+                  name: cassandra-secret
+                  key: CASSANDRA_KEYSPACE
+#            - name: CASSANDRA_USER
+#              valueFrom:
+#                secretKeyRef:
+#                  name: cassandra-secret
+#                  key: CASSANDRA_USER
+#            - name: CASSANDRA_PASSWORD
+#              valueFrom:
+#                secretKeyRef:
+#                  name: cassandra-secret
+#                  key: CASSANDRA_PASSWORD
+          livenessProbe:
+            exec:
+              command: ["cqlsh", "-u", "$(CASSANDRA_USER)", "-p", "$(CASSANDRA_PASSWORD)", "-e", "DESCRIBE KEYSPACES"]
+            initialDelaySeconds: 60
+            periodSeconds: 20
