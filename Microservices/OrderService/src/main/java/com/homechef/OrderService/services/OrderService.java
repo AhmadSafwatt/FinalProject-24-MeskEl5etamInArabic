@@ -45,7 +45,9 @@ public class OrderService {
         return orderRepository.findAll();
     }
 
-    public Order createOrder(Order order) {
+    public Order createOrder(Order order) { return createOrder(order, order.getBuyerId()); }
+    public Order createOrder(Order order, UUID buyerId) { // added buyerId parameter for controller authorization
+        order.setBuyerId(buyerId);
         Order createdOrder = orderRepository.save(order);
         sendOrderCreationNotifications(createdOrder);
         return createdOrder;
@@ -204,6 +206,18 @@ public class OrderService {
 
         // Process the received cart
         createOrder(cart.toOrder(price));
+    }
+
+    public void reOrderAndSendItemsToCart(UUID orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Order with id " + orderId + " not found"));
+        CartDTO cart = order.toCartDTO();
+        cart.setId(null); // set id to null to create a new cart
+
+        // Send the cart to the cart service
+        CartMessage cartMessage = new CartMessage(cart, 0.0);
+        rabbitMQProducer.sendCartReOrderMessage(cartMessage);
     }
 
 }

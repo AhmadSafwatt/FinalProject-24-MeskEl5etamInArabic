@@ -1,5 +1,6 @@
 package com.homechef.OrderService.rabbitmq;
 
+import com.homechef.OrderService.DTOs.CartMessage;
 import com.homechef.OrderService.DTOs.ProductMessage;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,15 @@ public class RabbitMQProducer {
                 OrderRabbitMQConfig.PRODUCT_EXCHANGE,
                 OrderRabbitMQConfig.DECREMENT_ROUTING_KEY,
                 productMessage
+        );
+    }
+
+    public void sendCartReOrderMessage(CartMessage cartMessage) {
+        System.out.println("Sending Cart Message to Order Service using RabbitMQ: " + cartMessage);
+        rabbitTemplate.convertAndSend(
+                OrderRabbitMQConfig.CART_ORDER_EXCHANGE,
+                OrderRabbitMQConfig.REORDERING_ROUTING,
+                cartMessage
         );
     }
 }

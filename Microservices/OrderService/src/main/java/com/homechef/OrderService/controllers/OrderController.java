@@ -7,6 +7,7 @@ import com.homechef.OrderService.services.OrderService;
 import com.homechef.OrderService.services.OrdersSeeder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -40,22 +41,26 @@ public class OrderController {
     }
 
     @PostMapping
-    public Order createOrder(@RequestBody Order order) {
-        return orderService.createOrder(order);
+    public Order createOrder(@RequestHeader("Authorization") String authHeader, @RequestBody Order order) {
+        UUID buyerId = UUID.fromString(getUserField(authHeader, "id"));
+        return orderService.createOrder(order, buyerId);
     }
 
     @GetMapping("/buyer/{buyerId}")
-    public List<Order> getAllOrdersByBuyerId(@PathVariable String buyerId) {
+    public List<Order> getAllOrdersByBuyerId(@RequestHeader("Authorization") String authHeader) {
+        String buyerId = getUserField(authHeader, "id");
         return orderService.getAllOrdersByBuyerId(UUID.fromString(buyerId));
     }
 
-    @GetMapping("/seller/{sellerId}")
-    public List<Order> getFilteredOrdersBySellerId(@PathVariable String sellerId) {
+    @GetMapping("/seller")
+    public List<Order> getFilteredOrdersBySellerId(@RequestHeader("Authorization") String authHeader) {
+        String sellerId = getUserField(authHeader, "id");
         return orderService.getFilteredOrdersBySellerId(UUID.fromString(sellerId));
     }
 
-    @GetMapping("/{orderId}/seller/{sellerId}")
-    public Order getOrderByIdFilteredBySellerId(@PathVariable String orderId, @PathVariable String sellerId) {
+    @GetMapping("/{orderId}/seller")
+    public Order getOrderByIdFilteredBySellerId(@RequestHeader("Authorization") String authHeader, @PathVariable String orderId) {
+        String sellerId = getUserField(authHeader, "id");
         return orderService.getOrderByIdFilteredBySellerId(UUID.fromString(orderId), UUID.fromString(sellerId));
     }
 
@@ -126,8 +131,15 @@ public class OrderController {
         orderService.updateItemNote(orderId, productId, note);
     }
 
+    @PostMapping("/{orderId}/reorder")
+    public ResponseEntity<String> reorder(@RequestHeader("Authorization") String authHeader, @PathVariable String orderId) {
+        validateeUserIsOrderBuyer(authHeader, UUID.fromString(orderId));
+        orderService.reOrderAndSendItemsToCart(UUID.fromString(orderId));
+        return ResponseEntity.ok("Order with id " + orderId + " has been reordered successfully");
+    }
+
     private void validateeUserIsOrderBuyer(String authHeader, UUID orderId) {
-        String userId = jwtUtil.getUserClaims(authHeader.replace("Bearer ", "")).get("id").toString();
+        String userId = getUserField(authHeader, "id");
         Order order = orderService.getOrderById(orderId);
         String orderBuyerId = order.getBuyerId().toString();
         if (!orderBuyerId.equals(userId)) {
@@ -137,7 +149,7 @@ public class OrderController {
 
     private void validateUserIsItemSeller(String authHeader, UUID orderId, UUID productId) {
         // only the seller of the product in the order can edit a note on his item
-        String userId = jwtUtil.getUserClaims(authHeader.replace("Bearer ", "")).get("id").toString();
+        String userId = getUserField(authHeader, "id");
         Order order = orderService.getOrderById(orderId);
         String productSellerId = order.getItems().stream()
                 .filter(item -> item.getProductId().equals(productId))
@@ -151,5 +163,9 @@ public class OrderController {
                     "you are not the seller of this product, so we can't let you edit a note on it");
         }
 
+    }
+
+    private String getUserField(String authHeader, String field) {
+        return jwtUtil.getUserClaims(authHeader.replace("Bearer ", "")).get(field).toString();
     }
 }

@@ -16,10 +16,17 @@ public class CartRabbitMQConfig {
     public static final String CART_QUEUE = "Cart_To_Order_Queue";
     public static final String EXCHANGE = "CART_ORDER_XCHANGE";
     public static final String CART_ROUTING = "cart_routing_key";
+
+    public static final String REORDERING_QUEUE = "reordering-queue";
+    public static final String REORDERING_ROUTING = "reordering-routing-key";
+
     @Bean
     public Queue cartQueue() {
         return new Queue(CART_QUEUE);
     }
+
+    @Bean
+    public Queue reorderingQueue() { return new Queue(REORDERING_QUEUE); }
 
     @Bean
     public TopicExchange cartExchange() {
@@ -30,6 +37,9 @@ public class CartRabbitMQConfig {
     public Binding cartBinding() {
         return BindingBuilder.bind(cartQueue()).to(cartExchange()).with(CART_ROUTING);
     }
+
+    @Bean
+    public Binding reorderingBinding() { return BindingBuilder.bind(reorderingQueue()).to(cartExchange()).with(REORDERING_ROUTING); }
 
     @Bean
     public Jackson2JsonMessageConverter cartMessageConverter() {

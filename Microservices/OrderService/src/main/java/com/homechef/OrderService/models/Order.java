@@ -3,6 +3,7 @@ package com.homechef.OrderService.models;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.homechef.OrderService.DTOs.CartDTO;
 import com.homechef.OrderService.states.*;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -100,5 +101,15 @@ public class Order {
         }
         items.add(item);
         item.setOrder(this);
+    }
+
+    public CartDTO toCartDTO() {
+        return new CartDTO(
+                this.getBuyerId(),
+                this.getItems().stream().map(OrderItem::toCartItemDTO)
+                        .toList(),
+                this.getOrderNote(),
+                false   // The promo must be re-initialized at the cart level
+        );
     }
 }
