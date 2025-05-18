@@ -59,6 +59,10 @@ public class ProductService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"amount sold cannot be negative");
         }
 
+        if (discount < 0.0 || discount > 1.0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Discount must be between 0 and 1");
+        }
+
 
 
 
@@ -131,8 +135,9 @@ public class ProductService {
         }
 
 
-
         productRepository.deleteById(productUUID);
+
+
     }
 
 
@@ -186,6 +191,10 @@ public class ProductService {
         }
 
         if (updates.containsKey("discount")) {
+            double discount = ((Number) updates.get("discount")).doubleValue();
+            if (discount < 0.0 || discount > 1.0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Discount must be between 0 and 1");
+            }
             products.updateOne(Filters.eq("_id", id),
                     Updates.set("discount", ((Number) updates.get("discount")).doubleValue()));
         }
