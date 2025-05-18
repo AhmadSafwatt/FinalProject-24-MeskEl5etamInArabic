@@ -2,6 +2,7 @@ package com.homechef.AuthService.Models;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.GenericGenerator;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.UUID;
 
@@ -9,12 +10,7 @@ import java.util.UUID;
 @Table(name = "users")
 public class User {
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(
-            name = "UUID",
-            strategy = "org.hibernate.id.UUIDGenerator"
-    )
-    @Column(columnDefinition = "UUID", updatable = false, nullable = false)
+    @Column(columnDefinition = "UUID", updatable = true, nullable = false)
     private UUID id;
     private String username;
     private String password;
@@ -22,6 +18,13 @@ public class User {
     private String address;
     private String phoneNumber;
     private String role;
+
+    @PrePersist
+    public void ensureId() {
+        if (this.id == null) {
+            this.id = UUID.randomUUID(); // Auto-generate only if not set
+        }
+    }
 
     public User() {
     }
@@ -32,8 +35,20 @@ public class User {
         this.email = email;
     }
 
+    public User(UUID id, String username, String password, String email) {
+        this.id = id;
+        this.username = username;
+        this.password = password;
+        this.email = email;
+    }
+
+
     public UUID getId() {
         return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
     }
 
     public String getUsername() {
@@ -94,5 +109,10 @@ public class User {
 
     public void setRoleUnverifiedSeller() {
         this.role = "unverified_seller";
+    }
+
+    public void setAndHashPassword(String password) {
+        PasswordEncoder passwordEncoder = new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder();
+        this.password = passwordEncoder.encode(password);
     }
 }
