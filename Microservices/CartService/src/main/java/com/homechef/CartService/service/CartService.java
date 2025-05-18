@@ -56,6 +56,9 @@ public class CartService {
 
     @CachePut(value = "cartCache", key = "#result.id")
     public Cart addProduct(String customerId , String productID , int quantity , String notes){
+        if(quantity < 1){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quantity has to be 1 or greater ");
+        }
         UUID customerIDD = UUID.fromString(customerId);
         UUID productIDD = UUID.fromString(productID);
         ProductDTO product = productClient.getProductById(productID);
