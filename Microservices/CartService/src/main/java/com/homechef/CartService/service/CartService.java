@@ -199,6 +199,7 @@ public class CartService {
                 }
             }
             if (!found) {
+                item.setDateAdded(LocalDateTime.now());
                 c.getCartItems().add(item);
             }
         }

@@ -1,5 +1,6 @@
 package com.homechef.CartService.controller;
 
+import com.homechef.CartService.DTO.CartMessage;
 import com.homechef.CartService.config.JwtUtil;
 import com.homechef.CartService.model.Cart;
 import com.homechef.CartService.model.CartItem;
@@ -79,8 +80,6 @@ public class CartController {
         return cartService.getCartByCustomerId(customerId);
     }
 
-   
-
     @DeleteMapping
     public ResponseEntity<String> deleteCart(@RequestHeader("Authorization") String authHeader) {
         String jwt = authHeader.replace("Bearer ", "");
@@ -91,5 +90,10 @@ public class CartController {
     public ResponseEntity<String> checkout(@RequestHeader("Authorization") String authHeader) {
         String jwt = authHeader.replace("Bearer ", "");
         return ResponseEntity.ok(cartService.checkoutCartByCustomerId(jwtUtil.getUserClaims(jwt).get("id").toString()));
+    }
+
+    @PostMapping("/reorder")
+    public void reorder(@RequestBody CartMessage cartMessage) {
+        cartService.receiveReOrderingCartMessage(cartMessage);
     }
 }

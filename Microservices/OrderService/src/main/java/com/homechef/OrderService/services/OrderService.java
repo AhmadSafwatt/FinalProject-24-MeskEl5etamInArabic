@@ -2,6 +2,7 @@ package com.homechef.OrderService.services;
 
 import com.homechef.OrderService.DTOs.CartDTO;
 import com.homechef.OrderService.DTOs.CartMessage;
+import com.homechef.OrderService.clients.CartServiceClient;
 import com.homechef.OrderService.clients.ProductServiceClient;
 import com.homechef.OrderService.clients.AuthServiceClient;
 import com.homechef.OrderService.models.Order;
@@ -31,15 +32,18 @@ public class OrderService {
     private final ProductServiceClient productServiceClient;
     private final RabbitMQProducer rabbitMQProducer;
     private final AuthServiceClient authServiceClient;
+    private final CartServiceClient cartServiceClient;
 
     @Autowired
     public OrderService(OrderRepository orderRepository, EmailService emailService,
-            RabbitMQProducer rabbitMQProducer, AuthServiceClient authServiceClient, ProductServiceClient productServiceClient) {
+            RabbitMQProducer rabbitMQProducer, AuthServiceClient authServiceClient,
+                        ProductServiceClient productServiceClient, CartServiceClient cartServiceClient) {
         this.orderRepository = orderRepository;
         this.emailService = emailService;
         this.rabbitMQProducer = rabbitMQProducer;
         this.authServiceClient = authServiceClient;
         this.productServiceClient = productServiceClient;
+        this.cartServiceClient = cartServiceClient;
     }
 
     public List<Order> getAllOrders() {
@@ -219,7 +223,8 @@ public class OrderService {
 
         // Send the cart to the cart service
         CartMessage cartMessage = new CartMessage(cart, 0.0);
-        rabbitMQProducer.sendCartReOrderMessage(cartMessage);
+        //rabbitMQProducer.sendCartReOrderMessage(cartMessage); changed to sync to match requirements
+        cartServiceClient.reorder(cartMessage);
     }
 
 }
