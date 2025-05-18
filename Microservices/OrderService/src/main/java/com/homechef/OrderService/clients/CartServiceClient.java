@@ -5,7 +5,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@FeignClient(name = "cart-service", url = "http://localhost:8082/carts")
+@FeignClient(name = "cart-service", url = "${cart-service.url}")
 public interface CartServiceClient {
 
     @PostMapping("/reorder")

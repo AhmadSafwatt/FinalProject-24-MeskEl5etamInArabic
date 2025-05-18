@@ -6,6 +6,7 @@ import com.homechef.AuthService.Repositories.UserRepository;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.HttpStatus;
@@ -41,6 +42,9 @@ public class AuthService {
     private final UserRepository userRepository;
     private final JwtService jwtService = JwtService.getInstance();
     private PasswordEncoder passwordEncoder;
+
+    @Value("${auth-service.url}")
+    private String authServiceBaseUrl;
 
 
     private final StringRedisTemplate redisTemplate;
@@ -205,7 +209,7 @@ public class AuthService {
         //TODONE: send email verification link, the link should be the url of verifyEmail controller with value of id`
 
         // Construct the verification link URL
-        String verifyEmailUrl = "http://localhost:8081/auth/verify-email?userId=" + id;
+        String verifyEmailUrl = authServiceBaseUrl + "/auth/verify-email?userId=" + id;
 
         // Compose the email using SimpleMailMessage
         SimpleMailMessage message = new SimpleMailMessage();

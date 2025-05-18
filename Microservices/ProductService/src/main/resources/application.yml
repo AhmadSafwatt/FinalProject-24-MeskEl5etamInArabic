@@ -7,7 +7,7 @@ spring:
       database: elthon2yelamr7
   rabbitmq:
     host: localhost
-    port: 5676
+    port: 5672
     username: guest
     password: guest
 server:

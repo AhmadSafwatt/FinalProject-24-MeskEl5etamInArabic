@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 // TODO: the current service url should be figured out by service discovery
-@FeignClient(name = "product-service", url = "http://localhost:8085/products")
+@FeignClient(name = "product-service", url = "${product-service.url}")
 public interface ProductServiceClient {
     // TODO: the specific endpoint should be modified when safwat team implements it
     @PutMapping("/{id}/decrement")

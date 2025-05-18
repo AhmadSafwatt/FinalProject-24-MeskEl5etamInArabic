@@ -1,6 +1,8 @@
 spring:
     application:
         name: api-gateway
+    main:
+      web-application-type: reactive
 
     cloud:
         gateway:
@@ -22,17 +24,24 @@ spring:
 
 
             - id: order-service
-              uri: lb://order-service
+              uri: http://localhost:8084/
               predicates:
-                - Path=/order/**
+                - Path=/orders/**
               filters:
                 - AuthenticationFilter
 
 
             - id: chat-service
-              uri: lb://chat-service
+              uri: http://localhost:8083/
               predicates:
-                - Path=/chat/**
+                - Path=/messages/**
+              filters:
+                - AuthenticationFilter
+
+            - id: product-service
+              uri: http://localhost:8085/
+              predicates:
+                - Path=/products/**
               filters:
                 - AuthenticationFilter
 

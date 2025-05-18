@@ -8,7 +8,7 @@ spring:
 
   rabbitmq:
     host: localhost
-    port: 5676
+    port: 5672
     username: guest
     password: guest
 
@@ -41,6 +41,15 @@ spring:
           auth: true
           starttls:
             enable: true # Use true for port 587
+
+auth-service:
+  url: http://localhost:8081/auth
+
+products-service:
+    url: http://localhost:8085/products
+
+cart-service:
+    url: http://localhost:8082/carts
 
 server:
   port: 8084

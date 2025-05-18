@@ -32,11 +32,14 @@ spring:
     block-duration: 600000
   data:
     redis:
-      host: localhost
-      password: redis-password
-      port: 6379
+      host: ${REDIS_HOST:localhost}       # Fallback to 'localhost' if not set
+      port: ${REDIS_PORT:6379}           # Default Redis port
+      password: ${REDIS_PASSWORD:redis-password}       # Empty fallback (no password)
       timeout: 60000
       database: 0
+
+auth-service:
+  url: http://localhost:8081
 
 logging:
   level:

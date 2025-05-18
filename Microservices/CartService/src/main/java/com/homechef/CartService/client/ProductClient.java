@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import com.homechef.CartService.model.ProductDTO;
 
-@FeignClient(name = "product-service", url = "http://localhost:8085/products")
+@FeignClient(name = "product-service", url = "${product-service.url}")
 public interface ProductClient {
 
     

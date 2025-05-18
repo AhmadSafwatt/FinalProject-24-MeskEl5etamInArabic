@@ -6,13 +6,13 @@ spring:
       uri: mongodb://bahy:alansary@localhost:27017/elsolasyelmare7?authSource=admin
       database: elsolasyelmare7
     redis:
-      host: localhost
-      port: 6379
+      host: ${REDIS_HOST:localhost}       # Fallback to 'localhost' if not set
+      port: ${REDIS_PORT:6379}
   cache:
     type: redis
   rabbitmq:
     host: localhost
-    port: 5676
+    port: 5672
     username: guest
     password: guest
 server:
@@ -21,3 +21,6 @@ server:
     include-message: always
     include-binding-errors: always
     include-stacktrace: on_param
+
+products-service:
+  url: http://localhost:8085/products
