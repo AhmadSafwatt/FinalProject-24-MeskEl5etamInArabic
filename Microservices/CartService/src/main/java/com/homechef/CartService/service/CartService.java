@@ -1,13 +1,20 @@
 package com.homechef.CartService.service;
+import com.homechef.CartService.DTO.CartMessage;
 import com.homechef.CartService.client.ProductClient;
 import com.homechef.CartService.model.Cart;
 import com.homechef.CartService.model.CartItem;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import com.homechef.CartService.model.ProductDTO;
+import com.homechef.CartService.rabbitmq.CartRabbitMQConfig;
 import com.homechef.CartService.repository.CartRepository;
 import java.util.*;
+
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -21,15 +28,19 @@ public class CartService {
     @Autowired
     private final ProductClient productClient;
 
+    @Autowired
+    private CheckoutFacade checkoutFacade;
+
+    @Autowired
+    private CacheManager cacheManager;
+
     public CartService(ProductClient productClient) {
         this.productClient = productClient;
     }
 
-
+    @CachePut(value = "cartCache", key = "#result.id")
     public Cart createCart(String customerId) {
-
         UUID customerIDD = UUID.fromString(customerId);
-
         if(!(cartRepository.findByCustomerId(customerIDD) == null))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Customer already has a cart");
         Cart cart1=new Cart.Builder()
@@ -39,30 +50,17 @@ public class CartService {
                 .notes("")
                 .promo(false)
                 .build();
+        cacheManager.getCache("user_cart_map").put(customerId, cart1.getId().toString());
         return cartRepository.save(cart1);
     }
 
-//    public Cart updateCart(String cartID, Cart cart) {
-//        UUID cartid = UUID.fromString(cartID);
-//        cart.setId(cartid);
-//        return cartRepository.save(cart);
-//    }
-
-//    public Cart addProduct(String customerId , String productID , int quantity , String notes){
-//        UUID customerIDD = UUID.fromString(customerId);
-//        UUID productIDD = UUID.fromString(productID);
-//        Cart cart = cartRepository.findByCustomerId(customerIDD);
-//        CartItem cartItem = new CartItem(productIDD , quantity , LocalDateTime.now() , notes , UUID.randomUUID());
-//        List <CartItem> oldCartItems = cart.getCartItems();
-//        oldCartItems.add(cartItem);
-//        cart.setCartItems(oldCartItems);
-//        return cartRepository.save(cart);
-//    }
-
+    @CachePut(value = "cartCache", key = "#result.id")
     public Cart addProduct(String customerId , String productID , int quantity , String notes){
         UUID customerIDD = UUID.fromString(customerId);
         UUID productIDD = UUID.fromString(productID);
         ProductDTO product = productClient.getProductById(productID);
+        if(product == null)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
         Cart cart = cartRepository.findByCustomerId(customerIDD);
 
         if(cart == null){
@@ -84,7 +82,7 @@ public class CartService {
         return cartRepository.save(cart);
     }
 
-
+    @CachePut(value = "cartCache", key = "#result.id")
     public Cart addNotesToCartItem(String customerId, String productID, String notes){
         UUID customerIDD = UUID.fromString(customerId);
         UUID productIDD = UUID.fromString(productID);
@@ -98,7 +96,7 @@ public class CartService {
         return cartRepository.save(cart);
     }
 
-
+    @CachePut(value = "cartCache", key = "#result.id")
     public Cart removeProduct(String customerId , String productId){
         UUID customerIDD = UUID.fromString(customerId);
         UUID productIDD = UUID.fromString(productId);
@@ -113,6 +111,7 @@ public class CartService {
         return cartRepository.save(cart);
     }
 
+    @CachePut(value = "cartCache", key = "#result.id")
     public Cart updatePromo(String customerId , boolean promo) {
         UUID customerIDD = UUID.fromString(customerId);
         Cart cart = cartRepository.findByCustomerId(customerIDD);
@@ -122,15 +121,7 @@ public class CartService {
         return cartRepository.save(cart);
     }
 
-
-//    public Cart updatePromo(String cartID , boolean promo) {
-//        Cart customerCart = getCartById(cartID);
-//        Cart newCart = new Cart.Builder().from(customerCart).promo(promo).build();
-//        return cartRepository.save(newCart);
-//    }
-
-
-
+    @CachePut(value = "cartCache", key = "#result.id")
     public Cart updateNotes(String customerId, String notes) {
         UUID customerIDD = UUID.fromString(customerId);
         Cart cart = cartRepository.findByCustomerId(customerIDD);
@@ -140,102 +131,85 @@ public class CartService {
         return cartRepository.save(cart);
     }
 
-//    public Cart updateNotes(String cartID, String notes) {
-//        Cart customerCart = getCartById(cartID);
-//        Cart newCart = new Cart.Builder().from(customerCart).notes(notes).build();
-//        return cartRepository.save(newCart);
-//    }
-
     public Cart getCartByCustomerId(String customerId) {
-        UUID customerUUID = UUID.fromString(customerId);
-        Cart cart = cartRepository.findByCustomerId(customerUUID);
-        if (cart == null) {
-            String errorMessage = "Cart not found for customer ID: " + customerId;
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, errorMessage);
+        String cartId = cacheManager.getCache("user_cart_map").get(customerId, String.class);
+        if (cartId == null) {
+            // If the cart ID is not in the cache, fetch it from the database
+            Cart cart = cartRepository.findByCustomerId(UUID.fromString(customerId));
+            if (cart == null) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cart not found for customer ID: " + customerId);
+            }
+            cartId = cart.getId().toString();
+            // Store the cart ID in the cache for future use
+            cacheManager.getCache("user_cart_map").put(customerId, cartId);
+            cacheManager.getCache("cartCache").put(cartId, cart);
+        }
+        Cart c = cacheManager.getCache("cartCache").get(cartId, Cart.class);
+        return getFullProduct(c);
+    }
+
+    private Cart getFullProduct (Cart cart){
+        List<String> ids = new ArrayList<>();
+        for (CartItem item : cart.getCartItems()){
+            ids.add(item.getProductId().toString());
+        }
+        List<ProductDTO> products = new ArrayList<>();
+        if (!ids.isEmpty())
+            products = productClient.getProductsById(ids);
+        for (int i = 0; i < cart.getCartItems().size(); i++) {
+             if (products.get(i) == null)
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("No product exists with ID: %s", products.get(i).getId()));
+            cart.getCartItems().get(i).setProduct(products.get(i));
         }
         return cart;
     }
 
-    public Cart getCartById(String cartId) {
-        UUID cartUUID = UUID.fromString(cartId);
-        Cart c = cartRepository.findById(cartUUID).orElse(null);
+    public String deleteCartByCustomerID(String customerId) {
+        UUID customerUUID = UUID.fromString(customerId);
+        Cart cart = cartRepository.findByCustomerId(customerUUID);
+        if (cart == null)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Cart not found for User: %s", customerId));
 
-        if (c == null) {
-            String errorMessage = "Cart not found for cart ID: " + cartId;
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, errorMessage);
-        }
-        List<String> ids = new ArrayList<>();
-        // Fetch product details from Product Service
-        for (CartItem item : c.getCartItems()){
-            ids.add(item.getProductId().toString());
-        }
-        List<ProductDTO> products = productClient.getProductsById(ids);
-        // Update cart items with product details
-        for (int i = 0; i < c.getCartItems().size(); i++) {
-            c.getCartItems().get(i).setProduct(products.get(i));
-        }
-        return c;
-    }
+        cacheManager.getCache("cartCache").evict(cart.getId());
+        cacheManager.getCache("user_cart_map").evict(customerId);
 
-
-    public String deleteCartById(String cartId) {
-        UUID cartUUID = UUID.fromString(cartId);
-        if (!cartRepository.existsById(cartUUID))
-            return "Cart Not Found";
-        cartRepository.deleteById(cartUUID);
+        cartRepository.delete(cart);
         return "Cart Deleted Successfully";
     }
 
-    public String checkoutCartById(String cartId) { // facade design pattern
-        Cart cart = findCart(cartId);
-        if (cart == null) return "Cart Not Found";
-
-        double totalCost = calculateTotalCost(cart);
-        Map<Cart, Double> cartCostMap = prepareCartCostMap(cart, totalCost);
-
-        sendCartToOrderService(cartCostMap);
-        clearCart(cart);
-
-        return "Checkout Successful";
+    public String checkoutCartByCustomerId(String customerId) { // facade design pattern
+        return checkoutFacade.execute(customerId);
     }
 
-    private Cart findCart(String cartId) {
-        UUID cartUUID = UUID.fromString(cartId);
-        return cartRepository.findById(cartUUID).orElse(null);
-    }
 
-    private double calculateTotalCost(Cart cart) {
-        List<CartItem> cartItems = cart.getCartItems();
-        double totalCost = 0;
-        List<String> ids = new ArrayList<>();
-        for (CartItem item : cartItems) {
-            ids.add(item.getProductId().toString());
+    // TODO: check if the logic is correct and respects the current design
+    @RabbitListener(queues = CartRabbitMQConfig.REORDERING_QUEUE)
+    public void receiveReOrderingCartMessage(CartMessage cartMsg) {
+        Cart cart = cartMsg.getCart();
+        System.out.println("Received cart message: " + cart);
+        Cart c = cartRepository.findByCustomerId(cart.getCustomerId());
+        if (c == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cart not found for customer ID: " + cart.getCustomerId());
         }
-        List<ProductDTO> products = productClient.getProductsById(ids);
-        for (int i = 0; i < cartItems.size(); i++) {
-            totalCost += (products.get(i).getPrice() * (1 - products.get(i).getDiscount())) * cartItems.get(i).getQuantity();
+        List<CartItem> existingCartItems = cart.getCartItems();
+
+        for (CartItem item : existingCartItems) {
+            boolean found = false; // to not use duplicate items
+            for (CartItem existingItem : c.getCartItems()) {
+                if (item.getProductId().equals(existingItem.getProductId())) {
+                    existingItem.setQuantity(existingItem.getQuantity() + item.getQuantity());
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                item.setDateAdded(LocalDateTime.now());
+                c.getCartItems().add(item);
+            }
         }
-        if (cart.isPromo())
-            totalCost = totalCost - 0.05*totalCost;
-        System.out.println(totalCost);
-        return totalCost;
-    }
 
-    private Map<Cart, Double> prepareCartCostMap(Cart cart, double totalCost) {
-        Map<Cart, Double> cartCostMap = new HashMap<>();
-        cartCostMap.put(cart, totalCost);
-        return cartCostMap;
-    }
+        cartRepository.save(c);
 
-    private void clearCart(Cart cart) {
-        cart.setCartItems(new ArrayList<>());
-        cartRepository.save(cart);
     }
-
-    private void sendCartToOrderService(Map<Cart, Double> cartCostMap) {
-        //orderService.sendCartCheckout(cartCostMap); // Async via RabbitMQ
-        System.out.println("SENT TO ORDER SERVICE");
-    }
-
 
 }
