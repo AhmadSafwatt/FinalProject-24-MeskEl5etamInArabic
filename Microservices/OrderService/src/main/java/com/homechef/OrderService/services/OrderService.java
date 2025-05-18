@@ -2,6 +2,7 @@ package com.homechef.OrderService.services;
 
 import com.homechef.OrderService.DTOs.CartDTO;
 import com.homechef.OrderService.DTOs.CartMessage;
+import com.homechef.OrderService.clients.CartServiceClient;
 import com.homechef.OrderService.clients.ProductServiceClient;
 import com.homechef.OrderService.clients.AuthServiceClient;
 import com.homechef.OrderService.models.Order;
@@ -28,17 +29,21 @@ import java.util.UUID;
 public class OrderService {
     private final OrderRepository orderRepository;
     private final EmailService emailService;
-//    private final ProductServiceClient productServiceClient;
+    private final ProductServiceClient productServiceClient;
     private final RabbitMQProducer rabbitMQProducer;
     private final AuthServiceClient authServiceClient;
+    private final CartServiceClient cartServiceClient;
 
     @Autowired
     public OrderService(OrderRepository orderRepository, EmailService emailService,
-            RabbitMQProducer rabbitMQProducer, AuthServiceClient authServiceClient) {
+            RabbitMQProducer rabbitMQProducer, AuthServiceClient authServiceClient,
+                        ProductServiceClient productServiceClient, CartServiceClient cartServiceClient) {
         this.orderRepository = orderRepository;
         this.emailService = emailService;
         this.rabbitMQProducer = rabbitMQProducer;
         this.authServiceClient = authServiceClient;
+        this.productServiceClient = productServiceClient;
+        this.cartServiceClient = cartServiceClient;
     }
 
     public List<Order> getAllOrders() {
@@ -133,9 +138,10 @@ public class OrderService {
         for (OrderItem item : order.getItems()) {
             UUID productId = item.getProductId();
             int quantity = item.getQuantity();
-//            productServiceClient.modifyProductSales(productId, -quantity); // Previous SYNC communication
+            productServiceClient.decrementAmountSold(productId.toString(), quantity); //SYNC communication
             // new ASYNC communication
-            rabbitMQProducer.sendProductDecrement(productId, quantity);
+            //rabbitMQProducer.sendProductDecrement(productId, quantity);
+            // Swapped back to sync, but both are working if changes are made
         }
     }
 
@@ -217,7 +223,8 @@ public class OrderService {
 
         // Send the cart to the cart service
         CartMessage cartMessage = new CartMessage(cart, 0.0);
-        rabbitMQProducer.sendCartReOrderMessage(cartMessage);
+        //rabbitMQProducer.sendCartReOrderMessage(cartMessage); changed to sync to match requirements
+        cartServiceClient.reorder(cartMessage);
     }
 
 }

@@ -39,11 +39,8 @@ import java.util.stream.Collectors;
 public class AuthService {
     private final JavaMailSender mailSender;
     private final UserRepository userRepository;
-
     private final JwtService jwtService = JwtService.getInstance();
-
     private PasswordEncoder passwordEncoder;
-
 
 
     private final StringRedisTemplate redisTemplate;

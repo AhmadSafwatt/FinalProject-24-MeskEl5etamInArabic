@@ -7,9 +7,13 @@ spring:
       database: elthon2yelamr7
   rabbitmq:
     host: localhost
-    port: 5672
+    port: 5676
     username: guest
     password: guest
 server:
   port: 8085
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: on_param
 

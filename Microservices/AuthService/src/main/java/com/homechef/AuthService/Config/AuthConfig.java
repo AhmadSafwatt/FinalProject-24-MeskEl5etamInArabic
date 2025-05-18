@@ -44,7 +44,8 @@ public class AuthConfig {
                                 "/auth/reset-password",
                                 "/auth/update-password",
                                 "/auth/validate-token",
-                                "/auth/fetch-emails"
+                                "/auth/fetch-emails",
+                                "/seed"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

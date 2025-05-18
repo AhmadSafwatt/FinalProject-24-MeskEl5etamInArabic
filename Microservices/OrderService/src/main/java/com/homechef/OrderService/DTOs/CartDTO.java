@@ -7,6 +7,8 @@ import com.homechef.OrderService.models.OrderStatus;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -44,10 +46,20 @@ public class CartDTO {
     }
 
     public Order toOrder(Double totalPrice) {
+        List<OrderItem> orderItems = new ArrayList<>();
+
+        for (CartItemDTO cartItem : this.getCartItems()) {
+            OrderItem orderItem = new OrderItem();
+            orderItem.setProductId(cartItem.getProductId());
+            orderItem.setSellerId(cartItem.getSellerId());
+            orderItem.setQuantity(cartItem.getQuantity());
+            orderItem.setNotes(cartItem.getNotes());
+
+            orderItems.add(orderItem);
+        }
         return new Order(
                 this.getCustomerId(),
-                this.getCartItems().stream().map(CartItemDTO::toOrderItem)
-                        .collect(Collectors.toList()),
+                orderItems,
                 totalPrice,
                 this.getNotes()
         );
