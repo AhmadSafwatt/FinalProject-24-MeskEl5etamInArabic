@@ -59,6 +59,8 @@ public class CartService {
         UUID customerIDD = UUID.fromString(customerId);
         UUID productIDD = UUID.fromString(productID);
         ProductDTO product = productClient.getProductById(productID);
+        if(product == null)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
         Cart cart = cartRepository.findByCustomerId(customerIDD);
 
         if(cart == null){
@@ -155,6 +157,8 @@ public class CartService {
         if (!ids.isEmpty())
             products = productClient.getProductsById(ids);
         for (int i = 0; i < cart.getCartItems().size(); i++) {
+             if (products.get(i) == null)
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("No product exists with ID: %s", products.get(i).getId()));
             cart.getCartItems().get(i).setProduct(products.get(i));
         }
         return cart;

@@ -77,7 +77,7 @@ public class ProductService {
         UUID productUUID = UUID.fromString(id);
 
         if (!productRepository.existsById(productUUID)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
+            return null;
         }
         return productRepository.findById(productUUID).orElse(null);
     }
@@ -87,7 +87,8 @@ public class ProductService {
         for (String id : ids){
             UUID productUUID = UUID.fromString(id);
             if (!productRepository.existsById(productUUID)) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
+                // throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
+                products.add(null);
             }
             Product product = productRepository.findById(productUUID).orElse(null);
             products.add(product);
