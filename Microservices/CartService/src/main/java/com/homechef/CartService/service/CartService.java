@@ -110,14 +110,14 @@ public class CartService {
         if(cart == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cart does not exist");
         List<CartItem> newCartItems = new ArrayList<>();
-        boolean found = false;
+        // boolean found = false;
         for(int i = 0 ; i< cart.getCartItems().size() ; i++){
             if(!(cart.getCartItems().get(i).getProductId().equals(productIDD))){
                 newCartItems.add(cart.getCartItems().get(i));
-                found = true;
+                // found = true;
             }
         }
-        if(!found)
+        if(newCartItems.size() == cart.getCartItems().size())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found in cart");
         cart.setCartItems(newCartItems);
         return cartRepository.save(cart);
