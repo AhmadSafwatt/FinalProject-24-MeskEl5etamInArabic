@@ -139,7 +139,7 @@ public class CartService {
         Cart cart = cartRepository.findByCustomerId(customerIDD);
         if(cart == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST  , "Cart does not exist");
-        cart.setNotes(notes);
+        cart.setNotes(cart.getNotes() + ", " + notes);
         return cartRepository.save(cart);
     }
 
