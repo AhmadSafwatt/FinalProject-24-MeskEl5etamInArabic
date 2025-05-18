@@ -7,6 +7,7 @@ import com.homechef.OrderService.clients.AuthServiceClient;
 import com.homechef.OrderService.models.Order;
 import com.homechef.OrderService.models.OrderItem;
 import com.homechef.OrderService.rabbitmq.OrderRabbitMQConfig;
+import com.homechef.OrderService.rabbitmq.RabbitMQProducer;
 import com.homechef.OrderService.repositories.OrderRepository;
 import com.homechef.OrderService.states.CancelledState;
 import com.homechef.OrderService.states.OrderState;
@@ -27,15 +28,16 @@ import java.util.UUID;
 public class OrderService {
     private final OrderRepository orderRepository;
     private final EmailService emailService;
-    private final ProductServiceClient productServiceClient;
+//    private final ProductServiceClient productServiceClient;
+    private final RabbitMQProducer rabbitMQProducer;
     private final AuthServiceClient authServiceClient;
 
     @Autowired
     public OrderService(OrderRepository orderRepository, EmailService emailService,
-            ProductServiceClient productServiceClient, AuthServiceClient authServiceClient) {
+            RabbitMQProducer rabbitMQProducer, AuthServiceClient authServiceClient) {
         this.orderRepository = orderRepository;
         this.emailService = emailService;
-        this.productServiceClient = productServiceClient;
+        this.rabbitMQProducer = rabbitMQProducer;
         this.authServiceClient = authServiceClient;
     }
 
@@ -43,7 +45,9 @@ public class OrderService {
         return orderRepository.findAll();
     }
 
-    public Order createOrder(Order order) {
+    public Order createOrder(Order order) { return createOrder(order, order.getBuyerId()); }
+    public Order createOrder(Order order, UUID buyerId) { // added buyerId parameter for controller authorization
+        order.setBuyerId(buyerId);
         Order createdOrder = orderRepository.save(order);
         sendOrderCreationNotifications(createdOrder);
         return createdOrder;
@@ -95,7 +99,7 @@ public class OrderService {
             order.cancelOrder();
             orderRepository.save(order);
             // TODO: uncomment this line when the api is ready
-            // decreaseProductSales(order);
+             decreaseProductSales(order);
             sendOrderCancellationNotification(order);
         } else {
             order.setOrderState(newState);
@@ -124,12 +128,14 @@ public class OrderService {
 
     // ------------------------------------------ helpers
 
-    // TODO: should be Async ?
+    // TODO: should be Async ? DONE
     private void decreaseProductSales(Order order) {
         for (OrderItem item : order.getItems()) {
             UUID productId = item.getProductId();
             int quantity = item.getQuantity();
-            productServiceClient.modifyProductSales(productId, -quantity);
+//            productServiceClient.modifyProductSales(productId, -quantity); // Previous SYNC communication
+            // new ASYNC communication
+            rabbitMQProducer.sendProductDecrement(productId, quantity);
         }
     }
 
@@ -200,6 +206,18 @@ public class OrderService {
 
         // Process the received cart
         createOrder(cart.toOrder(price));
+    }
+
+    public void reOrderAndSendItemsToCart(UUID orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Order with id " + orderId + " not found"));
+        CartDTO cart = order.toCartDTO();
+        cart.setId(null); // set id to null to create a new cart
+
+        // Send the cart to the cart service
+        CartMessage cartMessage = new CartMessage(cart, 0.0);
+        rabbitMQProducer.sendCartReOrderMessage(cartMessage);
     }
 
 }

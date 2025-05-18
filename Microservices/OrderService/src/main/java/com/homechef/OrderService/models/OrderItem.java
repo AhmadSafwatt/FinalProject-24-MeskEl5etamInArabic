@@ -1,10 +1,12 @@
 package com.homechef.OrderService.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.homechef.OrderService.DTOs.CartItemDTO;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -35,6 +37,16 @@ public class OrderItem {
         this.sellerId = sellerId;
         this.quantity = quantity;
         this.notes = notes;
+    }
+
+    public CartItemDTO toCartItemDTO() {
+        return new CartItemDTO(
+                this.productId,
+                this.quantity,
+                LocalDateTime.now(),
+                this.sellerId,
+                this.notes
+        );
     }
 
 }

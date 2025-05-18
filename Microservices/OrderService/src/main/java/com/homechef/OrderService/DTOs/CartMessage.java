@@ -10,4 +10,10 @@ public class CartMessage {
     @JsonProperty("cart")
     CartDTO cartDTO;
     Double totalPrice;
+
+    public CartMessage() {}
+    public CartMessage(CartDTO cart, double totalPrice) {
+        this.cartDTO = cart;
+        this.totalPrice = totalPrice;
+    }
 }
