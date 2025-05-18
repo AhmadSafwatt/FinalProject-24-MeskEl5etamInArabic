@@ -46,12 +46,18 @@ public class ProductService {
     public Product createProduct(String type, String name, UUID sellerId, Double price, int amountSold, String description, Double discount, Map<String, Object> request) {
 
 
-        if (!request.containsKey("type") || !request.containsKey("name") || !request.containsKey("sellerId") ||
+        if (!request.containsKey("type") || !request.containsKey("name")  ||
                 !request.containsKey("price")|| !request.containsKey("amountSold")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Missing required fields for Product");
         }
 
 
+        if (price < 0.0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Price cannot be negative");
+        }
+        if (amountSold < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"amount sold cannot be negative");
+        }
 
 
 
@@ -149,17 +155,27 @@ public class ProductService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"user not authorised to update this product");
         }
 
+
         if (updates.containsKey("name")) {
             products.updateOne(Filters.eq("_id", id),
                     Updates.set("name", (String) updates.get("name")));
         }
 
         if (updates.containsKey("price")) {
+            double price = ((Number) updates.get("price")).doubleValue();
+            if (price < 0.0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Price cannot be negative");
+            }
             products.updateOne(Filters.eq("_id", id),
                     Updates.set("price", ((Number) updates.get("price")).doubleValue()));
         }
 
         if (updates.containsKey("amountSold")) {
+            int newAmountSold = ((Number) updates.get("amountSold")).intValue();
+
+            if (newAmountSold < 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"amount sold cannot be negative");
+            }
             products.updateOne(Filters.eq("_id", id),
                     Updates.set("amountSold", ((Number) updates.get("amountSold")).intValue()));
         }
