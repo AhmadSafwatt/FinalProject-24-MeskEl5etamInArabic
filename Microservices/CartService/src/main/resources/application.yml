@@ -17,3 +17,7 @@ spring:
     password: guest
 server:
   port: 8082
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: on_param
