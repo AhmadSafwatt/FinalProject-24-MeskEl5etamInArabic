@@ -209,7 +209,6 @@ public class MessageController {
 
     @GetMapping("/search")
     public ResponseEntity<List<Message>> getMessagesByContent(@RequestParam String content) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         List<Message> messages = messageService.searchMessagesByContent(content);
         return ResponseEntity.ok(messages);
@@ -222,16 +221,26 @@ public class MessageController {
      * @param reportType Report type
      */
     @PatchMapping("/report/{id}")
-    public Message reportMessage(@PathVariable("id") UUID messageId, @RequestParam ReportType reportType) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String userId = (String) authentication.getDetails();
+    public ResponseEntity<?> reportMessage(@PathVariable("id") UUID messageId, @RequestParam(required = false) ReportType reportType) {
 
-        log.info("User {} is reporting message {} with type {}", userId, messageId, reportType);
+        if (reportType == null) {
+            return ResponseEntity
+                    .badRequest()
+                    .body("reportType parameter is required and must be a valid value.");
+        }
+
+        Message message = messageService.getMessageById(messageId);
+        if (message == null) {
+            return ResponseEntity
+                    .status(404)
+                    .body("Message with ID " + messageId + " not found.");
+        }
 
         ReportMessageCommand reportCommand = new ReportMessageCommand(messageId, reportType, messageService);
         reportCommand.execute();
 
-        return messageService.getMessageById(messageId);
+        return ResponseEntity.ok(messageService.getMessageById(messageId));
     }
+
 
 }
