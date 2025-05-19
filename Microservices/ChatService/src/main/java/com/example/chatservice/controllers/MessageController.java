@@ -209,9 +209,18 @@ public class MessageController {
         return ResponseEntity.noContent().build();
     }
 
+
+    /**
+     * Searches for messages with a given search string
+     *
+     * @param content message content
+     * @return Messages that contain the content string
+     */
     @GetMapping("/search")
     public ResponseEntity<List<Message>> getMessagesByContent(@RequestParam String content) {
-
+       if (content == null || content.isEmpty())
+           return ResponseEntity.badRequest().body(null);
+      
         List<Message> messages = messageService.searchMessagesByContent(content);
         return ResponseEntity.ok(messages);
     }
