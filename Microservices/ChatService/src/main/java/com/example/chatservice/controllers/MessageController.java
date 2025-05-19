@@ -15,10 +15,12 @@ import org.springframework.data.cassandra.core.query.CassandraPageRequest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.net.URI;
 import java.net.URLEncoder;
@@ -229,11 +231,15 @@ public class MessageController {
                     .body("reportType parameter is required and must be a valid value.");
         }
 
-        Message message = messageService.getMessageById(messageId);
-        if (message == null) {
-            return ResponseEntity
-                    .status(404)
-                    .body("Message with ID " + messageId + " not found.");
+        Message message;
+        try {
+            message = messageService.getMessageById(messageId);
+        } catch (ResponseStatusException ex) {
+            if (ex.getStatusCode() == HttpStatus.NOT_FOUND) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("Message with ID " + messageId + " not found.");
+            }
+            throw ex;
         }
 
         ReportMessageCommand reportCommand = new ReportMessageCommand(messageId, reportType, messageService);
