@@ -105,8 +105,21 @@ public class MessageController {
         return ResponseEntity.ok("Messages seeded successfully");
     }
 
+
+    /**
+     * Searches for messages with a given search string
+     *
+     * @param content message content
+     * @return Messages that contain the content string
+     */
     @GetMapping("/search")
     public ResponseEntity<List<Message>> getMessagesByContent(@RequestParam String content) {
+<<<<<<< Updated upstream
+=======
+       if (content == null || content.isEmpty())
+           return ResponseEntity.badRequest().body(null);
+
+>>>>>>> Stashed changes
         List<Message> messages = messageService.searchMessagesByContent(content);
         return ResponseEntity.ok(messages);
     }
