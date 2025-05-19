@@ -209,6 +209,8 @@ public class MessageController {
 
     @GetMapping("/search")
     public ResponseEntity<List<Message>> getMessagesByContent(@RequestParam String content) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
         List<Message> messages = messageService.searchMessagesByContent(content);
         return ResponseEntity.ok(messages);
     }
@@ -222,7 +224,7 @@ public class MessageController {
     @PatchMapping("/report/{id}")
     public Message reportMessage(@PathVariable("id") UUID messageId, @RequestParam ReportType reportType) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String userId = authentication.getPrincipal().toString();
+        String userId = (String) authentication.getDetails();
 
         log.info("User {} is reporting message {} with type {}", userId, messageId, reportType);
 

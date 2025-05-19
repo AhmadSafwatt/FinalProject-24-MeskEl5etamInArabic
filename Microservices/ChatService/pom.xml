@@ -140,8 +140,14 @@
 			<version>0.12.6</version>
 			<scope>runtime</scope>
 		</dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-openfeign-core</artifactId>
+            <version>4.2.1</version>
+            <scope>compile</scope>
+        </dependency>
 
-		<!-- ================================ END AUTH DEPENDENCIES ====================================-->
+        <!-- ================================ END AUTH DEPENDENCIES ====================================-->
 	</dependencies>
 
 	<build>
