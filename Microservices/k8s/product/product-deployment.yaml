@@ -23,7 +23,7 @@ spec:
               value: k8s
             - name: SPRING_DATA_MONGODB_URI
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   name: mongo-product-secret
                   key: URI
             - name: SPRING_DATA_MONGODB_DATABASE

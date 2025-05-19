@@ -27,7 +27,7 @@ spec:
             - name: SPRING_CASSANDRA_KEYSPACE_NAME
               value: "chat_keyspace"  # Replace with your actual keyspace name
             - name: SPRING_CASSANDRA_CONTACT_POINTS
-              value: "cassandra-service"  # Kubernetes service name
+              value: "cassandra"  # Kubernetes service name
             - name: SPRING_CASSANDRA_PORT
               value: "9042"
 

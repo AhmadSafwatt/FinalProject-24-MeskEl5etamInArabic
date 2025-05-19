@@ -22,7 +22,7 @@ spec:
             - name: SPRING_PROFILES_ACTIVE
               value: k8s
             - name: SPRING_DATASOURCE_URL
-              value: jdbc:postgresql://postgres-auth-0.postgres:5432/auth_db
+              value: jdbc:postgresql://postgres-auth-0.postgres-auth.homechef.svc.cluster.local:5432/auth_db
             - name: SPRING_DATASOURCE_USERNAME
               valueFrom:
                 secretKeyRef:

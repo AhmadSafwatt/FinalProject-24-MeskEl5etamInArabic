@@ -11,7 +11,7 @@ spring:
             - id: authentication-service
               uri: http://localhost:8081/
               predicates:
-                - Path=/auth/**
+                - Path=/auth/**,/seed
               filters:
                 - AuthenticationFilter
 

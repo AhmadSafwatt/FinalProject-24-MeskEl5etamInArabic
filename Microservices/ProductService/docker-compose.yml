@@ -23,7 +23,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: example
       MONGO_INITDB_DATABASE: elthon2yelamr7
     ports:
-      - "27018:27017"
+      - "27017:27017"
     volumes:
       - product_volume:/data/db
 

@@ -22,7 +22,7 @@ spec:
             - name: SPRING_PROFILES_ACTIVE
               value: k8s
             - name: SPRING_DATASOURCE_URL
-              value: jdbc:postgresql://postgres-order-0.postgres:5432/OrderService
+              value: jdbc:postgresql://postgres-order-0.postgres-order.homechef.svc.cluster.local:5432/OrderService
             - name: SPRING_DATASOURCE_USERNAME
               valueFrom:
                 secretKeyRef:

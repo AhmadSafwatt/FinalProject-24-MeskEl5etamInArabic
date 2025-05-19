@@ -1,13 +1,18 @@
-# cassandra-service.yaml
 apiVersion: v1
 kind: Service
 metadata:
   name: cassandra
   namespace: homechef
 spec:
+  clusterIP: None
   selector:
     app: cassandra
   ports:
+    - port: 7000
+      name: intra-node
+    - port: 7001
+      name: tls-intra-node
     - port: 9042
-      targetPort: 9042
-  clusterIP: None  # Headless service for direct pod DNS resolution
+      name: cql
+    - port: 9160
+      name: thrift
