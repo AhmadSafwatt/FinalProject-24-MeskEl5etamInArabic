@@ -6,7 +6,7 @@ import com.example.chatservice.services.MessageService;
 
 import java.util.UUID;
 
-public class ReportMessageCommand implements Command {
+public class ReportMessageCommand implements Command<Void> {
 
     private final UUID messageId;
     private final ReportType reportType;

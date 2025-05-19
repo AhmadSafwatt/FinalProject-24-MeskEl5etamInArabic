@@ -11,6 +11,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @Order(2)
@@ -63,5 +66,12 @@ public class GlobalExceptionHandler {
         String errorMessage = "An unexpected error occurred: " + ex.getMessage();
         ExceptionLoggingUtil.logStructuredError("GenericException", errorMessage, request, ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorMessage);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<String> handleUUIDConversionError(MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
+        String errorMessage = "Invalid UUID format: " + ex.getValue();
+        ExceptionLoggingUtil.logStructuredError("MethodArgumentTypeMismatchException", errorMessage, request, ex);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
     }
 }
