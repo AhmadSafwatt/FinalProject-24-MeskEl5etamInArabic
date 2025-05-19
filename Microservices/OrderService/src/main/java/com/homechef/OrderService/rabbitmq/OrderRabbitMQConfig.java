@@ -13,26 +13,54 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 @Configuration
 public class OrderRabbitMQConfig {
     public static final String CART_QUEUE = "Cart_To_Order_Queue";
-    public static final String EXCHANGE = "CART_ORDER_XCHANGE";
+    public static final String CART_ORDER_EXCHANGE = "CART_ORDER_XCHANGE";
     public static final String CART_ROUTING = "cart_routing_key";
 
+    public static final String REORDERING_QUEUE = "reordering-queue";
+    public static final String REORDERING_ROUTING = "reordering-routing-key";
+
+    public static final String DECREMENT_QUEUE = "product-decrement-queue";
+    public static final String PRODUCT_EXCHANGE = "product-exchange";
+
+    public static final String DECREMENT_ROUTING_KEY = "product.decrement";
+
     @Bean
-    public Queue queue() {
+    public Queue cartQueue() {
         return new Queue(CART_QUEUE);
     }
 
+    @Bean Queue reorderingQueue() { return new Queue(REORDERING_QUEUE); }
+
     @Bean
-    public TopicExchange exchange() {
-        return new TopicExchange(EXCHANGE);
+    public Queue decrementQueue() { return  new Queue(DECREMENT_QUEUE); }
+
+
+    @Bean
+    public TopicExchange cartExchange() {
+        return new TopicExchange(CART_ORDER_EXCHANGE);
     }
 
     @Bean
-    public Binding binding(Queue queue, TopicExchange exchange) {
-        return BindingBuilder.bind(queue).to(exchange).with(CART_ROUTING);
+    public TopicExchange productExchange() { return new TopicExchange(PRODUCT_EXCHANGE); }
+
+
+    @Bean
+    public Binding cartBinding(Queue cartQueue, TopicExchange cartExchange) {
+        return BindingBuilder.bind(cartQueue).to(cartExchange).with(CART_ROUTING);
     }
 
     @Bean
-    public Jackson2JsonMessageConverter orderMessageConverter() {
+    public Binding reorderingBinding(Queue reorderingQueue, TopicExchange cartExchange) {
+        return BindingBuilder.bind(reorderingQueue).to(cartExchange).with(REORDERING_ROUTING);
+    }
+
+    @Bean
+    public Binding decrementBinding(Queue decrementQueue, TopicExchange productExchange) {
+        return BindingBuilder.bind(decrementQueue).to(productExchange).with(DECREMENT_ROUTING_KEY);
+    }
+
+    @Bean
+    public Jackson2JsonMessageConverter messageConverter() {
         ObjectMapper mapper = new ObjectMapper()
                 .registerModule(new JavaTimeModule())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
