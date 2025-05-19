@@ -15,10 +15,12 @@ import org.springframework.data.cassandra.core.query.CassandraPageRequest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.net.URI;
 import java.net.URLEncoder;
@@ -207,8 +209,18 @@ public class MessageController {
         return ResponseEntity.noContent().build();
     }
 
+
+    /**
+     * Searches for messages with a given search string
+     *
+     * @param content message content
+     * @return Messages that contain the content string
+     */
     @GetMapping("/search")
     public ResponseEntity<List<Message>> getMessagesByContent(@RequestParam String content) {
+       if (content == null || content.isEmpty())
+           return ResponseEntity.badRequest().body(null);
+      
         List<Message> messages = messageService.searchMessagesByContent(content);
         return ResponseEntity.ok(messages);
     }
@@ -220,9 +232,30 @@ public class MessageController {
      * @param reportType Report type
      */
     @PatchMapping("/report/{id}")
-    public Message reportMessage(@PathVariable("id") UUID messageId, @RequestParam ReportType reportType) {
+    public ResponseEntity<?> reportMessage(@PathVariable("id") UUID messageId, @RequestParam(required = false) ReportType reportType) {
+
+        if (reportType == null) {
+            return ResponseEntity
+                    .badRequest()
+                    .body("reportType parameter is required and must be a valid value.");
+        }
+
+        Message message;
+        try {
+            message = messageService.getMessageById(messageId);
+        } catch (ResponseStatusException ex) {
+            if (ex.getStatusCode() == HttpStatus.NOT_FOUND) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("Message with ID " + messageId + " not found.");
+            }
+            throw ex;
+        }
+
         ReportMessageCommand reportCommand = new ReportMessageCommand(messageId, reportType, messageService);
         reportCommand.execute();
-        return messageService.getMessageById(messageId);
+
+        return ResponseEntity.ok(messageService.getMessageById(messageId));
     }
+
+
 }
