@@ -58,6 +58,8 @@ public class CartService {
     public Cart addProduct(String customerId , String productID , int quantity , String notes){
         UUID customerIDD = UUID.fromString(customerId);
         UUID productIDD = UUID.fromString(productID);
+        if(quantity <= 0)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quantity must be greater than 0");
         ProductDTO product = productClient.getProductById(productID);
         if(product == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
@@ -204,6 +206,16 @@ public class CartService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cart not found for customer ID: " + cart.getCustomerId());
         }
         List<CartItem> existingCartItems = cart.getCartItems();
+
+        for (CartItem item : existingCartItems) {
+            ProductDTO product = productClient.getProductById(item.getProductId().toString());
+            if (product == null) 
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found for ID: " + item.getProductId());
+            
+            if(item.getQuantity() <= 0) 
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quantity must be greater than 0");
+            
+        }
 
         for (CartItem item : existingCartItems) {
             boolean found = false; // to not use duplicate items
