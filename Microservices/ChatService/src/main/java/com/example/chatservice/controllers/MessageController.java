@@ -114,12 +114,9 @@ public class MessageController {
      */
     @GetMapping("/search")
     public ResponseEntity<List<Message>> getMessagesByContent(@RequestParam String content) {
-<<<<<<< Updated upstream
-=======
        if (content == null || content.isEmpty())
            return ResponseEntity.badRequest().body(null);
 
->>>>>>> Stashed changes
         List<Message> messages = messageService.searchMessagesByContent(content);
         return ResponseEntity.ok(messages);
     }
