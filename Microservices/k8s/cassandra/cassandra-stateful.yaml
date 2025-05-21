@@ -56,7 +56,6 @@ spec:
         name: cassandra-data
       spec:
         accessModes: [ "ReadWriteOnce" ]
-        storageClassName: "standard"
         resources:
           requests:
-            storage: 10Gi  # Adjust size as needed
+            storage: 1Gi  # Adjust size as needed
