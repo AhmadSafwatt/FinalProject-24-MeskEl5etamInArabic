@@ -10,4 +10,9 @@ public class HomeController {
     public String home() {
         return "Welcome to the Chat Service!";
     }
+
+    @GetMapping("/health")
+    public String health() {
+        return "Chat Service is running!";
+    }
 }
