@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbitmq-service
+  namespace: homechef
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rabbitmq-service
+  template:
+    metadata:
+      labels:
+        app: rabbitmq-service
+    spec:
+      containers:
+        - name: rabbitmq
+          image: rabbitmq:4-management
+          ports:
+            - containerPort: 5672  # AMQP port
+            - containerPort: 15672 # Management UI port
+          env:
+            - name: SPRING_RABBITMQ_HOST
+              value: "rabbitmq-service"  # Kubernetes service name if RabbitMQ is in-cluster
+            - name: SPRING_RABBITMQ_PORT
+              value: "5672"              # Default RabbitMQ port
+            - name: SPRING_RABBITMQ_USERNAME
+              valueFrom:
+                 secretKeyRef:
+                  name: rabbitmq-secret
+                  key: RABBITMQ_DEFAULT_USER
+            - name: SPRING_RABBITMQ_PASSWORD
+              valueFrom:
+                 secretKeyRef:
+                  name: rabbitmq-secret
+                  key: RABBITMQ_DEFAULT_PASS
+

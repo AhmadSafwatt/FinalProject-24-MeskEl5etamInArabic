@@ -1,6 +1,55 @@
 spring:
+  # to load the secrets from the application-secrets.yml file in the resources folder
+  profiles:
+    include: secrets
+
   application:
     name: OrderService
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+  datasource:
+    url: jdbc:postgresql://localhost:5436/OrderService
+    username: postgres
+    password: pass
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: create-drop
+    generate-ddl: true
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+
+  # for mail sending
+  mail:
+    host: smtp.gmail.com
+    port: 587 # Or 465 for SSL
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true # Use true for port 587
+
+auth-service:
+  url: http://localhost:8081/auth
+
+products-service:
+    url: http://localhost:8085/products
+
+cart-service:
+    url: http://localhost:8082/carts
 
 server:
   port: 8084
