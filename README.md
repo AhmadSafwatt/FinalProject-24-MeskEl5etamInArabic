@@ -2,7 +2,7 @@
 
 A comprehensive microservices-based food delivery platform backend built with Spring Boot, following modern distributed system principles and containerization best practices.
 
-## � Table of Contents
+## 📄 Table of Contents
 
 - [🚀 Tech Stack](#-tech-stack)
 - [✨ Features](#-features)
@@ -11,9 +11,6 @@ A comprehensive microservices-based food delivery platform backend built with Sp
 - [🛠️ Setup Instructions](#️-setup-instructions)
 - [📖 API Usage Examples](#-api-usage-examples)
 - [📁 Project Structure](#-project-structure)
-- [🤝 Contributing](#-contributing)
-- [📄 License](#-license)
-- [👥 Team](#-team)
 
 ## 🚀 Tech Stack
 
@@ -538,50 +535,3 @@ Talabat-Backend-Clone/
 ├── Task2/                        # Additional Tasks
 └── README.md
 ```
-
-## 🤝 Contributing
-
-<div align="center">
-  <img src="https://img.shields.io/badge/Contributions-Welcome-brightgreen?style=for-the-badge" alt="Contributions Welcome"/>
-  <img src="https://img.shields.io/badge/PRs-Welcome-blue?style=for-the-badge" alt="PRs Welcome"/>
-</div>
-
-<br>
-
-1. 🍴 Fork the repository
-2. 🌿 Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. 💾 Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. 📤 Push to the branch (`git push origin feature/amazing-feature`)
-5. 🔀 Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## 👥 Team
-
-<div align="center">
-  <img src="https://img.shields.io/badge/Team-Microservices_Enthusiasts-purple?style=for-the-badge" alt="Team"/>
-</div>
-
-<br>
-
-This project was developed as part of a microservices learning initiative, implementing modern backend development practices and distributed system principles.
-
----
-
-<div align="center">
-  <h3>🔗 Connect With The Project</h3>
-  
-  [![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/M-Bahy/Talabat-Backend-Clone)
-  [![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://github.com/M-Bahy/Talabat-Backend-Clone)
-  [![Kubernetes](https://img.shields.io/badge/Kubernetes-Ready-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white)](https://github.com/M-Bahy/Talabat-Backend-Clone)
-  
-  <br><br>
-  
-  **⭐ Star this repository if it helped you!**
-  
-  <img src="https://img.shields.io/github/stars/M-Bahy/Talabat-Backend-Clone?style=social" alt="GitHub stars"/>
-  <img src="https://img.shields.io/github/forks/M-Bahy/Talabat-Backend-Clone?style=social" alt="GitHub forks"/>
-  
-</div>
