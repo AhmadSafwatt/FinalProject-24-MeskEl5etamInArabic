@@ -2,44 +2,130 @@
 
 A comprehensive microservices-based food delivery platform backend built with Spring Boot, following modern distributed system principles and containerization best practices.
 
+## � Table of Contents
+
+- [🚀 Tech Stack](#-tech-stack)
+- [✨ Features](#-features)
+- [🗄️ Database Schema](#️-database-schema)
+- [🔗 REST API Endpoints](#-rest-api-endpoints)
+- [🛠️ Setup Instructions](#️-setup-instructions)
+- [📖 API Usage Examples](#-api-usage-examples)
+- [📁 Project Structure](#-project-structure)
+- [🤝 Contributing](#-contributing)
+- [📄 License](#-license)
+- [👥 Team](#-team)
+
 ## 🚀 Tech Stack
 
-- **Backend Framework**: Java 17, Spring Boot 3.x
+<p align="center">
+  <img src="https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white" alt="Java"/>
+  <img src="https://img.shields.io/badge/Spring_Boot-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white" alt="Spring Boot"/>
+  <img src="https://img.shields.io/badge/Spring_Security-6DB33F?style=for-the-badge&logo=Spring-Security&logoColor=white" alt="Spring Security"/>
+  <img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL"/>
+  <img src="https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB"/>
+  <img src="https://img.shields.io/badge/Apache_Cassandra-1287B1?style=for-the-badge&logo=apache-cassandra&logoColor=white" alt="Cassandra"/>
+  <img src="https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white" alt="Redis"/>
+  <img src="https://img.shields.io/badge/RabbitMQ-FF6600?style=for-the-badge&logo=rabbitmq&logoColor=white" alt="RabbitMQ"/>
+  <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker"/>
+  <img src="https://img.shields.io/badge/Kubernetes-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white" alt="Kubernetes"/>
+  <img src="https://img.shields.io/badge/Apache_Maven-C71A36?style=for-the-badge&logo=Apache-Maven&logoColor=white" alt="Maven"/>
+</p>
+
+### 🏗️ Architecture & Framework
+- **Backend Framework**: ![Java](https://img.shields.io/badge/Java-17-ED8B00?style=flat&logo=openjdk&logoColor=white) ![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.x-6DB33F?style=flat&logo=spring-boot&logoColor=white)
 - **Microservices Communication**: OpenFeign, RabbitMQ
 - **API Gateway**: Spring Cloud Gateway
-- **Security**: JWT Authentication, Spring Security
-- **Databases**:
-  - PostgreSQL (AuthService, OrderService)
-  - MongoDB (ProductService, CartService) 
-  - Apache Cassandra (ChatService)
-- **Caching**: Redis
-- **Containerization**: Docker, Docker Compose
-- **Orchestration**: Kubernetes
-- **Development Tools**: IntelliJ IDEA, VS Code, Postman
-- **Build Tool**: Maven
+- **Security**: ![JWT](https://img.shields.io/badge/JWT-000000?style=flat&logo=JSON%20web%20tokens&logoColor=white) Authentication, Spring Security
+
+### 🗄️ Databases
+- **PostgreSQL**: ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=flat&logo=postgresql&logoColor=white) (AuthService, OrderService)
+- **MongoDB**: ![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=flat&logo=mongodb&logoColor=white) (ProductService, CartService) 
+- **Apache Cassandra**: ![Cassandra](https://img.shields.io/badge/Cassandra-1287B1?style=flat&logo=apache-cassandra&logoColor=white) (ChatService)
+- **Caching**: ![Redis](https://img.shields.io/badge/Redis-DC382D?style=flat&logo=redis&logoColor=white)
+
+### 🚀 DevOps & Deployment
+- **Containerization**: ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white) ![Docker Compose](https://img.shields.io/badge/Docker_Compose-2496ED?style=flat&logo=docker&logoColor=white)
+- **Orchestration**: ![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?style=flat&logo=kubernetes&logoColor=white)
+- **Message Queue**: ![RabbitMQ](https://img.shields.io/badge/RabbitMQ-FF6600?style=flat&logo=rabbitmq&logoColor=white)
+
+### 🛠️ Development Tools
+- **IDEs**: ![IntelliJ IDEA](https://img.shields.io/badge/IntelliJIDEA-000000.svg?style=flat&logo=intellij-idea&logoColor=white) ![VS Code](https://img.shields.io/badge/VS_Code-007ACC?style=flat&logo=visual-studio-code&logoColor=white)
+- **API Testing**: ![Postman](https://img.shields.io/badge/Postman-FF6C37?style=flat&logo=postman&logoColor=white)
+- **Build Tool**: ![Maven](https://img.shields.io/badge/Apache_Maven-C71A36?style=flat&logo=Apache-Maven&logoColor=white)
 
 ## ✨ Features
 
-### Core Services
-- **Authentication Service**: User registration, login, JWT token management, email verification, password reset
-- **Product Service**: Product catalog management, CRUD operations, search functionality
-- **Cart Service**: Shopping cart management, item addition/removal, cart persistence
-- **Order Service**: Order processing, status tracking, order history
-- **Chat Service**: Real-time messaging system with message status tracking
-- **API Gateway**: Centralized routing, authentication, and load balancing
+<div align="center">
+  <img src="https://img.shields.io/badge/Microservices-Architecture-blue?style=for-the-badge" alt="Microservices"/>
+  <img src="https://img.shields.io/badge/RESTful-APIs-green?style=for-the-badge" alt="RESTful APIs"/>
+  <img src="https://img.shields.io/badge/JWT-Authentication-orange?style=for-the-badge" alt="JWT Auth"/>
+  <img src="https://img.shields.io/badge/Real--time-Messaging-purple?style=for-the-badge" alt="Real-time"/>
+</div>
 
-### Key Features
-- **Microservices Architecture**: Loosely coupled, independently deployable services
-- **JWT Authentication**: Secure token-based authentication across all services
-- **Real-time Communication**: Message queue integration with RabbitMQ
-- **Caching Strategy**: Redis-based caching for improved performance
-- **Database Per Service**: Each service manages its own database
-- **Containerized Deployment**: Docker containers with Kubernetes orchestration
-- **Service Discovery**: Inter-service communication via OpenFeign clients
+<br>
+
+### 🏢 Core Services
+- **🔐 Authentication Service**: User registration, login, JWT token management, email verification, password reset
+- **📦 Product Service**: Product catalog management, CRUD operations, search functionality
+- **🛒 Cart Service**: Shopping cart management, item addition/removal, cart persistence
+- **📋 Order Service**: Order processing, status tracking, order history
+- **💬 Chat Service**: Real-time messaging system with message status tracking
+- **🌐 API Gateway**: Centralized routing, authentication, and load balancing
+
+### 🎯 Key Features
+- **🏗️ Microservices Architecture**: Loosely coupled, independently deployable services
+- **🔒 JWT Authentication**: Secure token-based authentication across all services
+- **⚡ Real-time Communication**: Message queue integration with RabbitMQ
+- **🚀 Caching Strategy**: Redis-based caching for improved performance
+- **🗄️ Database Per Service**: Each service manages its own database
+- **🐳 Containerized Deployment**: Docker containers with Kubernetes orchestration
+- **🔍 Service Discovery**: Inter-service communication via OpenFeign clients
+
+## 🏗️ Architecture Overview
+
+```mermaid
+graph TB
+    Client[👥 Client Applications] --> Gateway[🌐 API Gateway :8080]
+    
+    Gateway --> Auth[🔐 Auth Service :8081]
+    Gateway --> Product[📦 Product Service :8085]
+    Gateway --> Cart[🛒 Cart Service :8082]
+    Gateway --> Order[📋 Order Service :8084]
+    Gateway --> Chat[💬 Chat Service :8083]
+    
+    Auth --> PostgresAuth[(🐘 PostgreSQL<br>Auth DB)]
+    Auth --> RedisCache[(🔴 Redis Cache)]
+    
+    Product --> MongoDB1[(🍃 MongoDB<br>Products DB)]
+    Cart --> MongoDB2[(🍃 MongoDB<br>Cart DB)]
+    Cart --> RedisCache
+    
+    Order --> PostgresOrder[(🐘 PostgreSQL<br>Orders DB)]
+    Chat --> Cassandra[(🔷 Cassandra<br>Messages DB)]
+    
+    Order --> RabbitMQ[🐰 RabbitMQ]
+    Cart --> RabbitMQ
+    Product --> RabbitMQ
+    
+    style Gateway fill:#e1f5fe
+    style Auth fill:#f3e5f5
+    style Product fill:#e8f5e8
+    style Cart fill:#fff3e0
+    style Order fill:#fce4ec
+    style Chat fill:#f1f8e9
+```
 
 ## 🗄️ Database Schema
 
-### AuthService (PostgreSQL)
+<div align="center">
+  <img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL"/>
+  <img src="https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB"/>
+  <img src="https://img.shields.io/badge/Apache_Cassandra-1287B1?style=for-the-badge&logo=apache-cassandra&logoColor=white" alt="Cassandra"/>
+</div>
+
+<br>
+
+### 🐘 AuthService (PostgreSQL)
 ```sql
 -- Users table
 CREATE TABLE users (
@@ -53,7 +139,7 @@ CREATE TABLE users (
 );
 ```
 
-### ProductService (MongoDB)
+### 🍃 ProductService (MongoDB)
 ```javascript
 // Products collection
 {
@@ -69,7 +155,7 @@ CREATE TABLE users (
 }
 ```
 
-### CartService (MongoDB)
+### 🍃 CartService (MongoDB)
 ```javascript
 // Carts collection
 {
@@ -88,7 +174,7 @@ CREATE TABLE users (
 }
 ```
 
-### OrderService (PostgreSQL)
+### 🐘 OrderService (PostgreSQL)
 ```sql
 -- Orders table
 CREATE TABLE orders (
@@ -111,7 +197,7 @@ CREATE TABLE order_items (
 );
 ```
 
-### ChatService (Cassandra)
+### 🔷 ChatService (Cassandra)
 ```cql
 -- Messages table
 CREATE TABLE messages (
@@ -128,7 +214,15 @@ CREATE TABLE messages (
 
 ## 🔗 REST API Endpoints
 
-### AuthService (Port: 8081)
+<div align="center">
+  <img src="https://img.shields.io/badge/REST-API-blue?style=for-the-badge&logo=api&logoColor=white" alt="REST API"/>
+  <img src="https://img.shields.io/badge/JSON-Format-orange?style=for-the-badge&logo=json&logoColor=white" alt="JSON"/>
+  <img src="https://img.shields.io/badge/JWT-Authorization-green?style=for-the-badge&logo=auth0&logoColor=white" alt="JWT"/>
+</div>
+
+<br>
+
+### 🔐 AuthService ![Port](https://img.shields.io/badge/Port-8081-blue?style=flat)
 ```
 POST   /auth/register          # User registration
 POST   /auth/token            # User login
@@ -140,7 +234,7 @@ DELETE /auth/delete-account/{userId} # Account deletion
 POST   /auth/fetch-emails     # Fetch user emails by IDs
 ```
 
-### ProductService (Port: 8085)
+### 📦 ProductService ![Port](https://img.shields.io/badge/Port-8085-green?style=flat)
 ```
 GET    /products              # Get all products
 POST   /products              # Create product
@@ -153,7 +247,7 @@ PUT    /products/discount/{id} # Apply discount
 PUT    /products/{id}/decrement # Decrement amount sold
 ```
 
-### CartService (Port: 8082)
+### 🛒 CartService ![Port](https://img.shields.io/badge/Port-8082-orange?style=flat)
 ```
 POST   /carts/createCart                    # Create cart
 PUT    /carts/addProduct                   # Add product to cart
@@ -167,7 +261,7 @@ POST   /carts/checkout                     # Checkout cart
 POST   /carts/reorder                      # Reorder from previous order
 ```
 
-### OrderService (Port: 8084)
+### 📋 OrderService ![Port](https://img.shields.io/badge/Port-8084-purple?style=flat)
 ```
 GET    /orders                    # Get all orders
 POST   /orders                    # Create order
@@ -179,7 +273,7 @@ PUT    /orders/{orderId}/items/{productId}/editNote # Edit order item note
 POST   /orders/{orderId}/reorder  # Reorder
 ```
 
-### ChatService (Port: 8083)
+### 💬 ChatService ![Port](https://img.shields.io/badge/Port-8083-red?style=flat)
 ```
 GET    /messages                  # Get all messages (paginated)
 POST   /messages                  # Create message
@@ -193,7 +287,7 @@ DELETE /messages                 # Clear all messages
 GET    /messages/seed            # Seed test messages
 ```
 
-### API Gateway (Port: 8080)
+### 🌐 API Gateway ![Port](https://img.shields.io/badge/Port-8080-darkblue?style=flat)
 ```
 # Routes all requests to appropriate microservices
 /auth/**     -> AuthService
@@ -205,13 +299,22 @@ GET    /messages/seed            # Seed test messages
 
 ## 🛠️ Setup Instructions
 
-### Prerequisites
-- Java 17+
-- Maven 3.6+
-- Docker & Docker Compose
-- Kubernetes (optional)
+<div align="center">
+  <img src="https://img.shields.io/badge/Java-17+-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white" alt="Java 17+"/>
+  <img src="https://img.shields.io/badge/Maven-3.6+-C71A36?style=for-the-badge&logo=Apache-Maven&logoColor=white" alt="Maven 3.6+"/>
+  <img src="https://img.shields.io/badge/Docker-Latest-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker"/>
+  <img src="https://img.shields.io/badge/Kubernetes-Optional-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white" alt="Kubernetes"/>
+</div>
 
-### Local Development Setup
+<br>
+
+### 📋 Prerequisites
+- ![Java](https://img.shields.io/badge/Java-17+-ED8B00?style=flat&logo=openjdk&logoColor=white)
+- ![Maven](https://img.shields.io/badge/Maven-3.6+-C71A36?style=flat&logo=Apache-Maven&logoColor=white)
+- ![Docker](https://img.shields.io/badge/Docker-Latest-2496ED?style=flat&logo=docker&logoColor=white) & Docker Compose
+- ![Kubernetes](https://img.shields.io/badge/Kubernetes-Optional-326CE5?style=flat&logo=kubernetes&logoColor=white) (optional)
+
+### 🚀 Local Development Setup
 
 1. **Clone the repository**
    ```bash
@@ -257,7 +360,7 @@ GET    /messages/seed            # Seed test messages
    cd ../API-Gateway && mvn spring-boot:run &
    ```
 
-### Docker Deployment
+### 🐳 Docker Deployment
 
 1. **Build and run all services**
    ```bash
@@ -269,7 +372,7 @@ GET    /messages/seed            # Seed test messages
    - API Gateway: http://localhost:8080
    - Individual services accessible through gateway or direct ports
 
-### Kubernetes Deployment
+### ☸️ Kubernetes Deployment
 
 1. **Apply namespace and secrets**
    ```bash
@@ -435,3 +538,50 @@ Talabat-Backend-Clone/
 ├── Task2/                        # Additional Tasks
 └── README.md
 ```
+
+## 🤝 Contributing
+
+<div align="center">
+  <img src="https://img.shields.io/badge/Contributions-Welcome-brightgreen?style=for-the-badge" alt="Contributions Welcome"/>
+  <img src="https://img.shields.io/badge/PRs-Welcome-blue?style=for-the-badge" alt="PRs Welcome"/>
+</div>
+
+<br>
+
+1. 🍴 Fork the repository
+2. 🌿 Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. 💾 Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. 📤 Push to the branch (`git push origin feature/amazing-feature`)
+5. 🔀 Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 👥 Team
+
+<div align="center">
+  <img src="https://img.shields.io/badge/Team-Microservices_Enthusiasts-purple?style=for-the-badge" alt="Team"/>
+</div>
+
+<br>
+
+This project was developed as part of a microservices learning initiative, implementing modern backend development practices and distributed system principles.
+
+---
+
+<div align="center">
+  <h3>🔗 Connect With The Project</h3>
+  
+  [![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/M-Bahy/Talabat-Backend-Clone)
+  [![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://github.com/M-Bahy/Talabat-Backend-Clone)
+  [![Kubernetes](https://img.shields.io/badge/Kubernetes-Ready-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white)](https://github.com/M-Bahy/Talabat-Backend-Clone)
+  
+  <br><br>
+  
+  **⭐ Star this repository if it helped you!**
+  
+  <img src="https://img.shields.io/github/stars/M-Bahy/Talabat-Backend-Clone?style=social" alt="GitHub stars"/>
+  <img src="https://img.shields.io/github/forks/M-Bahy/Talabat-Backend-Clone?style=social" alt="GitHub forks"/>
+  
+</div>
